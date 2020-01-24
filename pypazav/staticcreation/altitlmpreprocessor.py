@@ -11,6 +11,6 @@ def cutalti(filein, fileout, xmin, xmax, ymin, ymax, xres, yres):
     ds = gdal.Translate(fileout, ds, projWin=[xmin, ymax, xmax, ymin], xRes=xres, yRes = yres)
     ds = None
     
-def cuttlm(filein, fileout, xmin, xmax, ymin, ymax, xres, yres, burnatt='OBJEKTART'):
-    ds = gdal.Open(filein)
-    ds = gdal.Rasterize
+#def cuttlm(filein, fileout, xmin, xmax, ymin, ymax, xres, yres, burnatt='OBJEKTART'):
+#    ds = gdal.Open(filein)
+#    ds = gdal.Rasterize
