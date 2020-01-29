@@ -1,7 +1,9 @@
 #%%
 '''
-stefan fluc, 22.01.2020
+stefan fluck, 22.01.2020
 functions to cut swissalti3d dtm datafile and swisstlm shapefiles.
+
+Last updated: 29.01.2020
 '''
 
 
