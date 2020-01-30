@@ -87,8 +87,8 @@ def rasterandcuttlm(filein, fileout, xmin, xmax, ymin, ymax, xres, yres, burnatt
 
     Returns
     -------
-    array : TYPE
-        DESCRIPTION.
+    array : n.array
+        tlm burnatt as np array.
 
     '''
     from osgeo import ogr, gdal
