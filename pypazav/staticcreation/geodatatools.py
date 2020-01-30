@@ -39,6 +39,7 @@ def cutalti(filein, fileout, xmin, xmax, ymin, ymax, xres, yres):
     -------
     array : np.array
         dhm info as numpy array. array index 0 is northern most line (already flipped).
+    SAVES CUT TIF FILE UNDER fileout VARIABLE AS WELL. SEE fileout FOR TYPES.
 
     '''
     from osgeo import gdal
@@ -89,6 +90,7 @@ def rasterandcuttlm(filein, fileout, xmin, xmax, ymin, ymax, xres, yres, burnatt
     -------
     array : np.array
         tlm burnatt as np array. array index 0 is northern most line (already flipped).
+    SAVES CUT TIF FILE UNDER fileout VARIABLE AS WELL. SEE fileout FOR TYPES.
 
     '''
     from osgeo import ogr, gdal

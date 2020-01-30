@@ -6,4 +6,5 @@ STATIC CREATION FILE TURNED INTO FUNCTIONS
 """
 
 def loadascgeodata(array):
-    #use after applying geodatatools which output an array.
+    #either use geodatatools which return an array anyway or use this to import from .asc files.
+    
