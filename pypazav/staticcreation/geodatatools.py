@@ -38,7 +38,7 @@ def cutalti(filein, fileout, xmin, xmax, ymin, ymax, xres, yres):
     Returns
     -------
     array : np.array
-        dhm info as numpy array.
+        dhm info as numpy array. array index 0 is northern most line (already flipped).
 
     '''
     from osgeo import gdal
@@ -87,8 +87,8 @@ def rasterandcuttlm(filein, fileout, xmin, xmax, ymin, ymax, xres, yres, burnatt
 
     Returns
     -------
-    array : n.array
-        tlm burnatt as np array.
+    array : np.array
+        tlm burnatt as np array. array index 0 is northern most line (already flipped).
 
     '''
     from osgeo import ogr, gdal
