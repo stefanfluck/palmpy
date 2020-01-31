@@ -1,0 +1,37 @@
+INIFOR PROZESS
+--------------------------
+
+
+1) COSMO DATEN VORBEREITEN
+--env: module load nco/4.8.1, für ncdump danach module load netcdf/4.6.1-gnu
+
+- braucht COSMO files vom Zeitraum für Simulation inkl. Endzeitpunkt (zeitraum 11-15Z -> Files 11,12,13,14,15 benötigt)
+- Files in einen Ordner zusammen mit cosmo2inifor_revC packen. (REV C für laf-ETH Files, REV D für Meteotestformat MCH)
+- cosmo2inifor_revC ausführen -> macht soil.nc, hhl.nc, seg*-soil/flow.nc files.
+
+2) INIFOR AUSFÜHREN
+--env:logout, palm-module laden
+
+- soil.nc, hhl.nc, seg*-soil/flow.nc files in Ordner tun (meist in ~/palm/inifor/newdirectory)
+- namelist hinzufügen mit parent nxyz, dxyz, Simdauer in s anpassen
+- _static file: startzeit in LT +XX schreiben
+- inifor ausführen, dazu eine ordnerebene höher:
+
+inifor --path seg20190717 --date 2019071711 --init-mode volume -n seg20190717/namelist --input-prefix seg --static-driver seg20190717/seg20190717_static -o seg20190717_dynamic.nc --averaging-angle 0.1
+
+all short: 
+inifor -p <path> -d <date> -i <init-mode> -n <namelist> --input-prefix <input-prefix> -t <static-driver> -o <output> -a <averaging-angle>
+
+
+3) BEFORE RUNNING THE CASE
+--env: module purge und dann module load nco/4.8.1
+
+- Einträge Zeitvariablen ändern: ncap2 -O -s 'time=time+<UTCstartzeit_in_s>' seg<.>_dynamic.nc seg<.>_dynamic
+- im _p3d auch LT +XX
+
+
+
+
+for reference: 
+ncatted -O -a grid_mapping,SOILTYP,o,c,'rotated_pole' soil.nc
+ncea -d y_1,-0.5,0.5 -d x_1,-1.0,0.0 filein fileout
