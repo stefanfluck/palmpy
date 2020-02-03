@@ -38,7 +38,7 @@ def loadascgeodata(filename):
     yll = np.loadtxt(filename, max_rows=6, usecols=(1))[3] #x coord of lower left point
     res = np.loadtxt(filename, max_rows=6, usecols=(1))[4] #x coord of lower left point
     print('\nLoaded Geodata contained in File:\t'+str(filename)+'\nCoordinates of LL corner:\t\t '+str(xll)+
-          ' / '+str(yll)+'\nGrid Resolution:\t\t\t'+str(res))
+          ' / '+str(yll)+'\nGrid Resolution:\t\t\t'+str(res)+'\nArray Shape:\t\t\t\t'+str(arr.shape))
     return arr,xll,yll,res
 
 
@@ -57,14 +57,72 @@ def shifttopodown(arr):
     -------
     normed : np.array
         Array shifted down by amount.
-
-
+        
     '''
     import numpy as np
     amount = arr.min()
     normed = arr - amount
     print('Shifted the input array downwards by '+str(np.round(amount,3))+' meters.')
     return normed
+
+
+def childifyfilename(fileout, ischild):
+    '''
+    Modifies filename according to ischild identifier (if child 1 -> _N02) addendm to filename.
+
+    Parameters
+    ----------
+    fileout : str
+        original fileoutname (<RUN>_static).
+    ischild : int
+        running number of child ID.
+
+    Returns
+    -------
+    newname : str
+        added _NXX to the fileout name.
+
+    '''
+    if ischild != 0:
+        newname = fileout+'_N0'+str(ischild+1)
+    else:
+        newname = fileout
+    return newname
+
+
+#%%
+#params for createstaticfile
+
+ischild = 0
+
+
+
+def createstaticfile():
+    import xarray as xr
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
