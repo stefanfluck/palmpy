@@ -96,6 +96,116 @@ def childifyfilename(fileout, ischild):
 ischild = 0
 
 
+def mapbbclasses(bbarr):
+    '''
+    Take the TLM bodenbedeckung as numpy array (see geodatatools.py or loadascgeodata())
+    and translate the tlm classes into palm classes. This works based on the Bodenbedeckung-
+    Dataset so far. The pavement-array is empty for now - use other functions to define pavements.
+
+    Parameters
+    ----------
+    bbarr : np.arr
+        numpy array of TLM bodenbedeckung.
+
+    Returns
+    -------
+    vegarr : np.arr
+        vegetation classification for palm.
+    pavarr : np.arr
+        pavement classification for palm. returned empty so far.
+    watarr : np.arr
+        water classification for palm.
+
+    '''
+    import numpy as np
+    
+    #vegetation array
+    vegarr = np.ones(bbarr.shape)*-127
+    vegarr[bbarr==0]   = 3  # unclassified > short grass
+    vegarr[bbarr==1]   = 9  # fels > desert
+    vegarr[bbarr==6]   = 16 # gebueschwald > deciduous shrubs
+    vegarr[bbarr==7]   = 9  # lockergestein > desert
+    vegarr[bbarr==9]   = 13 # Gletscher > ice caps and glaciers
+    vegarr[bbarr==11]  = 14 # Feuchtgebiet > bogs and marshes
+    vegarr[bbarr==12]  = 17 # Wald > mixed Forest/woodland
+    vegarr[bbarr==13]  = 18 # Wald offen > interrupted forest
+
+    #pavement array
+    pavarr = np.ones(bbarr.shape)*-127
+    # pavarr[arr==7]   = 9
+
+    #water array
+    watarr = np.ones(bbarr.shape)*-127
+    watarr[bbarr==5]   = 2 #fliessgewaesser > river
+    watarr[bbarr==10]  = 1 #stehendes gewaesser > lake
+
+    #soiltype array
+    soilarr = np.ones(bbarr.shape)*-127
+    soilarr[bbarr==0] = 2 #medium
+    soilarr[bbarr==1] = 1 #coarse
+    soilarr[bbarr==5] = 2 #
+    soilarr[bbarr==6] = 2 #
+    soilarr[bbarr==7] = 1 #
+    soilarr[bbarr==9] = 1 #
+    soilarr[bbarr==11] = 1 #
+    soilarr[bbarr==12] = 1 #
+    soilarr[bbarr==13] = 1 #
+
+       
+    print(np.unique(vegarr))
+    print(np.unique(pavarr))
+    print(np.unique(watarr))
+    print(np.unique(soilarr))
+    
+    #pavearr can be processed further in other functions with more tlm datasets.
+    #if modified -> change function header info.
+        
+    return vegarr,pavarr,watarr
+
+
+def makesurffractarray(vegarr,pavarr,watarr):
+    '''
+    Takes vegetation, pavement and water classification arrays for palm, creates a
+    surface fraction array out of it.
+
+    Parameters
+    ----------
+    vegarr : np.array
+        vegetation classification array.
+    pavarr : np.array
+        pavement classification array.
+    watarr : np.array
+        water classification array.
+
+    Returns
+    -------
+    sfr : np.array
+        surface fraction array
+
+    '''
+    import numpy as np
+    sfr = np.ones((3,vegarr.shape[0], vegarr.shape[1]))
+    sfrveg = np.ones(vegarr.shape)
+    sfrveg[vegarr != -127] = 1
+    sfrveg[vegarr == -127] = 0
+    sfrpav = np.ones(pavarr.shape)
+    sfrpav[pavarr != -127] = 1
+    sfrpav[pavarr == -127] = 0
+    sfrwat = np.ones(watarr.shape)
+    sfrwat[watarr != -127] = 1
+    sfrwat[watarr == -127] = 0
+    sfr[0,:,:] = sfrveg
+    sfr[1,:,:] = sfrpav
+    sfr[2,:,:] = sfrwat
+    return sfr
+
+
+
+
+
+
+
+
 
 def createstaticfile():
     import xarray as xr
