@@ -184,7 +184,7 @@ def makesurffractarray(vegarr,pavarr,watarr):
 
     '''
     import numpy as np
-    sfr = np.ones((3,vegarr.shape[0], vegarr.shape[1]))
+    sfr = np.ones((3,vegarr.shape[0], vegarr.shape[1]))*-127
     sfrveg = np.ones(vegarr.shape)
     sfrveg[vegarr != -127] = 1
     sfrveg[vegarr == -127] = 0
@@ -200,7 +200,9 @@ def makesurffractarray(vegarr,pavarr,watarr):
     return sfr
 
 
-
+def modifyvegpars(vegarr,bbarr):
+    vegpars = np.ones((12,vegarr.shape[0], vegarr.shape[1]))*-9999.0
+    
 
 
 
