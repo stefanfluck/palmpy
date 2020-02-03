@@ -37,8 +37,8 @@ def loadascgeodata(filename):
     xll = np.loadtxt(filename, max_rows=6, usecols=(1))[2] #x coord of lower left point
     yll = np.loadtxt(filename, max_rows=6, usecols=(1))[3] #x coord of lower left point
     res = np.loadtxt(filename, max_rows=6, usecols=(1))[4] #x coord of lower left point
-    print('\nLoaded Geodata contained in File:\t'+str(filename)+'\nCoordinates of LL corner:\t '+str(xll)+
-          ' / '+str(yll)+'\nGrid Resolution:\t\t'+str(res))
+    print('\nLoaded Geodata contained in File:\t'+str(filename)+'\nCoordinates of LL corner:\t\t '+str(xll)+
+          ' / '+str(yll)+'\nGrid Resolution:\t\t\t'+str(res))
     return arr,xll,yll,res
 
 
