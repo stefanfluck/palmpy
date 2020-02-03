@@ -42,3 +42,29 @@ def loadascgeodata(filename):
     return arr,xll,yll,res
 
 
+def shifttopodown(arr):
+    '''
+    shifts topography array down so lowest value is 0. Subtracts the minimum value from the specified input array.
+
+    example usage: topo = shifttopodown(topo)
+    
+    Parameters
+    ----------
+    arr : np.array
+        Topography as numpy array.
+
+    Returns
+    -------
+    normed : np.array
+        Array shifted down by amount.
+
+
+    '''
+    import numpy as np
+    amount = arr.min()
+    normed = arr - amount
+    print('Shifted the input array downwards by '+str(np.round(amount,3))+' meters.')
+    return normed
+
+
+
