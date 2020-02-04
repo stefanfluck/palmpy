@@ -390,14 +390,57 @@ def setalbedopars(vegpars, bbarr, vegarr):
 #params for createstaticfile
 
 
-def createstaticcoords():
+def createstaticcoords(xsize, ysize, pixelsize):
+    '''
+    Provide x and y size of the raster by specifying topo.shape[0] for x and topo.shape[1] for y (or bare values with
+    the danger of it not matching.
+
+    Parameters
+    ----------
+    xsize : int
+        number of cells in rasters in x direction.
+    ysize : int
+        number of cells in rasters in y direction.
+    pixelsize : int
+        width of a pixel of the raster (resolution).
+
+    Returns
+    -------
+    x : np.array
+        x coordinates in correct spacing.
+    y : np.array
+        y coordinates in correct spacing.
+    nsurface_fraction : np.array
+        nsurface_fraction coordinates in correct spacing.
+    nvegetation_pars : np.array
+        nvegetation_pars coordinates in correct spacing.
+    nalbedo_pars : np.array
+        nalbedo_pars coordinates in correct spacing.
+    '''
+    import numpy as np
     
-    return 
+    xleft = 0; xright = xsize-1
+    yfront = 0; yback = ysize-1
+    
+    x = np.arange(xleft,xright*pixelsize+pixelsize,pixelsize) + 0.5*pixelsize
+    y = np.arange(yfront, yback*pixelsize+pixelsize, pixelsize) + 0.5*pixelsize
+    nsurface_fraction = np.array([0,1,2])
+    nvegetation_pars = np.array([0,1,2,3,4,5,6,7,8,9,10,11])
+    nalbedo_pars = np.array([0,1,2,3,4,5,6])
+    
+    return x, y, nsurface_fraction, nvegetation_pars, nalbedo_pars
 
 
-def createDataArrays():
+
+
+
+
+def createDataArrays(array, dims, coords):
+    import xarray as xr
     
-    return
+    # dataarray = xr.DataArray(array, dims=dis, coords={dims[1]:coor})
+    
+    return dataarray
 
 def setAttributes():
     
@@ -405,6 +448,12 @@ def setAttributes():
 
 
 def assemblestaticfile():
+    
+    return
+
+
+def outputstaticfile():
+    
     
     
 
