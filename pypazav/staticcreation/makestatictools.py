@@ -90,11 +90,6 @@ def childifyfilename(fileout, ischild):
     return newname
 
 
-#%%
-#params for createstaticfile
-
-ischild = 0
-
 
 def mapbbclasses(bbarr):
     '''
@@ -201,11 +196,167 @@ def makesurffractarray(vegarr,pavarr,watarr):
 
 
 def modifyvegpars(vegarr,bbarr):
+    '''
+    modify this one manually depending on what values should be set
+    for each bodenbedeckungskategorie or vegetation array category. 
+    
+    0 - min. canopy resistance
+    1 - leaf area index
+    2 - vegetation coverage
+    3 - canopy resistance coefficient (1/hPa)
+    4 - roughness length for momentum
+    5 - roughness length for heat
+    6 - skin layer heat conductivity (stable cond, W/m2/K)
+    7 - skin layer heat conductivity (unstable cond., W/m2/K)
+    8 - fraction of incoming shortwave radiation transmitted to soil
+    9 - heat capacityof surface skin layer (J/m2/K)
+    10- albedo type (not albedo value! for albedo value -> type=0 and
+        provide albedo_pars)
+    11- emissivity
+    
+    To set each category for desired category (either according to
+    palm category or TLM BB category, then uncomment the appropriate
+    section and filter for the appropriate category and set a value
+    according to the PIDS standard.)
+    
+    example:
+        if wanting to set albedo type for certain TLM categories:
+        1) uncomment tenarr section. 
+        2) add filter statements and assign new values by adding a line
+            "tenarr[<bbarr or vegarr> == <classification>] = <newvalue>"
+            between the existing statements
+    
+    Parameters
+    ----------
+    vegarr : np.array
+        vegetation classification array.
+    bbarr : np.array
+        array with TLM BB classifications.
+
+    Returns
+    -------
+    vegpars : np.array
+        vegetation parameters array.
+    
+    '''
+    import numpy as np
     vegpars = np.ones((12,vegarr.shape[0], vegarr.shape[1]))*-9999.0
     
+    # zeroarr = vegpars[0,:,:]
+    # 
+    # vegpars[0,:,:]  = zeroarr
+    
+    # onearr = vegpars[1,:,:]
+    # 
+    # vegpars[1,:,:]  = onearr
+    
+    # twoarr = vegpars[2,:,:]
+    # 
+    # vegpars[2,:,:]  = twoarr
+    
+    # threearr = vegpars[3,:,:]
+    # 
+    # vegpars[3,:,:]  = threearr
+    
+    # fourarr = vegpars[4,:,:]
+    # 
+    # vegpars[4,:,:]  = fourarr
+    
+    # fivearr = vegpars[5,:,:]
+    # 
+    # vegpars[5,:,:]  = fivearr
+    
+    # sixarr = vegpars[6,:,:]
+    # 
+    # vegpars[6,:,:]  = sixarr
+    
+    # sevenarr = vegpars[7,:,:]
+    # 
+    # vegpars[7,:,:]  = sevenarr
+    
+    # eightarr = vegpars[8,:,:]
+    # 
+    # vegpars[8,:,:]  = eightarr
+    
+    # ninearr = vegpars[9,:,:]
+    # 
+    # vegpars[9,:,:]  = ninearr
+    
+    tenarr = vegpars[10,:,:]
+    tenarr[bbarr == 7] = 0
+    vegpars[10,:,:] = tenarr
+    
+    # elevenarr = vegpars[11,:,:]
+    # 
+    # vegpars[11,:,:] = elevenarr
+        
+    return vegpars 
 
 
+def setalbedopars(vegpars, bbarr, vegarr):
+    '''
+    0: broadband albedo, 1: longwave, 2: shortwave direct albedo
+    3: longwave albedo for green fraction, 4: shortwave for green fraction
+    5: longwave for window fraction, 6: shortwave for window fraction
+        
+    
+    Set an albedo value everywhere where either bbarr or vegarr matches a category
+    and vegpars[10] matches 0 (user defined albedo type).
+    
+    example:
+        if wanting to set albedo for certain TLM categories:
+        1) add filter statements and assign new values by adding a line
+            "<number>arr[(<bbarr or vegarr> == <classification>) & (vegp...==)] = <newvalue>"
+            
+    
+    Parameters
+    ----------
+    vegpars : np.array
+        modified vegetation parameters.
+    bbarr : np.array
+        array with TLM BB classifications.
+    vegarr : np.array
+        vegetation classification array.
 
+    Returns
+    -------
+    albedopars : np.array
+        albedo parameters that are user defined.
+    '''
+    albedopars = np.ones((7, vegpars.shape[1], vegpars.shape[2]))*-9999.0
+    
+    zeroarr = albedopars[0,:,:]
+    zeroarr[(bbarr == 7) & (vegpars[10,:,:] == 0)] = 0.5
+    albedopars[0,:,:]  = zeroarr
+    
+    onearr = albedopars[1,:,:]
+    onearr[(bbarr == 7) & (vegpars[10,:,:]==0)] = 0.5 
+    albedopars[1,:,:]  = onearr
+    
+    twoarr = albedopars[2,:,:]
+    twoarr[(bbarr == 7) & (vegpars[10,:,:]==0)] = 0.5
+    albedopars[2,:,:]  = twoarr
+    
+    threearr = albedopars[3,:,:]
+    threearr[(bbarr == 7) & (vegpars[10,:,:]==0)] = 0.5
+    albedopars[3,:,:]  = threearr
+    
+    fourarr = albedopars[4,:,:]
+    fourarr[(bbarr == 7) & (vegpars[10,:,:]==0)] = 0.5
+    albedopars[4,:,:]  = fourarr
+    
+    fivearr = albedopars[5,:,:]
+    fivearr[(bbarr == 7) & (vegpars[10,:,:]==0)] = 0.5
+    albedopars[5,:,:]  = fivearr
+    
+    sixarr = albedopars[6,:,:]
+    sixarr[(bbarr == 7) & (vegpars[10,:,:]==0)] = 0.5
+    albedopars[6,:,:]  = sixarr
+    
+    return albedopars
+
+#%%
+#params for createstaticfile
 
 
 
