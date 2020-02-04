@@ -3,6 +3,37 @@ Created on Thu Jan 30 10:13:51 2020
 STATIC CREATION FILE TURNED INTO FUNCTIONS
 
 """
+import numpy as np
+import xarray as x
+
+
+fillvalues = {
+   "lat": float(-9999.0),
+   "lon": float(-9999.0),
+   "E_UTM": float(-9999.0),
+   "N_UTM": float(-9999.0),   
+   "zt": float(-9999.0),
+   "buildings_2d": float(-9999.0),
+   "buildings_3d": np.byte(-127),
+   "bridges_2d": float(-9999.0),
+   "building_id": int(-9999),
+   "bridges_id": int(-9999),
+   "building_type": np.byte(-127),
+   "nsurface_fraction": int(-9999),
+   "vegetation_type": np.byte(-127),
+   "vegetation_height": float(-9999.0),
+   "pavement_type": np.byte(-127),
+   "water_type": np.byte(-127),
+   "street_type": np.byte(-127), 
+   "street_crossings": np.byte(-127),   
+   "soil_type": np.byte(-127),
+   "surface_fraction": float(-9999.0),
+   "building_pars": float(-9999.0),
+   "vegetation_pars": float(-9999.0),
+   "tree_data": float(-9999.0),
+   "tree_type": np.byte(-127)
+   }
+
 
 def loadascgeodata(filename):
     '''
@@ -359,9 +390,22 @@ def setalbedopars(vegpars, bbarr, vegarr):
 #params for createstaticfile
 
 
+def createstaticcoords():
+    
+    return 
 
-def createstaticfile():
-    import xarray as xr
+
+def createDataArrays():
+    
+    return
+
+def setAttributes():
+    
+    return
+
+
+def assemblestaticfile():
+    
     
 
 
