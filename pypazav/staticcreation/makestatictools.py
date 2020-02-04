@@ -386,9 +386,6 @@ def setalbedopars(vegpars, bbarr, vegarr):
     
     return albedopars
 
-#%%
-#params for createstaticfile
-
 
 def createstaticcoords(xsize, ysize, pixelsize):
     '''
@@ -432,17 +429,27 @@ def createstaticcoords(xsize, ysize, pixelsize):
 
 
 
-
-
-
 def createDataArrays(array, dims, coords):
     import xarray as xr
-    
-    # dataarray = xr.DataArray(array, dims=dis, coords={dims[1]:coor})
-    
+    if len(dims) == 2:
+        arrflip = np.flip(array, axis=0)
+        dataarray = xr.DataArray(arrflip, dims=dims, coords={dims[1]:coords[1], dims[0]:coords[0]})
+    if len(dims) == 3:
+        arrflip = np.flip(array, axis=1)
+        dataarray = xr.DataArray(arrflip, dims=dims, coords={dims[2]:coords[2], dims[1]:coords[1], dims[0]:coords[0]})
     return dataarray
 
+#%%
+#params for createstaticfile
+
+
+
+
+
 def setAttributes():
+    
+    
+    
     
     return
 
