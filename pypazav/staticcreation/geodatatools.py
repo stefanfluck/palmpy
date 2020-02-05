@@ -113,9 +113,34 @@ def rasterandcuttlm(filein, fileout, xmin, xmax, ymin, ymax, xres, yres, burnatt
     return array
 
 
+def lv95towgs84(E,N):
+    '''
+    converts lv95 swiss coordinates to wgs84 coordinates according to 
+    "Formeln und Konstanten für die Berechnung der Schweizerischen schiefachsigen 
+    Zylinderprojektion und der Transformation zwischen Koordinatensystemen" by swisstopo, P.14.
+    
+    Parameters
+    ----------
+    E : float
+        east component (with leading 2!).
+    N : float
+        north component (with leading 1!).
 
-    
-    
+    Returns
+    -------
+    lon : float
+        longitude in wgs84.
+    lat : TYPE
+        latitude in wgs84.
+
+    '''
+    ys = (E-2600000)/1000000
+    xs = (N-1200000)/1000000
+    ls = 2.6779094 + 4.728982*ys + 0.791484 * ys * xs + 0.1306 * ys * xs**2 - 0.0436 * ys**3
+    ps = 16.9023892 + 3.238272 * xs - 0.270978 * ys**2  - 0.002528 * xs**2  - 0.0447 * ys**2 * xs - 0.0140 * xs**3 
+    lon = ls*100/36
+    lat = ps*100/36
+    return lon,lat
 
 #%%
 # par = cutalti('swissALTI3D2018.tif', 'parentdhm.asc', xmin=730000, xmax=742000, ymin=190000, ymax=202000, xres=40, yres=40)
