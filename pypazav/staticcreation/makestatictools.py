@@ -543,6 +543,7 @@ def setNeededAttributes(dataarray, staticvariable):
 
     return
 
+
 def assembleDataset():
     '''
     Creates a static file from provided dataarrays. The Function asks if you
@@ -573,11 +574,16 @@ def assembleDataset():
     if input('Do vegetation_pars? for Yes type y: ')=='y':
         static['vegetation_pars'] = vegetation_pars
     
+    static.coords['x'].attrs['_FillValue'] = fillvalues['E_UTM']
+    static.coords['x'].attrs['units'] = 'm'
+    static.coords['y'].attrs['_FillValue'] = fillvalues['N_UTM']
+    static.coords['y'].attrs['units'] = 'm'
+    
     return static
     
 
 
-infodir = {'version':           1,
+infodict = {'version':           1,
            'palm_version':      6.0,
            'origin_z':          0.0,
            'origin_y':          189000.0,
@@ -588,45 +594,85 @@ infodir = {'version':           1,
            'rotation_angle':    0.0,
            }
 
-def setGlobalAttributes(static, infodir):
-    static.attrs['version'] = infodir['version']
-    static.attrs['origin_z'] = infodir['origin_z']
-    static.attrs['origin_y'] = infodir['origin_y']
-    static.attrs['origin_x'] = infodir['origin_x']
-    static.attrs['origin_lat'] = infodir['origin_lat']
-    static.attrs['origin_lon'] = infodir['origin_lon']
-    static.attrs['rotation_angle'] = infodir['rotation_angle']
-    static.attrs['palm_version'] = infodir['palm_version']
-    static.attrs['origin_time'] = infodir['origin_time']
+def setGlobalAttributes(static, infodict):
+    '''
+    sets global Attributes to the static dataset accordint to the infordir.
+    infodict example: 
+        
+        infodict = {'version':           1,
+                    'palm_version':      6.0,
+                    'origin_z':          0.0,
+                    'origin_y':          189000.0,
+                    'origin_x':          730000.0,
+                    'origin_lat':        46.8392,
+                    'origin_lon':        9.143,
+                    'origin_time':       '2018-08-04 12:00:00 +01',
+                    'rotation_angle':    0.0,
+                    }
+
+    Parameters
+    ----------
+    static : xr.Dataset
+        DESCRIPTION.
+    infodir : dict
+        DESCRIPTION.
+
+    Returns
+    -------
+    None.
+
+    '''
+    static.attrs['version'] = infodict['version']
+    static.attrs['origin_z'] = infodict['origin_z']
+    static.attrs['origin_y'] = infodict['origin_y']
+    static.attrs['origin_x'] = infodict['origin_x']
+    static.attrs['origin_lat'] = infodict['origin_lat']
+    static.attrs['origin_lon'] = infodict['origin_lon']
+    static.attrs['rotation_angle'] = infodict['rotation_angle']
+    static.attrs['palm_version'] = infodict['palm_version']
+    static.attrs['origin_time'] = infodict['origin_time']
     
     
-#%%
+encodingdict = {'x':                {'dtype': 'float32'}, 
+                'y':                {'dtype': 'float32'},
+                'zt':               {'dtype': 'float32'},
+                'vegetation_type':  {'dtype': 'int8'},
+                'water_type':       {'dtype': 'int8'},
+                'soil_type':        {'dtype': 'int8'},
+                'pavement_type':    {'dtype': 'int8'},
+                'surface_fraction': {'dtype': 'float32'},
+                'vegetation_pars':  {'dtype': 'float32'}
+                }
 
+def outputstaticfile(static, fileout, encodingdict):
+    '''
+    Output the static file. Requires a encoding dict.
 
+    Parameters
+    ----------
+    static : TYPE
+        DESCRIPTION.
+    fileout : TYPE
+        DESCRIPTION.
+    encodingdict : dict
+        dict with specified datatypes for each variable and coordinate variable.
+        known datatypes that work: NC_FLOAT = int32 or float32, NC_BYTE = int8
+        
+        example: encodingdict = {'x':                {'dtype': 'float32'}, 
+                                 'y':                {'dtype': 'float32'},
+                                 'zt':               {'dtype': 'float32'},
+                                 'vegetation_type':  {'dtype': 'int8'}}
+    
+    Returns
+    -------
+    None.
 
-def outputstaticfile(static, fileout):
+    '''
     import xarray as xr
-    
     static.to_netcdf(fileout, mode='w', format="NETCDF3_CLASSIC",
-                     encoding = {
-                                'x':                {'dtype': 'float32'}, 
-                                'y':                {'dtype': 'float32'},
-                                'zt':               {'dtype': 'float32'},
-                                'vegetation_type':  {'dtype': 'int8'},
-                                'water_type':       {'dtype': 'int8'},
-                                'soil_type':        {'dtype': 'int8'},
-                                'pavement_type':    {'dtype': 'int8'},
-                                'surface_fraction': {'dtype': 'float32'},
-                                'vegetation_pars':  {'dtype': 'float32'}
-                                })
+                     encoding = encodingdict)
 
     
-
-
-
-
-
-
 
 
 
