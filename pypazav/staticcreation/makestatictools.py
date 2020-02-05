@@ -88,13 +88,14 @@ def shifttopodown(arr):
     -------
     normed : np.array
         Array shifted down by amount.
-        
+    amount : float
+        Array shifted down by this amount.        
     '''
     import numpy as np
     amount = arr.min()
     normed = arr - amount
     print('Shifted the input array downwards by '+str(np.round(amount,3))+' meters.')
-    return normed
+    return normed, amount
 
 
 def childifyfilename(fileout, ischild):
@@ -128,6 +129,9 @@ def mapbbclasses(bbarr):
     and translate the tlm classes into palm classes. This works based on the Bodenbedeckung-
     Dataset so far. The pavement-array is empty for now - use other functions to define pavements.
 
+    TODO: HAVE MAPPING DICT AS INPUT. in fact, do it with a config file that is read and
+    also applies to the other veg_pars stuff.
+
     Parameters
     ----------
     bbarr : np.arr
@@ -141,7 +145,8 @@ def mapbbclasses(bbarr):
         pavement classification for palm. returned empty so far.
     watarr : np.arr
         water classification for palm.
-
+    soilarr : np.arr
+        soil classification for palm.
     '''
     import numpy as np
     
@@ -158,7 +163,6 @@ def mapbbclasses(bbarr):
 
     #pavement array
     pavarr = np.ones(bbarr.shape)*fillvalues['pavement_type']
-    # pavarr[arr==7]   = 9
 
     #water array
     watarr = np.ones(bbarr.shape)*fillvalues['water_type']
@@ -178,15 +182,15 @@ def mapbbclasses(bbarr):
     soilarr[bbarr==13] = 1 #
 
        
-    print(np.unique(vegarr))
-    print(np.unique(pavarr))
-    print(np.unique(watarr))
-    print(np.unique(soilarr))
+    print('Unique veget. types:\t'+str(np.unique(vegarr)))
+    print('Unique pavement types:\t'+ str(np.unique(pavarr)))
+    print('Unique water types:\t'+str(np.unique(watarr)))
+    print('Unique soil types:\t'+str(np.unique(soilarr)))
     
     #pavearr can be processed further in other functions with more tlm datasets.
     #if modified -> change function header info.
         
-    return vegarr,pavarr,watarr
+    return vegarr,pavarr,watarr,soilarr
 
 
 def makesurffractarray(vegarr,pavarr,watarr):
@@ -488,7 +492,9 @@ def createDataArrays(array, dims, coords):
     '''
     Creates DataArrays. Provide the numpy array, its dimensions as a list of strings in correct order
     ([<3rd>,y,x]) and provide the coordinates as list of variables in same order as dimensions.
-    Returns a xr.Dataarray, name it with variable name as defined in the PIDS.
+    Flips the numpy arrays (due to requirement that row 0 is at south corner and not 
+    as in numpy at north (most upwards) side) and returns a xr.Dataarray, 
+    name it with variable name as defined in the PIDS.
 
     example usage: vegetation_type = createDataArrays(vegarr,['y','x'],[y,x])
 
@@ -592,42 +598,40 @@ def setNeededAttributes(dataarray, staticvariable):
     return
 
 
-def assembleDataset():
-    '''
-    Creates a static file from provided dataarrays. The Function asks if you
-    want to add each variable it has been designed for so far to the static file. 
-    confirm with "y" for each variable. DataArrays need to be present beforehand with correct name 
-    (like variable name defined in PIDS.)
+# def assembleDataset(zt=None,vegetation_type=None,water_type=None,
+#                     pavement_type=None,soil_type=None,
+#                     surface_fraction=None,vegetation_pars=None):
+#     '''
+#     Creates a static file from provided dataarrays. The Function asks if you
+#     want to add each variable it has been designed for so far to the static file. 
+#     confirm with "y" for each variable. DataArrays need to be present beforehand with correct name 
+#     (like variable name defined in PIDS.)
     
-    Returns
-    -------
-    static: xr.Dataset
-        static dataset.   
+#     Returns
+#     -------
+#     static: xr.Dataset
+#         static dataset.   
         
-    '''
-    import xarray as xr
-    static = xr.Dataset()
-    if input('Do zt? for Yes type y: ')=='y':
-        static['zt'] = zt
-    if input('Do vegetation_type? for Yes type y: ')=='y':
-        static['vegetation_type'] = vegetation_type
-    if input('Do water_type? for Yes type y: ')=='y':
-        static['water_type'] = water_type
-    if input('Do soil_type? for Yes type y: ')=='y':
-        static['soil_type'] = soil_type
-    if input('Do pavement_type? for Yes type y: ')=='y':
-        static['pavement_type'] = pavement_type
-    if input('Do surface_fraction? for Yes type y: ')=='y':
-        static['surface_fraction'] = surface_fraction
-    if input('Do vegetation_pars? for Yes type y: ')=='y':
-        static['vegetation_pars'] = vegetation_pars
+#     '''
+#     import xarray as xr
+#     static = xr.Dataset()
+#     if zt != None:
+#         static['zt'] = zt
+#     if vegetation_type != None:
+#         static['vegetation_type'] = vegetation_type
+#     if water_type != None:
+#         static['water_type'] = water_type
+#     if soil_type != None:
+#         static['soil_type'] = soil_type
+#     if pavement_type != None:
+#         static['pavement_type'] = pavement_type
+#     if surface_fraction != None:
+#         static['surface_fraction'] = surface_fraction
+#     if vegetation_pars != None:
+#         static['vegetation_pars'] = vegetation_pars
     
-    static.coords['x'].attrs['_FillValue'] = fillvalues['E_UTM']
-    static.coords['x'].attrs['units'] = 'm'
-    static.coords['y'].attrs['_FillValue'] = fillvalues['N_UTM']
-    static.coords['y'].attrs['units'] = 'm'
     
-    return static
+    # return static
     
 
 
@@ -679,7 +683,17 @@ def setGlobalAttributes(static, infodict):
     static.attrs['rotation_angle'] = infodict['rotation_angle']
     static.attrs['palm_version'] = infodict['palm_version']
     static.attrs['origin_time'] = infodict['origin_time']
-    
+
+    static.coords['x'].attrs['_FillValue'] = fillvalues['E_UTM']
+    static.coords['x'].attrs['units'] = 'm'
+    static.coords['y'].attrs['_FillValue'] = fillvalues['N_UTM']
+    static.coords['y'].attrs['units'] = 'm'
+
+
+
+
+
+
     
 encodingdict = {'x':                {'dtype': 'float32'}, 
                 'y':                {'dtype': 'float32'},
