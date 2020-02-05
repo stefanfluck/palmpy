@@ -146,7 +146,7 @@ def mapbbclasses(bbarr):
     import numpy as np
     
     #vegetation array
-    vegarr = np.ones(bbarr.shape)*-127
+    vegarr = np.ones(bbarr.shape)*fillvalues['vegetation_type']#-127
     vegarr[bbarr==0]   = 3  # unclassified > short grass
     vegarr[bbarr==1]   = 9  # fels > desert
     vegarr[bbarr==6]   = 16 # gebueschwald > deciduous shrubs
@@ -157,16 +157,16 @@ def mapbbclasses(bbarr):
     vegarr[bbarr==13]  = 18 # Wald offen > interrupted forest
 
     #pavement array
-    pavarr = np.ones(bbarr.shape)*-127
+    pavarr = np.ones(bbarr.shape)*fillvalues['pavement_type']
     # pavarr[arr==7]   = 9
 
     #water array
-    watarr = np.ones(bbarr.shape)*-127
+    watarr = np.ones(bbarr.shape)*fillvalues['water_type']
     watarr[bbarr==5]   = 2 #fliessgewaesser > river
     watarr[bbarr==10]  = 1 #stehendes gewaesser > lake
 
     #soiltype array
-    soilarr = np.ones(bbarr.shape)*-127
+    soilarr = np.ones(bbarr.shape)*fillvalues['soil_type']
     soilarr[bbarr==0] = 2 #medium
     soilarr[bbarr==1] = 1 #coarse
     soilarr[bbarr==5] = 2 #
@@ -210,7 +210,7 @@ def makesurffractarray(vegarr,pavarr,watarr):
 
     '''
     import numpy as np
-    sfr = np.ones((3,vegarr.shape[0], vegarr.shape[1]))*-127
+    sfr = np.ones((3,vegarr.shape[0], vegarr.shape[1]))*fillvalues['surface_fraction']
     sfrveg = np.ones(vegarr.shape)
     sfrveg[vegarr != -127] = 1
     sfrveg[vegarr == -127] = 0
@@ -230,6 +230,12 @@ def modifyvegpars(vegarr,bbarr):
     '''
     modify this one manually depending on what values should be set
     for each bodenbedeckungskategorie or vegetation array category. 
+    
+    TODO: REWRITE AS GENERIC xxx-PARS FILE: PROVIDE AS INPUT HOW MANY LEVELS, 
+    PROVIDE AS PROMPT WHICH ARRAY VEGARR OR BBARR, PROVIDE AS INPUT WHICH 
+    CATEGORY NUMBER TO BE MODIFIED AND TO WHICH VALUE. RETURN IS AS
+    ARRAY.
+    ONLY NEEDS ONE INPUT ARRAY!
     
     0 - min. canopy resistance
     1 - leaf area index
@@ -330,6 +336,7 @@ def setalbedopars(vegpars, bbarr, vegarr):
     3: longwave albedo for green fraction, 4: shortwave for green fraction
     5: longwave for window fraction, 6: shortwave for window fraction
         
+    TODO: DOES NOT NEED VEGPARS ARRAY.
     
     Set an albedo value everywhere where either bbarr or vegarr matches a category
     and vegpars[10] matches 0 (user defined albedo type).
@@ -430,6 +437,28 @@ def createstaticcoords(xsize, ysize, pixelsize):
 
 
 def createDataArrays(array, dims, coords):
+    '''
+    Creates DataArrays. Provide the numpy array, its dimensions as a list of strings in correct order
+    ([<3rd>,y,x]) and provide the coordinates as list of variables in same order as dimensions.
+    Returns a xr.Dataarray, name it with variable name as defined in the PIDS.
+
+    example usage: vegetation_type = createDataArrays(vegarr,['y','x'],[y,x])
+
+    Parameters
+    ----------
+    array : np.array
+        DESCRIPTION.
+    dims : list of strings
+        in correct order ([<3rd dimension>,y,x]). 3rd dimension could be z, nvegetation_pars or else.
+    coords : list of variables
+        same order as dims but not as strings, but variables.
+
+    Returns
+    -------
+    dataarray : xr.DataArray
+        xr Dataarray, name it appropriately like the variable name defined in the PIDS for the specific data array.
+
+    '''
     import xarray as xr
     if len(dims) == 2:
         arrflip = np.flip(array, axis=0)
@@ -439,28 +468,90 @@ def createDataArrays(array, dims, coords):
         dataarray = xr.DataArray(arrflip, dims=dims, coords={dims[2]:coords[2], dims[1]:coords[1], dims[0]:coords[0]})
     return dataarray
 
+
+def setNeededAttributes(dataarray, staticvariable):    
+    '''
+    Sets attributes.
+
+    Parameters
+    ----------
+    dataarray : TYPE
+        DESCRIPTION.
+    staticvariable : string
+        static file variable name as it is defined in PIDS.
+
+    Returns
+    -------
+    None.
+
+    '''
+    if staticvariable == 'zt':
+        dataarray.attrs['_FillValue'] = fillvalues[staticvariable]
+        dataarray.attrs['long_name'] = 'terrain_height';
+        
+    if staticvariable == 'vegetation_type':
+        dataarray.attrs['_FillValue'] = fillvalues[staticvariable]
+        dataarray.attrs['long_name'] = 'vegetation type classification'
+    
+    if staticvariable == 'water_type':
+        dataarray.attrs['_FillValue'] = fillvalues[staticvariable]
+        dataarray.attrs['long_name'] = 'water type classification'
+
+    if staticvariable == 'pavement_type':
+        dataarray.attrs['_FillValue'] = fillvalues[staticvariable]
+        dataarray.attrs['long_name'] = 'pavement type classification'
+    
+    if staticvariable == 'soil_type':
+        dataarray.attrs['_FillValue'] = fillvalues[staticvariable]
+        dataarray.attrs['long_name'] = 'soil type classification'    
+        
+    if staticvariable == 'surface_fraction':
+        dataarray.attrs['_FillValue'] = fillvalues[staticvariable]
+        dataarray.attrs['long_name'] = 'surface_tile_fraction'    
+        
+    if staticvariable == 'buildings_2d':
+        dataarray.attrs['_FillValue'] = fillvalues[staticvariable]
+        dataarray.attrs['long_name'] = 'vegetation parameters'         
+     
+    if staticvariable == 'building_id':
+        dataarray.attrs['_FillValue'] = fillvalues[staticvariable]
+        dataarray.attrs['long_name'] = 'building id numbers'      
+     
+    if staticvariable == 'building_type':
+        dataarray.attrs['_FillValue'] = fillvalues[staticvariable]
+        dataarray.attrs['long_name'] = 'building type classification'     
+     
+    if staticvariable == 'vegetation_pars':
+        dataarray.attrs['_FillValue'] = fillvalues[staticvariable]
+        dataarray.attrs['long_name'] = 'vegetation_parameters'    
+     
+    if staticvariable == 'albedo_pars':
+        dataarray.attrs['_FillValue'] = fillvalues[staticvariable]
+        dataarray.attrs['long_name'] = 'albedo parameters'
+        
+    if staticvariable == 'pavement_pars':
+        dataarray.attrs['_FillValue'] = fillvalues[staticvariable]
+        dataarray.attrs['long_name'] = 'pavement parameters'      
+        
+    if staticvariable == 'water_pars':
+        dataarray.attrs['_FillValue'] = fillvalues[staticvariable]
+        dataarray.attrs['long_name'] = 'water parameters'      
+    
+    if staticvariable == 'lad':
+        dataarray.attrs['_FillValue'] = fillvalues[staticvariable]
+        dataarray.attrs['long_name'] = 'leaf area density'          
+
+    return
+
 #%%
-#params for createstaticfile
 
-
-
-
-
-def setAttributes():
+def setGlobalAttributes(static, infodir):
     
-    
-    
-    
-    return
 
-
-def assemblestaticfile():
-    
-    return
 
 
 def outputstaticfile():
-    
+    return
     
     
 
