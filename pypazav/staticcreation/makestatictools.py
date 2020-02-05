@@ -4,7 +4,7 @@ STATIC CREATION FILE TURNED INTO FUNCTIONS
 
 """
 import numpy as np
-import xarray as x
+import xarray as xr
 
 
 fillvalues = {
