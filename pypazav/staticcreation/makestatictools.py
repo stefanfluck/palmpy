@@ -330,14 +330,62 @@ def modifyvegpars(vegarr,bbarr):
     return vegpars 
 
 
+def modifyXpars(levels,vegarr,bbarr):
+    '''
+    create a parameter array where different parameters can be changed 
+    based on the level (nXXX_pars as coordinate)
+    
+    TODO: REWRITE AS GENERIC xxx-PARS FILE: PROVIDE AS INPUT HOW MANY LEVELS, 
+    PROVIDE AS PROMPT WHICH ARRAY VEGARR OR BBARR, PROVIDE AS INPUT WHICH 
+    CATEGORY NUMBER TO BE MODIFIED AND TO WHICH VALUE. RETURN IS AS
+    ARRAY.
+    ONLY NEEDS ONE INPUT ARRAY!
+        
+    To set each category for desired category (either according to
+    palm category or TLM BB category, then uncomment the appropriate
+    section and filter for the appropriate category and set a value
+    according to the PIDS standard.)
+    
+    example:
+        if wanting to set albedo type for certain TLM categories:
+        1) uncomment tenarr section. 
+        2) add filter statements and assign new values by adding a line
+            "tenarr[<bbarr or vegarr> == <classification>] = <newvalue>"
+            between the existing statements
+    
+    Parameters
+    ----------
+    levels : int
+        how many parameterlevels shall be created.
+    vegarr : np.array
+        vegetation classification array.
+    bbarr : np.array
+        array with TLM BB classifications. Does not necessarily have to be provided, can also be None.
+
+    Returns
+    -------
+    vegpars : np.array
+        vegetation parameters array.
+    
+    '''
+    import numpy as np
+    xpars = np.ones((levels,vegarr.shape[0], vegarr.shape[1]))*-9999.0
+    
+    modarr = xpars[10,:,:]
+    modarr[bbarr == 7] = 0
+    xpars[10,:,:]  = modarr
+    
+    return xpars
+ 
+    
+
 def setalbedopars(vegpars, bbarr, vegarr):
     '''
     0: broadband albedo, 1: longwave, 2: shortwave direct albedo
     3: longwave albedo for green fraction, 4: shortwave for green fraction
     5: longwave for window fraction, 6: shortwave for window fraction
         
-    TODO: DOES NOT NEED VEGPARS ARRAY.
-    
+       
     Set an albedo value everywhere where either bbarr or vegarr matches a category
     and vegpars[10] matches 0 (user defined albedo type).
     
