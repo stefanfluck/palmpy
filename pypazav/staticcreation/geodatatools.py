@@ -115,7 +115,8 @@ def rasterandcuttlm(filein, fileout, xmin, xmax, ymin, ymax, xres, yres, burnatt
 
 def lv95towgs84(E,N):
     '''
-    converts lv95 swiss coordinates to wgs84 coordinates according to 
+    converts lv95 (or lv03, in which case it adds 2000000 or 1000000 to the coordinates)
+    swiss coordinates to wgs84 coordinates according to 
     "Formeln und Konstanten für die Berechnung der Schweizerischen schiefachsigen 
     Zylinderprojektion und der Transformation zwischen Koordinatensystemen" by swisstopo, P.14.
     
@@ -134,6 +135,8 @@ def lv95towgs84(E,N):
         latitude in wgs84.
 
     '''
+    E += 2000000 if E < 1500000 else E
+    N += 1000000 if N <  500000 else N
     ys = (E-2600000)/1000000
     xs = (N-1200000)/1000000
     ls = 2.6779094 + 4.728982*ys + 0.791484 * ys * xs + 0.1306 * ys * xs**2 - 0.0436 * ys**3
