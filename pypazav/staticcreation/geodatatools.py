@@ -16,6 +16,10 @@ def cutalti(filein, fileout, xmin, xmax, ymin, ymax, xres, yres):
         par = cutalti('swissALTI3D2018.tif', 'parentdhm.asc', xmin=730000, 
                       xmax=742000, ymin=190000, ymax=202000, xres=40, yres=40)
 
+    - also cuts orthoimages, but output needs to be tif.
+    - if error message says "NoneType" object has no attribute 'GetGeoTransform', relative Path
+      is incorrect.
+      
     Parameters
     ----------
     filein : str
@@ -135,6 +139,7 @@ def lv95towgs84(E,N):
         latitude in wgs84.
 
     '''
+    import numpy as np
     if E < 1500000:
         E += 2000000
     if N < 900000:
@@ -143,8 +148,8 @@ def lv95towgs84(E,N):
     xs = (N-1200000)/1000000
     ls = 2.6779094 + 4.728982*ys + 0.791484 * ys * xs + 0.1306 * ys * xs**2 - 0.0436 * ys**3
     ps = 16.9023892 + 3.238272 * xs - 0.270978 * ys**2  - 0.002528 * xs**2  - 0.0447 * ys**2 * xs - 0.0140 * xs**3 
-    lon = ls*100/36
-    lat = ps*100/36
+    lon = np.round(ls*100/36,4)
+    lat = np.round(ps*100/36,4)
     return lon,lat
 
 #%%
