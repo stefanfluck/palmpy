@@ -343,7 +343,7 @@ def modifyXpars(levels,vegarr,bbarr):
     PROVIDE AS PROMPT WHICH ARRAY VEGARR OR BBARR, PROVIDE AS INPUT WHICH 
     CATEGORY NUMBER TO BE MODIFIED AND TO WHICH VALUE. RETURN IS AS
     ARRAY.
-    ONLY NEEDS ONE INPUT ARRAY!
+    MAKE IT SO IT ALREADY CREATES ITS OWN COORDINATES!
         
     To set each category for desired category (either according to
     palm category or TLM BB category, then uncomment the appropriate
@@ -676,8 +676,8 @@ def setGlobalAttributes(static, infodict):
     '''
     static.attrs['version'] = infodict['version']
     static.attrs['origin_z'] = infodict['origin_z']
-    static.attrs['origin_y'] = infodict['origin_y']
-    static.attrs['origin_x'] = infodict['origin_x']
+    static.attrs['origin_y'] = float(infodict['origin_y'])
+    static.attrs['origin_x'] = float(infodict['origin_x'])
     static.attrs['origin_lat'] = infodict['origin_lat']
     static.attrs['origin_lon'] = infodict['origin_lon']
     static.attrs['rotation_angle'] = infodict['rotation_angle']
