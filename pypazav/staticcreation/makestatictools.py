@@ -641,11 +641,11 @@ def setNeededAttributes(dataarray, staticvariable):
 infodict = {'version':           1,
            'palm_version':      6.0,
            'origin_z':          0.0,
-           'origin_y':          189000.0,
-           'origin_x':          730000.0,
-           'origin_lat':        46.8392,
-           'origin_lon':        9.143,
-           'origin_time':       '2018-08-04 12:00:00 +01',
+           'origin_y':          0.0,
+           'origin_x':          0.0,
+           'origin_lat':        0.0,
+           'origin_lon':        00,
+           'origin_time':       '2000-01-01 00:00:00 +0',
            'rotation_angle':    0.0,
            }
 
