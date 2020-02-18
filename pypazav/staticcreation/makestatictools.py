@@ -79,6 +79,8 @@ def shifttopodown(arr):
 
     example usage: topo = shifttopodown(topo)
     
+    TODO: HAVE ischild AS INPUT BECAUSE OTHERWISE IT CALCULATES NEW ORIGIN Z!
+    
     Parameters
     ----------
     arr : np.array
