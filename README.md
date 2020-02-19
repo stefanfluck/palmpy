@@ -1,4 +1,4 @@
-# ZAV-PALM-Scripts
+# PALMPY
 
 Processing scripts for the PALM model system
 -------------
