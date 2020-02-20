@@ -20,13 +20,13 @@ def checknestcoordsvalid(dxyp,dxyn,nllx,nlly):
     Parameters
     ----------
     dxyp : float
-        DESCRIPTION.
+        grid spacing of parent/root.
     dxyn : float
-        DESCRIPTION.
+        grid spacing of nest.
     nllx : float
-        DESCRIPTION.
+        lower left corner x of nest.
     nlly : float
-        DESCRIPTION.
+        lower left corner y of nest.
 
     Returns
     -------
