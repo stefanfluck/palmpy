@@ -2,11 +2,13 @@
 Created on Thu Jan 30 10:13:51 2020
 STATIC CREATION FILE TURNED INTO FUNCTIONS
 
-TODO: when implementing streets, implement a function that sets pavement_type, street_type,
+TODO: 
+    
+    -   dicts to be added and implemented in the mapbbclasses
+
+    -   when implementing streets, implement a function that sets pavement_type, street_type,
         etc to fillvalue where it intersects with building_2d (np.where, check palm_csd)
 
-TODO: ADD CHECKS THAT ORIGINS OF DOMAIN AND CHILD DOMAIN ARE COMPATIBLE (NESTING
-NAMELIST LLX LLY COORDINATES TEILBAR DURCH PAREND DXY)
 
 """
 import numpy as np
@@ -182,8 +184,12 @@ def childifyfilename(fileout, ischild):
         newname = fileout
     return newname
 
-
-tlm2palmvegdict = {
+'''
+DICTIONARY MAPPING BODENBEDECKUNG AND OTHER CATEGORIES TO PALM CLASSES. BEST GUESS. IMPORT ARRAY IN 
+STATIC GENERATION SCRIPTS FOR INDIVIDUAL CHANGES.
+'''
+tlmbb2veg = {
+    #vegetation classes
     int(0):int(3),    # unclassified > short grass
     int(1):int(9),    # fels > desert
     int(6):int(16),   # gebueschwald > deciduous shrubs
@@ -192,13 +198,19 @@ tlm2palmvegdict = {
     int(11):int(14),  # Feuchtgebiet > bogs and marshes
     int(12):int(17),  # Wald > mixed Forest/woodland
     int(13):int(18),  # Wald offen > interrupted forest
-    } 
+   }
 
-tlm2palmwatdict = {
+tlmbb2wat = {
     int(5):int(2),    #fliessgewaesser > river
     int(10):int(1),   #stehendes gewaesser > lake
     }
-#TODO: to be added and implement in the mapbbclasses
+
+tlmstr2str = {
+    
+    }
+
+
+
 
 def mapbbclasses(bbarr):
     '''
@@ -487,64 +499,12 @@ def modifyparsarray(parsarr, npar, newvalue, filterarr, filtervalue):
 
     '''
     
-    import numpy as np
     newparsarr = parsarr[npar,:,:]
     newparsarr[filterarr==filtervalue] = newvalue
     parsarr[npar,:,:] = newparsarr
+    
     return parsarr
 
-    
-    
-    
-    
-
-
-# def modifyXpars(levels,vegarr,bbarr):
-#     '''
-#     create a parameter array where different parameters can be changed 
-#     based on the level (nXXX_pars as coordinate)
-    
-#     TODO: REWRITE AS GENERIC xxx-PARS FILE: PROVIDE AS INPUT HOW MANY LEVELS, 
-#     PROVIDE AS PROMPT WHICH ARRAY VEGARR OR BBARR, PROVIDE AS INPUT WHICH 
-#     CATEGORY NUMBER TO BE MODIFIED AND TO WHICH VALUE. RETURN IS AS
-#     ARRAY.
-#     MAKE IT SO IT ALREADY CREATES ITS OWN COORDINATES!
-        
-#     To set each category for desired category (either according to
-#     palm category or TLM BB category, then uncomment the appropriate
-#     section and filter for the appropriate category and set a value
-#     according to the PIDS standard.)
-    
-#     example:
-#         if wanting to set albedo type for certain TLM categories:
-#         1) uncomment tenarr section. 
-#         2) add filter statements and assign new values by adding a line
-#             "tenarr[<bbarr or vegarr> == <classification>] = <newvalue>"
-#             between the existing statements
-    
-#     Parameters
-#     ----------
-#     levels : int
-#         how many parameterlevels shall be created.
-#     vegarr : np.array
-#         vegetation classification array.
-#     bbarr : np.array
-#         array with TLM BB classifications. Does not necessarily have to be provided, can also be None.
-
-#     Returns
-#     -------
-#     vegpars : np.array
-#         vegetation parameters array.
-    
-#     '''
-#     import numpy as np
-#     xpars = np.ones((levels,vegarr.shape[0], vegarr.shape[1]))*-9999.0
-    
-#     modarr = xpars[10,:,:]
-#     modarr[bbarr == 7] = 0
-#     xpars[10,:,:]  = modarr
-    
-#     return xpars
  
     
 
