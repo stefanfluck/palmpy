@@ -34,6 +34,11 @@ fillvalues = {
    "surface_fraction": float(-9999.0),
    "building_pars": float(-9999.0),
    "vegetation_pars": float(-9999.0),
+   "water_pars": float(-9999.0),
+   "pavement_pars": float(-9999.0),
+   "buildings_pars": float(-9999.0),
+   "soil_pars": float(-9999.0),
+   "albedo_pars": float(-9999.0),
    "tree_data": float(-9999.0),
    "tree_type": np.byte(-127)
    }
@@ -262,111 +267,103 @@ def makesurffractarray(vegarr,pavarr,watarr):
     return sfr
 
 
-def modifyvegpars(vegarr,bbarr):
-    '''
-    modify this one manually depending on what values should be set
-    for each bodenbedeckungskategorie or vegetation array category. 
+# def modifyvegpars(vegarr,bbarr):
+#     '''
+#     modify this one manually depending on what values should be set
+#     for each bodenbedeckungskategorie or vegetation array category. 
     
-    TODO: REWRITE AS GENERIC xxx-PARS FILE: PROVIDE AS INPUT HOW MANY LEVELS, 
-    PROVIDE AS PROMPT WHICH ARRAY VEGARR OR BBARR, PROVIDE AS INPUT WHICH 
-    CATEGORY NUMBER TO BE MODIFIED AND TO WHICH VALUE. RETURN IS AS
-    ARRAY.
     
-    DO IT LIKE THIS: SET UP VEG/WAT/SOIL PARS ARRAY WITH ALL FILL VALUES.
-    WRITE FUNCTIONS TO GO INTO ARRAY TO DESIRED LEVEL, SUPPLY FILTER ARRAY, SUPPLY FILTER ARRAY CRITERA
-    AND NEW VALUE. THIS WAY ONLY ONE FUNCTION IS NEEDED FOR THIS COMPLEX TASK.
+#     0 - min. canopy resistance
+#     1 - leaf area index
+#     2 - vegetation coverage
+#     3 - canopy resistance coefficient (1/hPa)
+#     4 - roughness length for momentum
+#     5 - roughness length for heat
+#     6 - skin layer heat conductivity (stable cond, W/m2/K)
+#     7 - skin layer heat conductivity (unstable cond., W/m2/K)
+#     8 - fraction of incoming shortwave radiation transmitted to soil
+#     9 - heat capacityof surface skin layer (J/m2/K)
+#     10- albedo type (not albedo value! for albedo value -> type=0 and
+#         provide albedo_pars)
+#     11- emissivity
     
-    0 - min. canopy resistance
-    1 - leaf area index
-    2 - vegetation coverage
-    3 - canopy resistance coefficient (1/hPa)
-    4 - roughness length for momentum
-    5 - roughness length for heat
-    6 - skin layer heat conductivity (stable cond, W/m2/K)
-    7 - skin layer heat conductivity (unstable cond., W/m2/K)
-    8 - fraction of incoming shortwave radiation transmitted to soil
-    9 - heat capacityof surface skin layer (J/m2/K)
-    10- albedo type (not albedo value! for albedo value -> type=0 and
-        provide albedo_pars)
-    11- emissivity
+#     To set each category for desired category (either according to
+#     palm category or TLM BB category, then uncomment the appropriate
+#     section and filter for the appropriate category and set a value
+#     according to the PIDS standard.)
     
-    To set each category for desired category (either according to
-    palm category or TLM BB category, then uncomment the appropriate
-    section and filter for the appropriate category and set a value
-    according to the PIDS standard.)
+#     example:
+#         if wanting to set albedo type for certain TLM categories:
+#         1) uncomment tenarr section. 
+#         2) add filter statements and assign new values by adding a line
+#             "tenarr[<bbarr or vegarr> == <classification>] = <newvalue>"
+#             between the existing statements
     
-    example:
-        if wanting to set albedo type for certain TLM categories:
-        1) uncomment tenarr section. 
-        2) add filter statements and assign new values by adding a line
-            "tenarr[<bbarr or vegarr> == <classification>] = <newvalue>"
-            between the existing statements
-    
-    Parameters
-    ----------
-    vegarr : np.array
-        vegetation classification array.
-    bbarr : np.array
-        array with TLM BB classifications.
+#     Parameters
+#     ----------
+#     vegarr : np.array
+#         vegetation classification array.
+#     bbarr : np.array
+#         array with TLM BB classifications.
 
-    Returns
-    -------
-    vegpars : np.array
-        vegetation parameters array.
+#     Returns
+#     -------
+#     vegpars : np.array
+#         vegetation parameters array.
     
-    '''
-    import numpy as np
-    vegpars = np.ones((12,vegarr.shape[0], vegarr.shape[1]))*-9999.0
+#     '''
+#     import numpy as np
+#     vegpars = np.ones((12,vegarr.shape[0], vegarr.shape[1]))*-9999.0
     
-    # zeroarr = vegpars[0,:,:]
-    # 
-    # vegpars[0,:,:]  = zeroarr
+#     # zeroarr = vegpars[0,:,:]
+#     # 
+#     # vegpars[0,:,:]  = zeroarr
     
-    # onearr = vegpars[1,:,:]
-    # 
-    # vegpars[1,:,:]  = onearr
+#     # onearr = vegpars[1,:,:]
+#     # 
+#     # vegpars[1,:,:]  = onearr
     
-    # twoarr = vegpars[2,:,:]
-    # 
-    # vegpars[2,:,:]  = twoarr
+#     # twoarr = vegpars[2,:,:]
+#     # 
+#     # vegpars[2,:,:]  = twoarr
     
-    # threearr = vegpars[3,:,:]
-    # 
-    # vegpars[3,:,:]  = threearr
+#     # threearr = vegpars[3,:,:]
+#     # 
+#     # vegpars[3,:,:]  = threearr
     
-    # fourarr = vegpars[4,:,:]
-    # 
-    # vegpars[4,:,:]  = fourarr
+#     # fourarr = vegpars[4,:,:]
+#     # 
+#     # vegpars[4,:,:]  = fourarr
     
-    # fivearr = vegpars[5,:,:]
-    # 
-    # vegpars[5,:,:]  = fivearr
+#     # fivearr = vegpars[5,:,:]
+#     # 
+#     # vegpars[5,:,:]  = fivearr
     
-    # sixarr = vegpars[6,:,:]
-    # 
-    # vegpars[6,:,:]  = sixarr
+#     # sixarr = vegpars[6,:,:]
+#     # 
+#     # vegpars[6,:,:]  = sixarr
     
-    # sevenarr = vegpars[7,:,:]
-    # 
-    # vegpars[7,:,:]  = sevenarr
+#     # sevenarr = vegpars[7,:,:]
+#     # 
+#     # vegpars[7,:,:]  = sevenarr
     
-    # eightarr = vegpars[8,:,:]
-    # 
-    # vegpars[8,:,:]  = eightarr
+#     # eightarr = vegpars[8,:,:]
+#     # 
+#     # vegpars[8,:,:]  = eightarr
     
-    # ninearr = vegpars[9,:,:]
-    # 
-    # vegpars[9,:,:]  = ninearr
+#     # ninearr = vegpars[9,:,:]
+#     # 
+#     # vegpars[9,:,:]  = ninearr
     
-    tenarr = vegpars[10,:,:]
-    tenarr[bbarr == 7] = 0
-    vegpars[10,:,:] = tenarr
+#     tenarr = vegpars[10,:,:]
+#     tenarr[bbarr == 7] = 0
+#     vegpars[10,:,:] = tenarr
     
-    # elevenarr = vegpars[11,:,:]
-    # 
-    # vegpars[11,:,:] = elevenarr
+#     # elevenarr = vegpars[11,:,:]
+#     # 
+#     # vegpars[11,:,:] = elevenarr
         
-    return vegpars 
+#     return vegpars 
 
 
 
@@ -400,12 +397,12 @@ def createparsarrays(nx,ny):
         albedo_pars array with fillvalue and correct number of nalbedo_pars.
 
     '''
-    vegpars = np.ones((12,ny,nx))*-9999.0
-    watpars = np.ones((7,ny,nx))*-9999.0
-    pavpars = np.ones((4,ny,nx))*-9999.0
-    soilpars = np.ones((8,ny,nx))*-9999.0
-    bldpars = np.ones((136,ny,nx))*-9999.0
-    albpars = np.ones((7,ny,nx))*-9999.0
+    vegpars = np.ones((12,ny,nx))*fillvalues['vegetation_pars']
+    watpars = np.ones((7,ny,nx))*fillvalues['water_pars']
+    pavpars = np.ones((4,ny,nx))*fillvalues['pavement_pars']
+    soilpars = np.ones((8,ny,nx))*fillvalues['soil_pars']
+    bldpars = np.ones((136,ny,nx))*fillvalues['building_pars']
+    albpars = np.ones((7,ny,nx))*fillvalues['albedo_pars']
     
     return vegpars,watpars,pavpars,soilpars,bldpars,albpars
 
