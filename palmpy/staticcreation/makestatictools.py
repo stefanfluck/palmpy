@@ -8,7 +8,7 @@ NAMELIST LLX LLY COORDINATES TEILBAR DURCH PAREND DXY)
 
 """
 import numpy as np
-import xarray as xr
+
 
 
 fillvalues = {
@@ -77,18 +77,21 @@ def loadascgeodata(filename):
     return arr,xll,yll,res
 
 
-def shifttopodown(arr):
+def shifttopodown(arr, ischild, shift=None):
     '''
     shifts topography array down so lowest value is 0. Subtracts the minimum value from the specified input array.
 
-    example usage: topo = shifttopodown(topo)
-    
-    TODO: HAVE ischild AS INPUT BECAUSE OTHERWISE IT CALCULATES NEW ORIGIN Z!
+    example usage: topo,origin_z = shifttopodown(topo,ischild) #when using it for a parent/root
+                   topo,origin_z = shifttopodown(topo,ischild,shift=origin_z) #when used for child
     
     Parameters
     ----------
     arr : np.array
         Topography as numpy array.
+    ischild: int
+        info if the domain is the root or a child.
+    shift : float
+        how much domain shall be shifted. only taken into account if ischild not 0. Default = None.
 
     Returns
     -------
@@ -98,9 +101,16 @@ def shifttopodown(arr):
         Array shifted down by this amount.        
     '''
     import numpy as np
-    amount = arr.min()
-    normed = arr - amount
-    print('Shifted the input array downwards by '+str(np.round(amount,3))+' meters.')
+    if ischild == 0:
+        amount = arr.min()
+        normed = arr - amount
+        print('Shifted the input array downwards by '+str(np.round(amount,3))+' meters.')
+        
+    else:
+        amount = shift
+        normed = arr - amount
+        print('Performed on child domain. Array shifted down by value provided in fcn call "shift": '+str(shift)+' meters.')
+        
     return normed, amount
 
 
