@@ -128,6 +128,22 @@ def childifyfilename(fileout, ischild):
     return newname
 
 
+tlm2palmvegdict = {
+    int(0):int(3),    # unclassified > short grass
+    int(1):int(9),    # fels > desert
+    int(6):int(16),   # gebueschwald > deciduous shrubs
+    int(7):int(9),    # lockergestein > desert
+    int(9):int(13),   # Gletscher > ice caps and glaciers
+    int(11):int(14),  # Feuchtgebiet > bogs and marshes
+    int(12):int(17),  # Wald > mixed Forest/woodland
+    int(13):int(18),  # Wald offen > interrupted forest
+    } 
+
+tlm2palmwatdict = {
+    int(5):int(2),    #fliessgewaesser > river
+    int(10):int(1),   #stehendes gewaesser > lake
+    }
+#TODO: to be added and implement in the mapbbclasses
 
 def mapbbclasses(bbarr):
     '''
@@ -383,124 +399,191 @@ def createparsarrays(nx,ny):
     
     return vegpars,watpars,pavpars,soilpars,bldpars,albpars
 
-    
-    
-    nsurface_fraction, nvegetation_pars, nalbedo_pars, npavement_pars, nsoil_pars, nwater_pars, nbuilding_pars
-    
-    
-    
 
 
-def modifyXpars(levels,vegarr,bbarr):
+def modifyparsarray(parsarr, npar, newvalue, filterarr, filtervalue):
     '''
-    create a parameter array where different parameters can be changed 
-    based on the level (nXXX_pars as coordinate)
+    Modify individual parameters depending on a conditions of a 2D array (filterarr).
     
-    TODO: REWRITE AS GENERIC xxx-PARS FILE: PROVIDE AS INPUT HOW MANY LEVELS, 
-    PROVIDE AS PROMPT WHICH ARRAY VEGARR OR BBARR, PROVIDE AS INPUT WHICH 
-    CATEGORY NUMBER TO BE MODIFIED AND TO WHICH VALUE. RETURN IS AS
-    ARRAY.
-    MAKE IT SO IT ALREADY CREATES ITS OWN COORDINATES!
-        
-    To set each category for desired category (either according to
-    palm category or TLM BB category, then uncomment the appropriate
-    section and filter for the appropriate category and set a value
-    according to the PIDS standard.)
+    Modifies the provided parsarr on the level npar for positions in 2D, where
+    the value in the filterarr matches the filtervalue. If it does, it overwrites
+    it with the newvalue.
     
-    example:
-        if wanting to set albedo type for certain TLM categories:
-        1) uncomment tenarr section. 
-        2) add filter statements and assign new values by adding a line
-            "tenarr[<bbarr or vegarr> == <classification>] = <newvalue>"
-            between the existing statements
+    see http://palm.muk.uni-hannover.de/trac/wiki/doc/app/iofiles/pids/static/tables
     
+    Example usage: set albedo_type in vegetation_pars where land surface is desert.
+    
+    vegetation_pars = modifyparsarray(vegetation_pars, 10, 12, vegetation_type, 9)
+    
+    as in: "modify array at parameter 10 to 12 where vegetation_type is 9."
+    
+    CAUTION: if ALBEDO-value needs to be set directly, use setalbedovalue() instead,
+    which also calls this function to first set albedo_types to 0!
+
     Parameters
     ----------
-    levels : int
-        how many parameterlevels shall be created.
-    vegarr : np.array
-        vegetation classification array.
-    bbarr : np.array
-        array with TLM BB classifications. Does not necessarily have to be provided, can also be None.
+    parsarr : np.array (3D)
+        3D numpy array of desired parameters
+    npar : int
+        index of desired parameter to be changed.
+    newvalue : float
+        new value at filtered positions
+    filterarr : np.array (2D)
+        2D numpy array for position detection.
+    filtervalue : int
+        value for which filterarr is filtered.
 
     Returns
     -------
-    vegpars : np.array
-        vegetation parameters array.
-    
+    parsarr : np.array (3D)
+        modified parameter array.
+
     '''
+    
     import numpy as np
-    xpars = np.ones((levels,vegarr.shape[0], vegarr.shape[1]))*-9999.0
+    newparsarr = parsarr[npar,:,:]
+    newparsarr[filterarr==filtervalue] = newvalue
+    parsarr[npar,:,:] = newparsarr
+    return parsarr
+
     
-    modarr = xpars[10,:,:]
-    modarr[bbarr == 7] = 0
-    xpars[10,:,:]  = modarr
     
-    return xpars
+    
+    
+
+
+# def modifyXpars(levels,vegarr,bbarr):
+#     '''
+#     create a parameter array where different parameters can be changed 
+#     based on the level (nXXX_pars as coordinate)
+    
+#     TODO: REWRITE AS GENERIC xxx-PARS FILE: PROVIDE AS INPUT HOW MANY LEVELS, 
+#     PROVIDE AS PROMPT WHICH ARRAY VEGARR OR BBARR, PROVIDE AS INPUT WHICH 
+#     CATEGORY NUMBER TO BE MODIFIED AND TO WHICH VALUE. RETURN IS AS
+#     ARRAY.
+#     MAKE IT SO IT ALREADY CREATES ITS OWN COORDINATES!
+        
+#     To set each category for desired category (either according to
+#     palm category or TLM BB category, then uncomment the appropriate
+#     section and filter for the appropriate category and set a value
+#     according to the PIDS standard.)
+    
+#     example:
+#         if wanting to set albedo type for certain TLM categories:
+#         1) uncomment tenarr section. 
+#         2) add filter statements and assign new values by adding a line
+#             "tenarr[<bbarr or vegarr> == <classification>] = <newvalue>"
+#             between the existing statements
+    
+#     Parameters
+#     ----------
+#     levels : int
+#         how many parameterlevels shall be created.
+#     vegarr : np.array
+#         vegetation classification array.
+#     bbarr : np.array
+#         array with TLM BB classifications. Does not necessarily have to be provided, can also be None.
+
+#     Returns
+#     -------
+#     vegpars : np.array
+#         vegetation parameters array.
+    
+#     '''
+#     import numpy as np
+#     xpars = np.ones((levels,vegarr.shape[0], vegarr.shape[1]))*-9999.0
+    
+#     modarr = xpars[10,:,:]
+#     modarr[bbarr == 7] = 0
+#     xpars[10,:,:]  = modarr
+    
+#     return xpars
  
     
 
-def setalbedopars(vegpars, bbarr, vegarr):
+def setalbedovalue(albedopars, vegpars, filterarr, filtervalue, newvalue, npar):
     '''
-    0: broadband albedo, 1: longwave, 2: shortwave direct albedo
-    3: longwave albedo for green fraction, 4: shortwave for green fraction
-    5: longwave for window fraction, 6: shortwave for window fraction
+    Set albedo-values directly in albedo_pars and in vegetation_pars the albedo
+    type to 0 (user defined) in one go. 
         
        
-    Set an albedo value everywhere where either bbarr or vegarr matches a category
-    and vegpars[10] matches 0 (user defined albedo type).
+
     
-    example:
-        if wanting to set albedo for certain TLM categories:
-        1) add filter statements and assign new values by adding a line
-            "<number>arr[(<bbarr or vegarr> == <classification>) & (vegp...==)] = <newvalue>"
+    example, if wanting to set albedo for certain TLM categories:
+        
+        albpars = setalbedovalue(albpars, vegpars, vegarr, 9, 0.5)
+        ...changes the albedo value at positions where
+            a) vegetation type is 9
+            b) vegpars[10] is 0
+                                           ...to 0.5. 
             
     
     Parameters
     ----------
+    albedopars : np.array 3D
+        albedo_pars array.
     vegpars : np.array
-        modified vegetation parameters.
-    bbarr : np.array
-        array with TLM BB classifications.
-    vegarr : np.array
-        vegetation classification array.
+        vegpars vegetation parameters.
+    filterarr : np.array
+        vegetation classification- or BB array.
+    filtervalue : int
+        value with which filterarr will be filtered.
+    newvalue : float
+        new value to be entered.
+    npar : int
+    which parameter. set -1 for all the same value, otherwise specify nalbedo_pars
 
     Returns
     -------
+    vegpars : np.array
+        vegetation_pars array with albedo_type set to 0 for filterarr==filtervalue
     albedopars : np.array
         albedo parameters that are user defined.
+
     '''
-    albedopars = np.ones((7, vegpars.shape[1], vegpars.shape[2]))*-9999.0
     
-    zeroarr = albedopars[0,:,:]
-    zeroarr[(bbarr == 7) & (vegpars[10,:,:] == 0)] = 0.5
-    albedopars[0,:,:]  = zeroarr
+    vegpars = modifyparsarray(vegpars,10,0,filterarr,filtervalue)
+  
+    # zeroarr = albedopars[0,:,:]
+    # zeroarr[(filterarr == filtervalue) & (vegpars[10,:,:] == 0)] = newvalue
+    # albedopars[0,:,:]  = zeroarr
     
-    onearr = albedopars[1,:,:]
-    onearr[(bbarr == 7) & (vegpars[10,:,:]==0)] = 0.5 
-    albedopars[1,:,:]  = onearr
+    # onearr = albedopars[1,:,:]
+    # onearr[(filterarr == filtervalue) & (vegpars[10,:,:]==0)] = newvalue
+    # albedopars[1,:,:]  = onearr
     
-    twoarr = albedopars[2,:,:]
-    twoarr[(bbarr == 7) & (vegpars[10,:,:]==0)] = 0.5
-    albedopars[2,:,:]  = twoarr
+    # twoarr = albedopars[2,:,:]
+    # twoarr[(filterarr == filtervalue) & (vegpars[10,:,:]==0)] = newvalue
+    # albedopars[2,:,:]  = twoarr
     
-    threearr = albedopars[3,:,:]
-    threearr[(bbarr == 7) & (vegpars[10,:,:]==0)] = 0.5
-    albedopars[3,:,:]  = threearr
+    # threearr = albedopars[3,:,:]
+    # threearr[(filterarr == filtervalue) & (vegpars[10,:,:]==0)] = newvalue
+    # albedopars[3,:,:]  = threearr
     
-    fourarr = albedopars[4,:,:]
-    fourarr[(bbarr == 7) & (vegpars[10,:,:]==0)] = 0.5
-    albedopars[4,:,:]  = fourarr
+    # fourarr = albedopars[4,:,:]
+    # fourarr[(filterarr == filtervalue) & (vegpars[10,:,:]==0)] = newvalue
+    # albedopars[4,:,:]  = fourarr
     
-    fivearr = albedopars[5,:,:]
-    fivearr[(bbarr == 7) & (vegpars[10,:,:]==0)] = 0.5
-    albedopars[5,:,:]  = fivearr
+    # fivearr = albedopars[5,:,:]
+    # fivearr[(filterarr == filtervalue) & (vegpars[10,:,:]==0)] = newvalue
+    # albedopars[5,:,:]  = fivearr
     
-    sixarr = albedopars[6,:,:]
-    sixarr[(bbarr == 7) & (vegpars[10,:,:]==0)] = 0.5
-    albedopars[6,:,:]  = sixarr
+    # sixarr = albedopars[6,:,:]
+    # sixarr[(filterarr == filtervalue) & (vegpars[10,:,:]==0)] = newvalue
+    # albedopars[6,:,:]  = sixarr
     
-    return albedopars
+    if npar == -1:
+        for i in range(albedopars.shape[0]):
+            zeroarr = albedopars[i,:,:]
+            zeroarr[(filterarr == filtervalue) & (vegpars[10,:,:] == 0)] = newvalue
+            albedopars[i,:,:]  = zeroarr
+    
+    else:
+        zeroarr = albedopars[npar,:,:]
+        zeroarr[(filterarr == filtervalue) & (vegpars[10,:,:] == 0)] = newvalue
+        albedopars[npar,:,:]  = zeroarr
+    
+    return vegpars,albedopars
 
 
 def createstaticcoords(xsize, ysize, pixelsize):
