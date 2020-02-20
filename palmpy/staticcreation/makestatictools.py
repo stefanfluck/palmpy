@@ -209,6 +209,10 @@ tlmstr2str = {
     
     }
 
+ownclass2palm = {
+    int(1001) : 'etwas für maisfeld'
+    }
+
 
 
 
