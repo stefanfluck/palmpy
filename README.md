@@ -3,7 +3,7 @@
 Processing scripts for the PALM model system
 -------------
 
-This is a github repo for PALM scripts that should facilitate the usage of [PALM](palm-model.org). This repository contains various elements, that deal with certain aspects of handling data for PALM, especially with geodata products by swisstopo in mind (_swissALTI3D, swissTLM3D_). These elements can be grouped in actions regarding
+This is a github repo for PALM scripts that should facilitate the usage of [PALM](https://palm.muk.uni-hannover.de/trac). This repository contains various elements, that deal with certain aspects of handling data for PALM, especially with geodata products by swisstopo in mind (_swissALTI3D, swissTLM3D_). These elements can be grouped in actions regarding
 
   - input data processing
       - swissALTI3D & swissTLM3D -> <id>_static files
