@@ -9,7 +9,7 @@ This is a github repo for PALM scripts that should facilitate the usage of [PALM
       - swissALTI3D & swissTLM3D -> <id>_static files
       - COSMO data preprocessor for INIFOR compatibility
   - runtime analysis
-      - plotting of _tmp/<id>.#/RUN_CONTROL_ data (available soon)
+      - plotting of _tmp/id.#/RUN_CONTROL_ data (available soon)
   - postprocessing of output data
       - output (available soon)
 
