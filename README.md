@@ -15,6 +15,8 @@ This is a github repo for PALM scripts that should facilitate the usage of PALM 
 
 with a clear focus on the first, as it is clearly the most labor-intensive and tedious step of them all. This repo also contains the conda environment needed for all those functions.
 
+Depending on your system, choose the appropriate <env>.yml file. Try to use the one with package version info first (conda env create -f palmenv-versinfo.yml -n <newname>). This may not work on systems other than windows 10 x86.
+
 This repository is a the result of student work at the Center for Aviation, ZHAW School of Engineering in Winterthur and is work in progress. 
 
 
