@@ -343,6 +343,54 @@ def modifyvegpars(vegarr,bbarr):
     return vegpars 
 
 
+
+def createparsarrays(nx,ny):
+    '''
+    Creates XXX_pars arrays with correct fill values and "height". 
+    If some are not needed, they can be skipped when calling the function, e.g.
+    _,_,_,soil_pars,_,_ = createparsarrays(nx,ny) 
+    if only the soil_pars array needs to be created.
+
+    Parameters
+    ----------
+    nx : int
+        number of cells in x direction.
+    ny : int
+        number of cells in y direction.
+
+    Returns
+    -------
+    vegpars : np.array
+        vegetation_pars array with fillvalue and correct number of nvegetation_pars.
+    watpars : TYPE
+        water_pars array with fillvalue and correct number of nwater_pars.
+    pavpars : TYPE
+        pavement_pars array with fillvalue and correct number of npavement_pars.
+    soilpars : TYPE
+        soil_pars array with fillvalue and correct number of nsoil_pars.
+    bldpars : TYPE
+        building_pars array with fillvalue and correct number of nbuilding_pars.
+    albpars : TYPE
+        albedo_pars array with fillvalue and correct number of nalbedo_pars.
+
+    '''
+    vegpars = np.ones((12,ny,nx))*-9999.0
+    watpars = np.ones((7,ny,nx))*-9999.0
+    pavpars = np.ones((4,ny,nx))*-9999.0
+    soilpars = np.ones((8,ny,nx))*-9999.0
+    bldpars = np.ones((136,ny,nx))*-9999.0
+    albpars = np.ones((7,ny,nx))*-9999.0
+    
+    return vegpars,watpars,pavpars,soilpars,bldpars,albpars
+
+    
+    
+    nsurface_fraction, nvegetation_pars, nalbedo_pars, npavement_pars, nsoil_pars, nwater_pars, nbuilding_pars
+    
+    
+    
+
+
 def modifyXpars(levels,vegarr,bbarr):
     '''
     create a parameter array where different parameters can be changed 
