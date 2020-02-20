@@ -2,12 +2,52 @@
 Created on Thu Jan 30 10:13:51 2020
 STATIC CREATION FILE TURNED INTO FUNCTIONS
 
+TODO: when implementing streets, implement a function that sets pavement_type, street_type,
+        etc to fillvalue where it intersects with building_2d (np.where, check palm_csd)
 
 TODO: ADD CHECKS THAT ORIGINS OF DOMAIN AND CHILD DOMAIN ARE COMPATIBLE (NESTING
 NAMELIST LLX LLY COORDINATES TEILBAR DURCH PAREND DXY)
 
 """
 import numpy as np
+
+
+def checknestcoordsvalid(dxyp,dxyn,nllx,nlly):
+    '''
+    Checks if grid spacing of parent and child match, also if lower left position of nest is aligned 
+    with parent grid.
+
+    Parameters
+    ----------
+    dxyp : float
+        DESCRIPTION.
+    dxyn : float
+        DESCRIPTION.
+    nllx : float
+        DESCRIPTION.
+    nlly : float
+        DESCRIPTION.
+
+    Returns
+    -------
+    None.
+
+    '''
+    dxyp = float(dxyp)
+    dxyn = float(dxyn)
+    nllx = float(nllx)
+    nlly = float(nlly)
+    
+    if (dxyp%dxyn==0) & (nllx%dxyp==0) & (nlly%dxyp==0):
+        print('chosen parameter match')
+    if (nllx%dxyp!=0):
+        print('Error: llx of nest not integer divisible by dxyp, hence not aligned with parent grid')
+    if (nlly%dxyp!=0):
+        print('Error: lly of nest not integer divisible by dxyp, hence not aligned with parent grid')
+    if (dxyp%dxyn!=0):
+        print('Error: dxyn not an integer divisor of dxyp, does not align')
+    
+
 
 
 
