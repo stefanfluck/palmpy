@@ -32,25 +32,55 @@ def checknestcoordsvalid(dxyp,dxyn,nllx,nlly):
 
     Returns
     -------
-    None.
+    result : Boolean
+        True if checks are passed.
 
     '''
     dxyp = float(dxyp)
     dxyn = float(dxyn)
     nllx = float(nllx)
     nlly = float(nlly)
+    result = False
     
     if (dxyp%dxyn==0) & (nllx%dxyp==0) & (nlly%dxyp==0):
         print('chosen parameter match')
+        result = True
     if (nllx%dxyp!=0):
         print('Error: llx of nest not integer divisible by dxyp, hence not aligned with parent grid')
     if (nlly%dxyp!=0):
         print('Error: lly of nest not integer divisible by dxyp, hence not aligned with parent grid')
     if (dxyp%dxyn!=0):
         print('Error: dxyn not an integer divisor of dxyp, does not align')
-    
+    return result
 
+def checknxyzvalid(nx,ny,nz):
+    '''
+    Checks if nx,ny and nz will pass the palm checks.
 
+    Parameters
+    ----------
+    nx : int
+        number of cells in x.
+    ny : int
+        number of cells in y.
+    nz : int
+        number of cells in z.
+
+    Returns
+    -------
+    result : Boolean
+        True if checks are passed.
+
+    '''
+    result = False
+    if (nx%nz==0) & (ny%nz==0):
+        print('nx, ny and nz match')
+        result=True
+    if (nx%nz!=0):
+        print('nx is not integer divisible by nz')
+    if (ny%nz!=0):
+        print('ny is not integer divisible by nz')
+    return result
 
 
 fillvalues = {
