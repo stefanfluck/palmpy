@@ -924,6 +924,19 @@ def outputstaticfile(static, fileout, encodingdict):
     
 
 
+#CANOPY IMPLEMENTATION
+
+def readsingletreeshp():
+    return None
+
+def readtreelineshp():
+    return None
+
+def readpatchshp():
+    return None
+
+
+
 
 
 
