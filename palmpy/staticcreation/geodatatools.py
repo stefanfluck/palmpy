@@ -152,6 +152,43 @@ def lv95towgs84(E,N):
     lat = np.round(ps*100/36,4)
     return lon,lat
 
+
+
+def cutortho(filein, fileout, xmin, xmax, ymin, ymax, xres, yres):
+    '''
+    Cuts an orthoimage in geotif format to the provided boundaries and resolution, 
+    does not change crs. Only tested for outputting again a .tif geotif file. 
+    
+
+    Parameters
+    ----------
+    filein : str
+        filename of input file. Provide a Geotiff orthoimage file.
+    fileout : str
+        output filename with ending .tif.
+    xmin : int
+        lower left corner x coordinate.
+    xmax : int
+        upper right corner x coordinate.
+    ymin : int
+        lower left corner y coordinate.
+    ymax : int
+        upper right corner y coordinate.
+    xres : int
+        target resolution in x direction.
+    yres : int
+        target resolution in y direction. choose symmetrically to xres.
+
+    Returns
+    -------
+    Saves cut orthoimage to provided path. No return in python.
+    
+    '''
+    from osgeo import gdal
+    ds = gdal.Open(filein)
+    ds = gdal.Translate(fileout, ds, projWin=[xmin, ymax, xmax, ymin], xRes=xres, yRes = yres)
+
+
 #%%
 # par = cutalti('swissALTI3D2018.tif', 'parentdhm.asc', xmin=730000, xmax=742000, ymin=190000, ymax=202000, xres=40, yres=40)
 # chi = cutalti('swissALTI3D2018.tif', 'childdhm.asc', xmin=735000, xmax=738000, ymin=194720, ymax=197720, xres=20, yres=20)
