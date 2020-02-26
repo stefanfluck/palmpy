@@ -1,4 +1,4 @@
-# palmpy
+# PALMPY
 
 Processing scripts for the PALM model system
 -------------
