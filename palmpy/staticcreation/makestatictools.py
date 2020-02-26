@@ -43,7 +43,7 @@ def checknestcoordsvalid(dxyp,dxyn,nllx,nlly):
     result = False
     
     if (dxyp%dxyn==0) & (nllx%dxyp==0) & (nlly%dxyp==0):
-        print('chosen parameter match')
+        print('Chosen parameters for dxy of child and parent and llxy of child match')
         result = True
     if (nllx%dxyp!=0):
         print('Error: llx of nest not integer divisible by dxyp, hence not aligned with parent grid')
@@ -74,7 +74,7 @@ def checknxyzvalid(nx,ny,nz):
     '''
     result = False
     if (nx%nz==0) & (ny%nz==0):
-        print('nx, ny and nz match')
+        print('Chosen parameters and resulting nx, ny and nz match')
         result=True
     if (nx%nz!=0):
         print('nx is not integer divisible by nz')

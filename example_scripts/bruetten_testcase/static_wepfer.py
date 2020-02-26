@@ -1,5 +1,10 @@
 """
 create static files just using dhm and tlm bb
+
+TODO: make it so an infinite number of nests can be used. use lists for every parameter instead of 
+      laufnummer-variable names and provide indexes. 
+
+
 """
 import xarray as xr
 from pathlib import Path
@@ -21,11 +26,13 @@ filenames =   'wepf_static'
 totalnumberofdomains = 2
 flags = (1,1,0,0,0)  # ( zt, TLMBBtypes, vegetation_pars, albedo_pars, treeraster)
 origin_time = '2019-08-01 12:00:00 +02'
+cutorthoimg = True  # provide orthoimages for parent and child domains
 
 #GEODATA FILES
+ortho = "E:\\Dokumente\\Bibliothek\\Meteorology\\Geodaten\\zrh_lszh_winti\\swissimage2.5m_latest.tif"
 dhm = "E:\\Dokumente\\Bibliothek\\Meteorology\\Geodaten\\zrh_lszh_winti\\swissALTI3D2018.tif"
 bb = "E:\\Dokumente\\Bibliothek\\Meteorology\\Geodaten\\zrh_lszh_winti\\tlm\\swissTLM3D_2019_tlm_bodenbedeckung\\bb.shp"
-outpath = str(Path.home() / 'Desktop' / 'wepf')+'\\'
+outpath = str(Path.home() / 'Desktop' / 'test')+'\\'
 
 poix,poiy      =  692542.0, 259033.0                # Point of interest
 #parent
@@ -59,12 +66,6 @@ mst.checknxyzvalid(nx1,ny1,nz1)                     # childchecks
 mst.checknestcoordsvalid(xres0,xres1,llx1,lly1)     # childchecks
 
 
-print('Setup the following parameters in the namelists:\n'+
-      'Parent Domain'+':\tnx/ny/nz dx/dy/dz  =  '+str(int(nx0-1))+'/'+str(int(ny0-1))+'/'+str(int(nz0))+
-      '\t'+str(xres0)+'/'+str(yres0)+'/'+str(zres0)+'\n'+
-      'Child Domain 1'+':\tnx/ny/nz dx/dy/dz  =  '+str(int(nx1-1))+'/'+str(int(ny1-1))+'/'+str(int(nz1))+
-      '\t'+str(xres1)+'/'+str(yres1)+'/'+str(zres1) +
-      '\nNest 1 llx-Position Coordinates for &nesting_parameters (x,y): '+str(llx1)+', '+str(lly1))
 
 
 
@@ -168,7 +169,8 @@ if flags[3] == 1:
 
 mst.outputstaticfile(static,outpath+filename, encodingdict)
 
-
+if cutorthoimg == True:
+    gdt.cutortho(ortho, outpath+filename+'_ortho.tif', xmin,xmax,ymin,ymax,xres,yres)
 
 
 
@@ -269,6 +271,24 @@ if flags[3] == 1:
     encodingdict['albedo_pars'] = {'dtype':'float32'}
 
 mst.outputstaticfile(static,outpath+filename, encodingdict)
+
+if cutorthoimg == True:
+    gdt.cutortho(ortho, outpath+filename+'_ortho.tif', xmin,xmax,ymin,ymax,xres,yres)
+
+
+
+#%% finishing actions
+
+
+
+print('Setup the following parameters in the namelists:\n'+
+      'Parent Domain'+':\tnx/ny/nz dx/dy/dz  =  '+str(int(nx0-1))+'/'+str(int(ny0-1))+'/'+str(int(nz0))+
+      '\t'+str(xres0)+'/'+str(yres0)+'/'+str(zres0)+'\n'+
+      'Child Domain 1'+':\tnx/ny/nz dx/dy/dz  =  '+str(int(nx1-1))+'/'+str(int(ny1-1))+'/'+str(int(nz1))+
+      '\t'+str(xres1)+'/'+str(yres1)+'/'+str(zres1) +
+      '\nNest 1 llx-Position Coordinates for &nesting_parameters (x,y): '+str(llx1)+', '+str(lly1))
+
+
 
 
 
