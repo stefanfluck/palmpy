@@ -924,6 +924,28 @@ def outputstaticfile(static, fileout, encodingdict):
     
 
 
+#CANOPY IMPLEMENTATION
+
+
+
+def readsingletreeshp():
+    return None
+
+def readtreelineshp():
+    return None
+
+def readpatchshp():
+    return None
+
+def createzlad(arrlist):
+    "input a list with arrays in it, for loop over it and get maximum tree height"
+    return None
+
+def createlad():
+    return None
+
+
+
 
 
 
