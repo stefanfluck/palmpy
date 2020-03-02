@@ -45,7 +45,7 @@ xaus0,yaus0    =   8192.0, 8192.0                   # dimensions of domain in me
 xmin0,ymin0    =   poi2x-xaus0/2, poi2y-yaus0/2       # lower left corner (origin) coordinates
 xmax0, ymax0   =   xmin0+xaus0, ymin0+yaus0         # calculation of upper right corner coords
 zmax0          =   4096.0                           # vertical extent
-xres0,yres0,zres0    =  32.0, 32.0, 32.0            # resolutions
+xres0,yres0,zres0    =  64.0, 64.0, 64.0            # resolutions
 
 nx0      =  (xmax0-xmin0)/xres0                     # number of gridpoints in x
 ny0      =  (ymax0-ymin0)/yres0                     # number of gridpoints in y
@@ -54,11 +54,11 @@ mst.checknxyzvalid(nx0,ny0,nz0)                     # parentchecks
 
 #child 1
 ischild1       =   1
-xaus1,yaus1    =   2048.0, 2048.0                   # dimensions of domain in meter
+xaus1,yaus1    =   3072.0, 3072.0                   # dimensions of domain in meter
 xmin1,ymin1    =   poi2x-xaus1/2, poi2y-yaus1/2       # lower left corner (origin) coordinates
 xmax1, ymax1   =   xmin1+xaus1, ymin1+yaus1         # calculation of upper right corner coords
-zmax1          =   2048.0                            # vertical extent
-xres1,yres1,zres1    =  8.0, 8.0, 8.0            # resolutions
+zmax1          =   3072.0                            # vertical extent
+xres1,yres1,zres1    =  32.0, 32.0, 32.0            # resolutions
 
 nx1      =  (xmax1-xmin1)/xres1                     # number of gridpoints in x
 ny1      =  (ymax1-ymin1)/yres1                     # number of gridpoints in y
@@ -306,7 +306,7 @@ print('Setup the following parameters in the namelists:\n'+
       
 print('Child Domain 1'+':\tnx/ny/nz dx/dy/dz  =  '+str(int(nx1-1))+'/'+str(int(ny1-1))+'/'+str(int(nz1))+
       '\t'+str(xres1)+'/'+str(yres1)+'/'+str(zres1) +
-      '\nNest 1 llx-Position Coordinates for &nesting_parameters (x,y): '+str(llx1)+', '+str(lly1))
+      '\nNest 1 llx-Position Coordinates for &nesting_parameters (x,y): '+str(llx1)+', '+str(lly1)+'\n')
 
 if totalnumberofdomains>=2:
     print('Child Domain 2'+':\tnx/ny/nz dx/dy/dz  =  '+str(int(nx2-1))+'/'+str(int(ny2-1))+'/'+str(int(nz2))+
