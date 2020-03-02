@@ -10,6 +10,7 @@ import xarray as xr
 from pathlib import Path
 import sys
 import configparser as cfp
+import numpy as np
 
 modulepath = str(Path.home() / 'Documents' / 'Python Scripts' / 'ZAV-PALM-Scripts')
 if modulepath not in sys.path:
@@ -23,7 +24,7 @@ import palmpy.staticcreation.makestatictools as mst
 
 #%% setup
 filenames =   'yverdon_static'
-totalnumberofdomains = 2
+totalnumberofdomains = 3
 flags = (1,1,0,0,0)  # ( zt, TLMBBtypes, vegetation_pars, albedo_pars, treeraster)
 origin_time = '2019-06-07 12:00:00 +02'
 cutorthoimg = True  # provide orthoimages for parent and child domains
@@ -45,7 +46,7 @@ xaus0,yaus0    =   8192.0, 8192.0                   # dimensions of domain in me
 xmin0,ymin0    =   poi2x-xaus0/2, poi2y-yaus0/2       # lower left corner (origin) coordinates
 xmax0, ymax0   =   xmin0+xaus0, ymin0+yaus0         # calculation of upper right corner coords
 zmax0          =   4096.0                           # vertical extent
-xres0,yres0,zres0    =  64.0, 64.0, 64.0            # resolutions
+xres0,yres0,zres0    =  32.0, 32.0, 32.0            # resolutions
 
 nx0      =  (xmax0-xmin0)/xres0                     # number of gridpoints in x
 ny0      =  (ymax0-ymin0)/yres0                     # number of gridpoints in y
@@ -55,10 +56,10 @@ mst.checknxyzvalid(nx0,ny0,nz0)                     # parentchecks
 #child 1
 ischild1       =   1
 xaus1,yaus1    =   3072.0, 3072.0                   # dimensions of domain in meter
-xmin1,ymin1    =   poi2x-xaus1/2, poi2y-yaus1/2       # lower left corner (origin) coordinates
+xmin1,ymin1    =   poi2x-xaus1/2, poi2y+512-yaus1/2       # lower left corner (origin) coordinates
 xmax1, ymax1   =   xmin1+xaus1, ymin1+yaus1         # calculation of upper right corner coords
 zmax1          =   3072.0                            # vertical extent
-xres1,yres1,zres1    =  32.0, 32.0, 32.0            # resolutions
+xres1,yres1,zres1    =  16.0, 16.0, 16.0            # resolutions
 
 nx1      =  (xmax1-xmin1)/xres1                     # number of gridpoints in x
 ny1      =  (ymax1-ymin1)/yres1                     # number of gridpoints in y
@@ -71,9 +72,9 @@ mst.checknestcoordsvalid(xres0,xres1,llx1,lly1)     # childchecks
 
 #child 2
 ischild2       =   2
-xaus2,yaus2    =   1024.0, 768.0                   # dimensions of domain in meter
-xmin2,ymin2    =   poi2x-xaus2/2, poi2y-yaus2/2       # lower left corner (origin) coordinates
-xmax2, ymax2   =   xmin2+xaus2, ymin2+yaus2         # calculation of upper right corner coords
+xaus2,yaus2    =   1024.0, 1024.0                   # dimensions of domain in meter
+xmin2,ymin2    =   poi2x-xaus2/2, poi2y+256-(yaus2/2)       # lower left corner (origin) coordinates
+xmax2, ymax2   =   xmin2+xaus2, ymin2+yaus2      # calculation of upper right corner coords
 zmax2          =   256.0                            # vertical extent
 xres2,yres2,zres2    =  2.0, 2.0, 2.0            # resolutions
 
@@ -311,9 +312,23 @@ print('Child Domain 1'+':\tnx/ny/nz dx/dy/dz  =  '+str(int(nx1-1))+'/'+str(int(n
 if totalnumberofdomains>=2:
     print('Child Domain 2'+':\tnx/ny/nz dx/dy/dz  =  '+str(int(nx2-1))+'/'+str(int(ny2-1))+'/'+str(int(nz2))+
           '\t'+str(xres2)+'/'+str(yres2)+'/'+str(zres2) +
-          '\nNest 2 llx-Position Coordinates for &nesting_parameters (x,y): '+str(llx2)+', '+str(lly2))
+          '\nNest 2 llx-Position Coordinates for &nesting_parameters (x,y): '+str(llx2)+', '+str(lly2)+'\n\n')
 
 
+cellcount0=nx0*ny0*nz0
+totcells=cellcount0
+if totalnumberofdomains>=2:
+    cellcount1=nx1*ny1*nz1
+    totcells+=cellcount1
+if totalnumberofdomains>=3:
+    cellcount2=nx2*ny2*nz2
+    totcells+=cellcount2
+print('Total cells: '+str(totcells))
+print('Cells Parent: '+str(cellcount0)+'\t\t'+str(np.round(cellcount0/totcells*100,2))+'%')
+if totalnumberofdomains>=2:
+    print('Cells Child1: '+str(cellcount1)+'\t\t'+str(np.round(cellcount1/totcells*100,2))+'%')
+if totalnumberofdomains>=3:
+    print('Cells Child2: '+str(cellcount2)+'\t'+str(np.round(cellcount2/totcells*100,2))+'%')
 
 
 
