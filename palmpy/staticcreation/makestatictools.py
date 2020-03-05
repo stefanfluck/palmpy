@@ -93,6 +93,7 @@ fillvalues = {
    "buildings_3d": np.byte(-127),
    "bridges_2d": float(-9999.0),
    "building_id": int(-9999),
+   "tree_id": int(-9999),
    "bridges_id": int(-9999),
    "building_type": np.byte(-127),
    "nsurface_fraction": int(-9999),
@@ -782,6 +783,10 @@ def setNeededAttributes(dataarray, staticvariable):
     if staticvariable == 'lad':
         dataarray.attrs['_FillValue'] = fillvalues[staticvariable]
         dataarray.attrs['long_name'] = 'leaf area density'          
+  
+    if staticvariable == 'tree_id':
+        dataarray.attrs['_FillValue'] = fillvalues[staticvariable]
+        dataarray.attrs['long_name'] = 'tree id'          
 
     return
 
@@ -880,19 +885,64 @@ def setGlobalAttributes(static, infodict):
 
 
 
+# encodingdict = {'x':                {'dtype': 'float32'}, 
+#                 'y':                {'dtype': 'float32'},
+#                 'zt':               {'dtype': 'float32'},
+#                 'vegetation_type':  {'dtype': 'int8'},
+#                 'water_type':       {'dtype': 'int8'},
+#                 'soil_type':        {'dtype': 'int8'},
+#                 'pavement_type':    {'dtype': 'int8'},
+#                 'surface_fraction': {'dtype': 'float32'},
+#                 'vegetation_pars':  {'dtype': 'float32'}
+#                 }
+
+def setupencodingdict(flags):
+    '''
+    creates a encodingdict dictionary for saving static files 
+    in xarray
+
+    Parameters
+    ----------
+    flags : dict
+        dict from the static generation script.
+
+    Returns
+    -------
+    encodingdict : dict
+        encoding dict with needed conversions.
+
+    '''
+    encodingdict = {'x':  {'dtype': 'float32'}, 
+                    'y':  {'dtype': 'float32'}}
+    if flags['doterrain'] == True:
+        encodingdict['zt'] = {'dtype': 'float32'}
+    if flags['dotlmbb'] == True:
+        encodingdict['vegetation_type'] = {'dtype': 'int8'}
+        encodingdict['water_type'] = {'dtype': 'int8'}
+        encodingdict['soil_type'] = {'dtype': 'int8'}
+        encodingdict['pavement_type'] = {'dtype': 'int8'}
+        encodingdict['surface_fraction'] = {'dtype': 'float32'}
+        encodingdict['nsurface_fraction'] = {'dtype': 'float32'}
+    if flags['dovegpars'] == True:
+        encodingdict['vegetation_pars'] = {'dtype':'float32'}
+    if flags['doalbedopars'] == True:
+        encodingdict['albedo_pars'] = {'dtype':'float32'}
+    if flags['dolad'] == True:
+        encodingdict['lad'] = {'dtype':'float32'}
+        encodingdict['tree_id'] = {'dtype':'int32'}
+    if flags['dobuildings2d'] == True:
+        encodingdict['buildings_2d'] = {'dtype':'float32'}
+        encodingdict['building_id'] = {'dtype':'int8'}
+    if flags['dobuildings3d'] == True:
+        encodingdict['buildings_3d'] = {'dtype':'uint8'}
+        encodingdict['building_id'] = {'dtype':'int8'}
+    if flags['dostreettypes'] == True:
+        encodingdict['street_type'] =  {'dtype':'int8'}
+    return encodingdict
 
 
-    
-encodingdict = {'x':                {'dtype': 'float32'}, 
-                'y':                {'dtype': 'float32'},
-                'zt':               {'dtype': 'float32'},
-                'vegetation_type':  {'dtype': 'int8'},
-                'water_type':       {'dtype': 'int8'},
-                'soil_type':        {'dtype': 'int8'},
-                'pavement_type':    {'dtype': 'int8'},
-                'surface_fraction': {'dtype': 'float32'},
-                'vegetation_pars':  {'dtype': 'float32'}
-                }
+
+
 
 def outputstaticfile(static, fileout, encodingdict):
     '''
