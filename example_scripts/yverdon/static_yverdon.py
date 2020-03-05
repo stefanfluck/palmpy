@@ -25,17 +25,33 @@ import palmpy.staticcreation.makestatictools as mst
 #%% setup
 filenames =   'yverdon_static'
 totalnumberofdomains = 3
-flags = (1,1,0,0,0)  # ( zt, TLMBBtypes, vegetation_pars, albedo_pars, treeraster)
+# flags = (1,1,0,0,0)  # ( zt, TLMBBtypes, vegetation_pars, albedo_pars, treeraster)
+flags = {'doterrain':       True,
+         'dotlmbb':         True,
+         'dolad':           True, #for now: resolved tree file, treerows file and singletree file needed
+         'dobuildings2d':   False,
+         'dovegpars':       False,
+         'doalbedopars':    False,
+         'dostreetsbb':     False
+         }
+
 origin_time = '2019-06-07 12:00:00 +02'
 cutorthoimg = True  # provide orthoimages for parent and child domains
 
-#GEODATA FILES
-ortho = "E:\\Dokumente\\Bibliothek\\Meteorology\\Geodaten\\zrh_lszh_winti\\swissimage2.5m_latest.tif"
-dhm = "E:\\Dokumente\\Bibliothek\\Meteorology\\Geodaten\\zrh_lszh_winti\\swissALTI3D2018.tif"
-bb = "E:\\Dokumente\\Bibliothek\\Meteorology\\Geodaten\\zrh_lszh_winti\\tlm\\swissTLM3D_2019_tlm_bodenbedeckung\\bb.shp"
+#GEODATA FILES (if not available, write None)
+ortho = "C:\\Users\\stefa\\Desktop\\preprocessed_shp\\swissimage2.5cutlarger.tif"
+dhm = "C:\\Users\\stefa\\Desktop\\preprocessed_shp\\swissALTI3Dcut.tif"
+bb = "C:\\Users\\stefa\\Desktop\\preprocessed_shp\\yverdoncut_bb.shp"
+resolvedforestshp = 'C:\\Users\\stefa\\Desktop\\preprocessed_shp\\yverdoncut_bb_waldonly.shp'
+treerowsshp =       'C:\\Users\\stefa\\Desktop\\preprocessed_shp\\yverdoncut_breihe_mod_puff.shp'
+singletreesshp =    'C:\\Users\\stefa\\Desktop\\preprocessed_shp\\yverdoncut_ebgeb_mod_puff.shp'
+
+
 
 #OUTPUT
-outpath = str(Path.home() / 'Desktop' / 'yverdon_out')+'\\'
+subdir_rasteredshp = str(Path.home() / 'Desktop' / 'preprocessed_shp' / 'rasteredshp')+'\\' #where rastered shp shall be saved
+outpath = str(Path.home() / 'Desktop' / 'yverdon_out')+'\\' #where the staticfile shall be saved
+
 
 poix,poiy      =  536953.0, 179395.0                # Point of interest ARP
 poi2x,poi2y    =  536524.0, 178530.0                # Point of Interest, Messstation
@@ -53,7 +69,7 @@ ny0      =  (ymax0-ymin0)/yres0                     # number of gridpoints in y
 nz0      =  zmax0/zres0                             # number of gridpoints in z
 mst.checknxyzvalid(nx0,ny0,nz0)                     # parentchecks
 
-#child 1
+##################### child 1 ###########################
 ischild1       =   1
 xaus1,yaus1    =   3072.0, 3072.0                   # dimensions of domain in meter
 xmin1,ymin1    =   poi2x-xaus1/2, poi2y+512-yaus1/2       # lower left corner (origin) coordinates
@@ -70,7 +86,14 @@ lly1     =   ymin1-ymin0                            # ll-corner y coords in pare
 mst.checknxyzvalid(nx1,ny1,nz1)                     # childchecks
 mst.checknestcoordsvalid(xres0,xres1,llx1,lly1)     # childchecks
 
-#child 2
+#LAD PARAMETERS CHILD 1
+lai_forest = 8; lai_breihe = 10; lai_ebgebu = 8;
+a_forest = 2;   b_forest = 1.2
+a_breihe = 1.3; b_breihe = 1.1
+a_ebgebu = 4;   b_ebgebu = 2
+
+
+##################### child 2 ###########################
 ischild2       =   2
 xaus2,yaus2    =   1024.0, 1024.0                   # dimensions of domain in meter
 xmin2,ymin2    =   poi2x-xaus2/2, poi2y+256-(yaus2/2)       # lower left corner (origin) coordinates
@@ -101,7 +124,8 @@ xmax = xmax0
 ymin = ymin0 #in LV03 Koordinaten, lower left corner
 ymax = ymax0
 xres = xres0
-yres = xres0
+yres = yres0
+zres = zres0
 
 infodict = {'version':           1,
             'palm_version':      6.0,
@@ -133,11 +157,11 @@ vegarr, pavarr, watarr, soilarr = mst.mapbbclasses(bbdat)
 sfrarr = mst.makesurffractarray(vegarr,pavarr,watarr)
 
 #create static coordinates
-x,y,nsurface_fraction,_,_,_,_,_,_ = mst.createstaticcoords(vegarr.shape[0],vegarr.shape[1],xres)
-if flags[2] == 1:
-    _,_,_,nvegetation_pars,_,_,_,_,_ =  mst.createstaticcoords(vegarr.shape[0],vegarr.shape[1],xres)
-if flags[3] == 1:
-    _,_,_,_,nalbedo_pars,_,_,_,_ = mst.createstaticcoords(vegarr.shape[0],vegarr.shape[1],xres)
+x,y,nsurface_fraction = mst.createstaticcoords(vegarr.shape[0],vegarr.shape[1],xres) [0:3]
+if flags['dovegpars'] == True:
+    nvegetation_pars =  mst.createstaticcoords(vegarr.shape[0],vegarr.shape[1],xres)[3]
+if flags['doalbedopars'] == True:
+    nalbedo_pars = mst.createstaticcoords(vegarr.shape[0],vegarr.shape[1],xres)[4]
 
 #create dataarrays
 zt = mst.createDataArrays(ztdat,['y','x'],[y,x])
@@ -146,9 +170,9 @@ pavement_type = mst.createDataArrays(pavarr,['y','x'],[y,x])
 water_type = mst.createDataArrays(watarr,['y','x'],[y,x])
 soil_type = mst.createDataArrays(soilarr,['y','x'],[y,x])
 surface_fraction = mst.createDataArrays(sfrarr,['nsurface_fraction','y','x'],[nsurface_fraction,y,x])
-if flags[2] == 1:
+if flags['dovegpars'] == True:
     vegetation_pars =  mst.createDataArrays(vegpars, ['nvegetation_pars','y','x'],[nvegetation_pars,y,x])
-if flags[3] == 1:
+if flags['doalbedopars'] == True:
     albedo_pars =  mst.createDataArrays(albedopars, ['nalbedo_pars','y','x'],[nalbedo_pars,y,x])
 
 
@@ -174,18 +198,23 @@ mst.setGlobalAttributes(static,infodict)
 
 #output the static file
 encodingdict = {'x':                {'dtype': 'float32'}, 
-                'y':                {'dtype': 'float32'},
-                'zt':               {'dtype': 'float32'},
-                'vegetation_type':  {'dtype': 'int8'},
-                'water_type':       {'dtype': 'int8'},
-                'soil_type':        {'dtype': 'int8'},
-                'pavement_type':    {'dtype': 'int8'},
-                'surface_fraction': {'dtype': 'float32'},
-                'nsurface_fraction':{'dtype': 'float32'}}
-if flags[2] == 1:
+                'y':                {'dtype': 'float32'}
+               }
+if flags['doterrain'] == True:
+    encodingdict['zt'] = {'dtype': 'float32'}
+if flags['dotlmbb'] == True:
+    encodingdict['vegetation_type'] = {'dtype': 'int8'}
+    encodingdict['water_type'] = {'dtype': 'int8'}
+    encodingdict['soil_type'] = {'dtype': 'int8'}
+    encodingdict['pavement_type'] = {'dtype': 'int8'}
+    encodingdict['surface_fraction'] = {'dtype': 'float32'}
+    encodingdict['nsurface_fraction'] = {'dtype': 'float32'}
+
+if flags['dovegpars'] == True:
     encodingdict['vegetation_pars'] = {'dtype':'float32'}
-if flags[3] == 1:
+if flags['doalbedopars'] == True:
     encodingdict['albedo_pars'] = {'dtype':'float32'}
+
 
 mst.outputstaticfile(static,outpath+filename, encodingdict)
 
@@ -195,16 +224,18 @@ if cutorthoimg == True:
 
 
 #%%#######################################################
-## This section creates the parent static file.
+## This section creates the child 1 static file.
 
 #assign variables:
+filename = filenames
 ischild = ischild1 #Child id. this here is not a child, i.e. parent. 
 xmin = xmin1 #in LV03 Koordinaten, lower left corner
 xmax = xmax1
 ymin = ymin1 #in LV03 Koordinaten, lower left corner
 ymax = ymax1
 xres = xres1
-yres = xres1
+yres = yres1
+zres = zres1
 
 infodict = {'version':           1,
             'palm_version':      6.0,
@@ -235,33 +266,111 @@ vegarr, pavarr, watarr, soilarr = mst.mapbbclasses(bbdat)
 #create surface fraction array
 sfrarr = mst.makesurffractarray(vegarr,pavarr,watarr)
 
+##### treat LAD
+
+# if flags['dolad'] == True:
+
+try:
+    os.mkdir(subdir_rasteredshp)
+except:
+    pass    
+
+resforesttop = gdt.rasterandcuttlm(resolvedforestshp, subdir_rasteredshp+'resolvedforesttop1.asc', 
+                                xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_TOP')
+resforestbot = gdt.rasterandcuttlm(resolvedforestshp, subdir_rasteredshp+'resolvedforestbot1.asc', 
+                                xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_BOT')
+resforestid = gdt.rasterandcuttlm(resolvedforestshp, subdir_rasteredshp+'resolvedforestid1.asc', 
+                                xmin, xmax, ymin, ymax, xres, yres, burnatt='ID')
+resbreihetop = gdt.rasterandcuttlm(treerowsshp, subdir_rasteredshp+'resolvedbreihentop1.asc', 
+                                xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_TOP')
+resbreihebot = gdt.rasterandcuttlm(treerowsshp, subdir_rasteredshp+'resolvedbreihenbot1.asc', 
+                                xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_BOT')
+resbreiheid = gdt.rasterandcuttlm(treerowsshp, subdir_rasteredshp+'resolvedbreihenid1.asc', 
+                                xmin, xmax, ymin, ymax, xres, yres, burnatt='ID')
+resebgebtop = gdt.rasterandcuttlm(singletreesshp, subdir_rasteredshp+'resolvedebgebtop1.asc', 
+                                xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_TOP')
+resebgebbot = gdt.rasterandcuttlm(singletreesshp, subdir_rasteredshp+'resolvedebgebbot1.asc', 
+                                xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_BOT')
+resebgebid = gdt.rasterandcuttlm(singletreesshp, subdir_rasteredshp+'resolvedebgebid1.asc', 
+                                xmin, xmax, ymin, ymax, xres, yres, burnatt='ID')
+
+canopyheight = np.maximum.reduce([resforesttop, resbreihetop, resebgebtop])
+canopybottom = np.maximum.reduce([resforestbot, resbreihebot, resebgebbot])
+canopyid = np.maximum.reduce([resforestid, resbreiheid, resebgebid])
+
+#create arrays for alpha and beta and reduce to one layer.
+resforesta = np.where(resforesttop[:,:] != 0, a_forest, resforesttop[:,:])     # alpha für forest
+resforestb = np.where(resforesttop[:,:] != 0, b_forest, resforesttop[:,:])     # beta für forest
+resbreihea = np.where(resbreihetop[:,:] != 0, a_breihe, resbreihetop[:,:])     # alpha für baumreihe
+resbreiheb = np.where(resbreihetop[:,:] != 0, b_breihe, resbreihetop[:,:])     # beta für baumreihe
+resebgeba = np.where(resebgebtop[:,:] != 0, a_ebgebu, resebgebtop[:,:])        # alpha für ebgeb
+resebgebb = np.where(resebgebtop[:,:] != 0, b_ebgebu, resebgebtop[:,:])        # beta für ebgeb
+canalpha = np.maximum.reduce([resforesta,resbreihea,resebgeba])
+canbeta = np.maximum.reduce([resforestb,resbreiheb,resebgebb])
+
+#create an LAI array
+laiforest = np.where(resforesttop[:,:] != 0, lai_forest, resforesttop[:,:])
+laibreihe = np.where(resbreihetop[:,:] != 0, lai_breihe, resbreihetop[:,:])
+laiebgeb = np.where(resebgebtop[:,:] != 0, lai_ebgebu, resebgebtop[:,:])        
+lai = np.maximum.reduce([laiforest, laibreihe, laiebgeb])
+
+maxtreeheight = np.max(canopyheight) #evaluate maximum tree height for zlad array generation
+
+zlad= mst.createzlad(maxtreeheight, zres) #create zlad array
+ladarr = np.ones((len(zlad), canopyheight.shape[0], canopyheight.shape[1]))*mst.fillvalues['tree_data'] #create empty lad array
+
+chdztop = np.round(canopyheight/zres,0).astype(int)
+chidxtop = np.where( (chdztop[:,:]==0), -9999, chdztop[:,:]) #index of zlad height that needs to be filled
+chdzbot = np.round(canopybottom/zres,0).astype(int)
+chidxbot = np.where( (chdzbot[:,:]==0), 0, chdzbot[:,:]) #index of zlad height that needs to be filled
+
+#create actual lad array
+from scipy.stats import beta
+for i in range(ladarr.shape[1]):
+    for j in range(ladarr.shape[2]):
+        # if not np.isnan(chidxtop[i,j]):
+        if not chidxtop[i,j] == -9999:
+            botindex = int(chidxbot[i,j])
+            topindex = int(chidxtop[i,j])+1
+            pdf = beta.pdf(x=np.arange(0,1,(1/(topindex-botindex))),a=canalpha[i,j],b=canbeta[i,j])
+            ladarr[botindex:topindex,i,j] = pdf/pdf.max()*lai[i,j]/canopyheight[i,j]
+
+
+
+
 #create static coordinates
-x,y,nsurface_fraction,_,_,_,_,_,_ = mst.createstaticcoords(vegarr.shape[0],vegarr.shape[1],xres)
-if flags[2] == 1:
-    _,_,_,nvegetation_pars,_,_,_,_,_ =  mst.createstaticcoords(vegarr.shape[0],vegarr.shape[1],xres)
-if flags[3] == 1:
-    _,_,_,_,nalbedo_pars,_,_,_,_ = mst.createstaticcoords(vegarr.shape[0],vegarr.shape[1],xres)
+x,y = mst.createstaticcoords(vegarr.shape[0],vegarr.shape[1],xres)[0:2]
+if flags['dotlmbb'] == True:
+    nsurface_fraction = mst.createstaticcoords(vegarr.shape[0],vegarr.shape[1],xres)[2]
+if flags['dovegpars'] == True:
+    nvegetation_pars =  mst.createstaticcoords(vegarr.shape[0],vegarr.shape[1],xres)[3]
+if flags['doalbedopars'] == True:
+    nalbedo_pars = mst.createstaticcoords(vegarr.shape[0],vegarr.shape[1],xres)[4]
 
 #create dataarrays
-zt = mst.createDataArrays(ztdat,['y','x'],[y,x])
-vegetation_type = mst.createDataArrays(vegarr,['y','x'],[y,x])
-pavement_type = mst.createDataArrays(pavarr,['y','x'],[y,x])
-water_type = mst.createDataArrays(watarr,['y','x'],[y,x])
-soil_type = mst.createDataArrays(soilarr,['y','x'],[y,x])
-surface_fraction = mst.createDataArrays(sfrarr,['nsurface_fraction','y','x'],[nsurface_fraction,y,x])
-if flags[2] == 1:
+if flags['doterrain'] == True:
+    zt = mst.createDataArrays(ztdat,['y','x'],[y,x])
+    mst.setNeededAttributes(zt, 'zt')
+if flags['dotlmbb'] == True:
+    vegetation_type = mst.createDataArrays(vegarr,['y','x'],[y,x])
+    pavement_type = mst.createDataArrays(pavarr,['y','x'],[y,x])
+    water_type = mst.createDataArrays(watarr,['y','x'],[y,x])
+    soil_type = mst.createDataArrays(soilarr,['y','x'],[y,x])
+    surface_fraction = mst.createDataArrays(sfrarr,['nsurface_fraction','y','x'],[nsurface_fraction,y,x])
+    mst.setNeededAttributes(vegetation_type,'vegetation_type')
+    mst.setNeededAttributes(pavement_type,'pavement_type')
+    mst.setNeededAttributes(water_type,'water_type')
+    mst.setNeededAttributes(soil_type,'soil_type')
+    mst.setNeededAttributes(surface_fraction,'surface_fraction')
+if flags['dovegpars'] == True:
     vegetation_pars =  mst.createDataArrays(vegpars, ['nvegetation_pars','y','x'],[nvegetation_pars,y,x])
-if flags[3] == 1:
+if flags['doalbedopars'] == True:
     albedo_pars =  mst.createDataArrays(albedopars, ['nalbedo_pars','y','x'],[nalbedo_pars,y,x])
+if flags['dolad'] == True:
+    lad = mst.createDataArrays(ladarr,['zlad', 'y', 'x'], [zlad,y,x])
+    mst.setNeededAttributes(lad, 'lad')
 
 
-#set needed attributes to the data arrays
-mst.setNeededAttributes(zt, 'zt')
-mst.setNeededAttributes(vegetation_type,'vegetation_type')
-mst.setNeededAttributes(pavement_type,'pavement_type')
-mst.setNeededAttributes(water_type,'water_type')
-mst.setNeededAttributes(soil_type,'soil_type')
-mst.setNeededAttributes(surface_fraction,'surface_fraction')
 
 #assemble Dataset
 static = xr.Dataset()
@@ -271,29 +380,38 @@ static['water_type'] = water_type
 static['soil_type'] = soil_type
 static['pavement_type'] = pavement_type
 static['surface_fraction'] = surface_fraction
+if flags['dolad'] == True:
+    static['lad'] = lad
 
 #set global attributes
 mst.setGlobalAttributes(static,infodict)
 
 #output the static file
 encodingdict = {'x':                {'dtype': 'float32'}, 
-                'y':                {'dtype': 'float32'},
-                'zt':               {'dtype': 'float32'},
-                'vegetation_type':  {'dtype': 'int8'},
-                'water_type':       {'dtype': 'int8'},
-                'soil_type':        {'dtype': 'int8'},
-                'pavement_type':    {'dtype': 'int8'},
-                'surface_fraction': {'dtype': 'float32'},
-                'nsurface_fraction':{'dtype': 'float32'}}
-if flags[2] == 1:
+                'y':                {'dtype': 'float32'}}
+if flags['doterrain'] == True:
+    encodingdict['zt'] = {'dtype': 'float32'}
+if flags['dotlmbb'] == True:
+    encodingdict['vegetation_type'] = {'dtype': 'int8'}
+    encodingdict['water_type'] = {'dtype': 'int8'}
+    encodingdict['soil_type'] = {'dtype': 'int8'}
+    encodingdict['pavement_type'] = {'dtype': 'int8'}
+    encodingdict['surface_fraction'] = {'dtype': 'float32'}
+    encodingdict['nsurface_fraction'] = {'dtype': 'float32'}
+if flags['dovegpars'] == True:
     encodingdict['vegetation_pars'] = {'dtype':'float32'}
-if flags[3] == 1:
+if flags['doalbedopars'] == True:
     encodingdict['albedo_pars'] = {'dtype':'float32'}
+if flags['dolad'] == True:
+    encodingdict['lad'] = {'dtype':'float32'}
 
 mst.outputstaticfile(static,outpath+filename, encodingdict)
 
 if cutorthoimg == True:
     gdt.cutortho(ortho, outpath+filename+'_ortho.tif', xmin,xmax,ymin,ymax,xres,yres)
+
+
+
 
 
 

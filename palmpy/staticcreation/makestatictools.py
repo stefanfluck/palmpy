@@ -112,7 +112,8 @@ fillvalues = {
    "soil_pars": float(-9999.0),
    "albedo_pars": float(-9999.0),
    "tree_data": float(-9999.0),
-   "tree_type": np.byte(-127)
+   "tree_type": np.byte(-127),
+   "lad": float(-9999.0)
    }
 
 
@@ -947,125 +948,36 @@ def createzlad(maxtreeheight, dz):
     return zlad
 
 
+def showbetadistribution():
+    '''
+    plots various distributions for different alpha and beta values
 
-def createlad(arrlist):
-    "input a list with arrays in it, for loop over it and get maximum tree height"
-    return None
+    Returns
+    -------
+    shows plot.
 
-
-
-"""
-Created on Wed Mar  4 10:07:21 2020
-
-@author: stefa
-"""
-import xarray as xr
-import numpy as np
-from pathlib import Path
-import matplotlib.pyplot as plt
-import sys
-
-
-modulepath = str(Path.home() / 'Documents' / 'Python Scripts' / 'ZAV-PALM-Scripts')
-if modulepath not in sys.path:
-    sys.path.append(modulepath)
-
-from palmpy.staticcreation.geodatatools import *
-from palmpy.staticcreation.makestatictools import *
-#%%
-example_static = str(Path.home() / 'Desktop' / 'palm' / 'static_driver_example.nc')
-ex = xr.open_dataset(example_static)
-
-print(ex.zlad)
-print(ex.lad)
+    '''
+    from scipy.stats import beta
+    import matplotlib.pyplot as plt
+    fig=plt.figure()
+    ax=fig.gca()
+    ax.plot(np.arange(0,1,0.01),beta.pdf(x=np.arange(0,1,0.01), a=2, b=2), label='a=2,b=2')
+    ax.plot(np.arange(0,1,0.01),beta.pdf(x=np.arange(0,1,0.01), a=1.3, b=1.1), label='a=1.3,b=1.1')
+    ax.plot(np.arange(0,1,0.01),beta.pdf(x=np.arange(0,1,0.01), a=4, b=2), label='a=4,b=2')
+    ax.plot(np.arange(0,1,0.01),beta.pdf(x=np.arange(0,1,0.01), a=5, b=2), label='a=5,b=2')
+    ax.plot(np.arange(0,1,0.01),beta.pdf(x=np.arange(0,1,0.01), a=2, b=3), label='a=2,b=3')
+    ax.plot(np.arange(0,1,0.01),beta.pdf(x=np.arange(0,1,0.01), a=2, b=1.2), label='a=2,b=1.2')
+    ax.plot(np.arange(0,1,0.01),beta.pdf(x=np.arange(0,1,0.01), a=3, b=1.2), label='a=3,b=1.2')
+    ax.legend(); ax.grid()
 
 
-resforesttop = rasterandcuttlm('yverdoncut_bb_waldonly.shp', 'rasteredshp\\resolvedforesttop.asc', 
-                               534988.0, 538060.0, 177506.0, 180578.0, 16, 16,
-                               burnatt='HEIGHT_TOP')
-resforestbot = rasterandcuttlm('yverdoncut_bb_waldonly.shp', 'rasteredshp\\resolvedforestbot.asc', 
-                               534988.0, 538060.0, 177506.0, 180578.0, 16, 16,
-                               burnatt='HEIGHT_BOT')
-resforestid = rasterandcuttlm('yverdoncut_bb_waldonly.shp', 'rasteredshp\\resolvedforestid.asc', 
-                               534988.0, 538060.0, 177506.0, 180578.0, 16, 16,
-                               burnatt='ID')
-resbreihetop = rasterandcuttlm('yverdoncut_breihe_mod_puff.shp', 'rasteredshp\\resolvedbreihentop.asc', 
-                               534988.0, 538060.0, 177506.0, 180578.0, 16, 16,
-                               burnatt='HEIGHT_TOP')
-resbreihebot = rasterandcuttlm('yverdoncut_breihe_mod_puff.shp', 'rasteredshp\\resolvedbreihenbot.asc', 
-                               534988.0, 538060.0, 177506.0, 180578.0, 16, 16,
-                               burnatt='HEIGHT_BOT')
-resbreiheid = rasterandcuttlm('yverdoncut_breihe_mod_puff.shp', 'rasteredshp\\resolvedbreihenid.asc', 
-                               534988.0, 538060.0, 177506.0, 180578.0, 16, 16,
-                               burnatt='ID')
-resebgebtop = rasterandcuttlm('yverdoncut_ebgeb_mod_puff.shp', 'rasteredshp\\resolvedebgebtop.asc', 
-                               534988.0, 538060.0, 177506.0, 180578.0, 16, 16,
-                               burnatt='HEIGHT_TOP')
-resebgebbot = rasterandcuttlm('yverdoncut_ebgeb_mod_puff.shp', 'rasteredshp\\resolvedebgebbot.asc', 
-                               534988.0, 538060.0, 177506.0, 180578.0, 16, 16,
-                               burnatt='HEIGHT_BOT')
-resebgebid = rasterandcuttlm('yverdoncut_ebgeb_mod_puff.shp', 'rasteredshp\\resolvedebgebid.asc', 
-                               534988.0, 538060.0, 177506.0, 180578.0, 16, 16,
-                               burnatt='ID')
-
-canopyheight = np.maximum.reduce([resforesttop, resbreihetop, resebgebtop])
-canopybottom = np.maximum.reduce([resforestbot, resbreihebot, resebgebbot])
-canopyid = np.maximum.reduce([resforestid, resbreiheid, resebgebid])
-
-resforesta = np.where(resforesttop[:,:] != 0, 2, resforesttop[:,:])
-resforestb = np.where(resforesttop[:,:] != 0, 1.2, resforesttop[:,:])
-resbreihea = np.where(resbreihetop[:,:] != 0, 1.3, resbreihetop[:,:])
-resbreiheb = np.where(resbreihetop[:,:] != 0, 1.1, resbreihetop[:,:])   # beta für baumreihe
-resebgeba = np.where(resebgebtop[:,:] != 0, 4, resebgebtop[:,:])        # alpha für ebgeb
-resebgebb = np.where(resebgebtop[:,:] != 0, 2, resebgebtop[:,:])
-canalpha = np.maximum.reduce([resforesta,resbreihea,resebgeba])
-canbeta = np.maximum.reduce([resforestb,resbreiheb,resebgebb])
-
-laiforest = np.where(resforesttop[:,:] != 0, 8, resforesttop[:,:])
-laibreihe = np.where(resbreihetop[:,:] != 0, 10, resbreihetop[:,:])
-laiebgeb = np.where(resebgebtop[:,:] != 0, 8, resebgebtop[:,:])        
-lai = np.maximum.reduce([laiforest, laibreihe, laiebgeb])
-
-maxtreeheight = np.max(canopyheight)
-dz = 16
-
-zlad= createzlad(maxtreeheight, dz)
-lad = np.ones((len(zlad), canopyheight.shape[0], canopyheight.shape[1]))*fillvalues['tree_data']
 
 
-chdztop = np.round(canopyheight/dz,0).astype(int)
-chidxtop = np.where( (chdztop[:,:]==0), -9999, chdztop[:,:]) #index of zlad height that needs to be filled
-chdzbot = np.round(canopybottom/dz,0).astype(int)
-chidxbot = np.where( (chdzbot[:,:]==0), 0, chdzbot[:,:]) #index of zlad height that needs to be filled
 
 
-from scipy.stats import beta
-for i in range(lad.shape[1]):
-    for j in range(lad.shape[2]):
-        # if not np.isnan(chidxtop[i,j]):
-        if not chidxtop[i,j] == -9999:
-            botindex = int(chidxbot[i,j])
-            topindex = int(chidxtop[i,j])+1
-            pdf = beta.pdf(x=np.arange(0,1,(1/(topindex-botindex))),a=canalpha[i,j],b=canbeta[i,j])
-            lad[botindex:topindex,i,j] = pdf/pdf.max()*lai[i,j]/canopyheight[i,j]          
-            
-            
-            
-plt.imshow(lad[2,:,:], vmin=0, vmax=1, cmap='Greens')
-plt.imshow(np.flip(lad[:,21,:],axis=0), vmin=0, vmax=1, cmap='Greens')
 
 
-#%%
-fig=plt.figure()
-ax=fig.gca()
-ax.plot(beta.pdf(x=np.arange(0,1,0.01), a=2, b=2), label='a=2,b=2')
-ax.plot(beta.pdf(x=np.arange(0,1,0.01), a=1.3, b=1.1), label='a=1.3,b=1.1')
-ax.plot(beta.pdf(x=np.arange(0,1,0.01), a=4, b=2), label='a=4,b=2')
-ax.plot(beta.pdf(x=np.arange(0,1,0.01), a=5, b=2), label='a=5,b=2')
-ax.plot(beta.pdf(x=np.arange(0,1,0.01), a=2, b=3), label='a=2,b=3')
-ax.plot(beta.pdf(x=np.arange(0,1,0.01), a=2, b=1.2), label='a=2,b=1.2')
-ax.plot(beta.pdf(x=np.arange(0,1,0.01), a=3, b=1.2), label='a=3,b=1.2')
-ax.legend(); ax.grid()
+
 
 
 
