@@ -26,16 +26,6 @@ import palmpy.staticcreation.makestatictools as mst
 #%% setup
 filenames =   'yverdon_static'
 totalnumberofdomains = 3
-flags = {'doterrain':       True,
-         'dotlmbb':         True,
-         'dostreetsbb':     True,
-         'dolad':           True, #for now: resolved tree file, treerows file and singletree file needed
-         'dobuildings2d':   False,
-         'dobuildings3d':   False,
-         'dovegpars':       False,
-         'doalbedopars':    False,
-         'dostreettypes':   False
-         }
 
 origin_time = '2019-06-07 12:00:00 +02'
 cutorthoimg = True  # provide orthoimages for parent and child domains
@@ -71,6 +61,17 @@ ny0      =  (ymax0-ymin0)/yres0                     # number of gridpoints in y
 nz0      =  zmax0/zres0                             # number of gridpoints in z
 mst.checknxyzvalid(nx0,ny0,nz0)                     # parentchecks
 
+flags0 = {'doterrain':       True,
+          'dotlmbb':         True,
+          'dostreetsbb':     True,
+          'dolad':           False, #for now: resolved tree file, treerows file and singletree file needed
+          'dobuildings2d':   False,
+          'dobuildings3d':   False,
+          'dovegpars':       False,
+          'doalbedopars':    False,
+          'dostreettypes':   False
+          }
+
 ##################### child 1 ###########################
 ischild1       =   1
 xaus1,yaus1    =   3072.0, 3072.0                   # dimensions of domain in meter
@@ -89,11 +90,21 @@ mst.checknxyzvalid(nx1,ny1,nz1)                     # childchecks
 mst.checknestcoordsvalid(xres0,xres1,llx1,lly1)     # childchecks
 
 #LAD PARAMETERS CHILD 1
-lai_forest = 8; lai_breihe = 10; lai_ebgebu = 8;
-a_forest = 2;   b_forest = 1.2
-a_breihe = 1.3; b_breihe = 1.1
-a_ebgebu = 4;   b_ebgebu = 2
+lai_forest1 = 8; lai_breihe1 = 10; lai_ebgebu1 = 8;
+a_forest1 = 2;   b_forest1 = 1.2
+a_breihe1 = 1.3; b_breihe1 = 1.1
+a_ebgebu1 = 4;   b_ebgebu1 = 2
 
+flags1 = {'doterrain':       True,
+          'dotlmbb':         True,
+          'dostreetsbb':     True,
+          'dolad':           True, #for now: resolved tree file, treerows file and singletree file needed
+          'dobuildings2d':   False,
+          'dobuildings3d':   False,
+          'dovegpars':       False,
+          'doalbedopars':    False,
+          'dostreettypes':   False
+          }
 
 ##################### child 2 ###########################
 ischild2       =   2
@@ -120,6 +131,7 @@ mst.checknestcoordsvalid(xres1,xres2,llx2,lly2)     # childchecks
 #assign values
 filename = filenames
 ischild = ischild0 #Child id. this here is not a child, i.e. parent.
+flags = flags0
 
 xmin = xmin0 #in LV03 Koordinaten, lower left corner
 xmax = xmax0 #in LV03 Koordinaten, upper right corner
@@ -231,6 +243,8 @@ if cutorthoimg == True:
 #assign variables:
 filename = filenames
 ischild = ischild1 #Child id. this here is not a child, i.e. parent. 
+flags = flags1
+
 xmin = xmin1 #in LV03 Koordinaten, lower left corner
 xmax = xmax1
 ymin = ymin1 #in LV03 Koordinaten, lower left corner
@@ -238,6 +252,12 @@ ymax = ymax1
 xres = xres1
 yres = yres1
 zres = zres1
+
+lai_forest = lai_forest1; lai_breihe = lai_breihe1; lai_ebgebu = lai_ebgebu1
+a_forest = a_forest1; b_forest = b_forest1
+a_breihe = a_breihe1; b_breihe = b_breihe1
+a_ebgebu = a_ebgebu1; b_ebgebu = b_ebgebu1
+
 
 infodict = {'version':           1,
             'palm_version':      6.0,
@@ -253,17 +273,16 @@ infodict = {'version':           1,
 #childify filename (add _NXX if necessary)
 filename = mst.childifyfilename(filename, ischild)
 
-#treat terrain
+##### treat terrain
 if flags['doterrain'] == True:
     ztdat = gdt.cutalti(dhm, outpath+'child1dhm.asc',xmin,xmax,ymin,ymax,xres,yres)
     ztdat, origin_z = mst.shifttopodown(ztdat,ischild,shift=origin_z) #shift the domain downwards
     infodict['origin_z'] = origin_z
 
-#treat tlmbb
+##### treat tlm-bb bulk parametrization
 if flags['dotlmbb'] == True:
     bbdat = gdt.rasterandcuttlm(bb, outpath+'child1bb.asc',xmin,xmax,ymin,ymax,xres,yres, burnatt='OBJEKTART')
-    #map tlm bodenbedeckungs-kategorien to the palm definitions.
-    vegarr, pavarr, watarr, soilarr = mst.mapbbclasses(bbdat)
+    vegarr, pavarr, watarr, soilarr = mst.mapbbclasses(bbdat)  #map tlm bodenbedeckungs-kategorien to the palm definitions.
     
     if flags['dostreetsbb'] == True:
         paved = gdt.rasterandcuttlm(pavementareas, outpath+'child1pavement.asc',xmin,xmax,ymin,ymax,xres,yres, burnatt='OBJEKTART')
@@ -273,8 +292,6 @@ if flags['dotlmbb'] == True:
         pavarr = np.where ( pavarr[:,:] != 0, 1, mst.fillvalues['pavement_type']) #TODO: mit einem map dict auch pavements richtig klassifizieren.
     #create surface fraction array
     sfrarr = mst.makesurffractarray(vegarr,pavarr,watarr)
-
-
 
 ##### treat LAD
 if flags['dolad'] == True:
@@ -345,7 +362,9 @@ if flags['dolad'] == True:
 
     vegarr = np.where(canopyid[:,:] != 0, 3, vegarr[:,:])
 
-#create static netcdf file
+
+
+######### create static netcdf file
 static = xr.Dataset()
 x,y = mst.createstaticcoords(vegarr.shape[0],vegarr.shape[1],xres)[0:2]
 
@@ -385,13 +404,15 @@ if flags['dolad'] == True:
     tree_id = mst.createDataArrays(canopyid, ['y','x'], [y,x])
     mst.setNeededAttributes(tree_id,'tree_id')
     static['tree_id'] = tree_id
+# if flags['dobuildings2d'] == True:
+#     continue
+
+
 
 encodingdict = mst.setupencodingdict(flags)
-#set global attributes
-mst.setGlobalAttributes(static,infodict)
+mst.setGlobalAttributes(static,infodict) #set global attributes
 
-#output the static file
-mst.outputstaticfile(static,outpath+filename, encodingdict)
+mst.outputstaticfile(static,outpath+filename, encodingdict) #output the static file
 
 if cutorthoimg == True:
     gdt.cutortho(ortho, outpath+filename+'_ortho.tif', xmin,xmax,ymin,ymax,xres,yres)
