@@ -39,6 +39,8 @@ treerowsshp =       'C:\\Users\\stefa\\Desktop\\preprocessed_shp\\yverdoncut_bre
 singletreesshp =    'C:\\Users\\stefa\\Desktop\\preprocessed_shp\\yverdoncut_ebgeb_mod_puff.shp'
 pavementareas =     'C:\\Users\\stefa\\Desktop\\preprocessed_shp\\yverdoncut_strasse_vkareal_eisenbahn_versflaechen.shp'
 gebaeudefoots =     'C:\\Users\\stefa\\Desktop\\preprocessed_shp\\yverdoncut_gebfoot_mod.shp'
+crops=              'C:\\Users\\stefa\\Desktop\\preprocessed_shp\\yverdon_felder.shp'
+
 
 #OUTPUT
 subdir_rasteredshp = str(Path.home() / 'Desktop' / 'preprocessed_shp' / 'rasteredshp')+'\\' #where rastered shp shall be saved
@@ -61,10 +63,13 @@ ny0      =  (ymax0-ymin0)/yres0                     # number of gridpoints in y
 nz0      =  zmax0/zres0                             # number of gridpoints in z
 mst.checknxyzvalid(nx0,ny0,nz0)                     # parentchecks
 
+bulkvegclass0 = 1
+
 flags0 = {'doterrain':       True,
           'dotlmbb':         True,
-          'dostreetsbb':     True,
-          'dolad':           False, #for now: resolved tree file, treerows file and singletree file needed
+          'dostreetsbb':     True, #requires dotlmbb = True
+          'docropfields':    True, #requires dotlmbb = true
+          'dolad':           False, #for now: resolved tree file, treerows file and singletree file needed, requires dotlmbb=true
           'dobuildings2d':   False,
           'dobuildings3d':   False,
           'dovegpars':       False,
@@ -89,6 +94,8 @@ lly1     =   ymin1-ymin0                            # ll-corner y coords in pare
 mst.checknxyzvalid(nx1,ny1,nz1)                     # childchecks
 mst.checknestcoordsvalid(xres0,xres1,llx1,lly1)     # childchecks
 
+bulkvegclass1 = 1
+
 #LAD PARAMETERS CHILD 1
 lai_forest1 = 8; lai_breihe1 = 10; lai_ebgebu1 = 8;
 a_forest1 = 2;   b_forest1 = 1.2
@@ -98,8 +105,9 @@ a_ebgebu1 = 4;   b_ebgebu1 = 2
 flags1 = {'doterrain':       True,
           'dotlmbb':         True,
           'dostreetsbb':     True,
+          'docropfields':    True,
           'dolad':           True, #for now: resolved tree file, treerows file and singletree file needed
-          'dobuildings2d':   False,
+          'dobuildings2d':   True,
           'dobuildings3d':   False,
           'dovegpars':       False,
           'doalbedopars':    False,
@@ -123,6 +131,8 @@ lly2     =   ymin2-ymin1                            # ll-corner y coords in pare
 mst.checknxyzvalid(nx2,ny2,nz2)                     # childchecks
 mst.checknestcoordsvalid(xres1,xres2,llx2,lly2)     # childchecks
 
+bulkvegclass2 = 1
+
 #LAD PARAMETERS CHILD 2
 lai_forest2 = 8; lai_breihe2 = 10; lai_ebgebu2 = 8;
 a_forest2 = 2;   b_forest2 = 1.2
@@ -132,6 +142,7 @@ a_ebgebu2 = 4;   b_ebgebu2 = 2
 flags2 = {'doterrain':       True,
           'dotlmbb':         True,
           'dostreetsbb':     True,
+          'docropfields':    True,
           'dolad':           True, #for now: resolved tree file, treerows file and singletree file needed
           'dobuildings2d':   True,
           'dobuildings3d':   False,
@@ -155,6 +166,7 @@ ymax = ymax0
 xres = xres0
 yres = yres0
 zres = zres0
+bulkvegclass = bulkvegclass0
 
 if flags['dolad'] == True:
     lai_forest = lai_forest0; lai_breihe = lai_breihe0; lai_ebgebu = lai_ebgebu0
@@ -192,6 +204,85 @@ if flags['dotlmbb'] == True:
     bbdat = gdt.rasterandcuttlm(bb, outpath+'bb'+str(ischild)+'.asc',xmin,xmax,ymin,ymax,xres,yres, burnatt='OBJEKTART')
     vegarr, pavarr, watarr, soilarr = mst.mapbbclasses(bbdat)  #map tlm bodenbedeckungs-kategorien to the palm definitions.
     
+
+
+##### treat LAD
+    if flags['dolad'] == True:
+        try:
+            os.mkdir(subdir_rasteredshp)
+        except:
+            pass    
+        
+        resforesttop = gdt.rasterandcuttlm(resolvedforestshp, subdir_rasteredshp+'resolvedforesttop'+str(ischild)+'.asc', 
+                                        xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_TOP')
+        resforestbot = gdt.rasterandcuttlm(resolvedforestshp, subdir_rasteredshp+'resolvedforestbot'+str(ischild)+'.asc', 
+                                        xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_BOT')
+        resforestid = gdt.rasterandcuttlm(resolvedforestshp, subdir_rasteredshp+'resolvedforestid'+str(ischild)+'.asc', 
+                                        xmin, xmax, ymin, ymax, xres, yres, burnatt='ID')
+        resbreihetop = gdt.rasterandcuttlm(treerowsshp, subdir_rasteredshp+'resolvedbreihentop'+str(ischild)+'.asc', 
+                                        xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_TOP')
+        resbreihebot = gdt.rasterandcuttlm(treerowsshp, subdir_rasteredshp+'resolvedbreihenbot'+str(ischild)+'.asc', 
+                                        xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_BOT')
+        resbreiheid = gdt.rasterandcuttlm(treerowsshp, subdir_rasteredshp+'resolvedbreihenid'+str(ischild)+'.asc', 
+                                        xmin, xmax, ymin, ymax, xres, yres, burnatt='ID')
+        resebgebtop = gdt.rasterandcuttlm(singletreesshp, subdir_rasteredshp+'resolvedebgebtop'+str(ischild)+'.asc', 
+                                        xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_TOP')
+        resebgebbot = gdt.rasterandcuttlm(singletreesshp, subdir_rasteredshp+'resolvedebgebbot'+str(ischild)+'.asc', 
+                                        xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_BOT')
+        resebgebid = gdt.rasterandcuttlm(singletreesshp, subdir_rasteredshp+'resolvedebgebid'+str(ischild)+'.asc', 
+                                        xmin, xmax, ymin, ymax, xres, yres, burnatt='ID')
+        
+        canopyheight = np.maximum.reduce([resforesttop, resbreihetop, resebgebtop])
+        canopybottom = np.maximum.reduce([resforestbot, resbreihebot, resebgebbot])
+        canopyid = np.maximum.reduce([resforestid, resbreiheid, resebgebid])
+        
+        #create arrays for alpha and beta and reduce to one layer.
+        resforesta = np.where(resforesttop[:,:] != 0, a_forest, resforesttop[:,:])     # alpha für forest
+        resforestb = np.where(resforesttop[:,:] != 0, b_forest, resforesttop[:,:])     # beta für forest
+        resbreihea = np.where(resbreihetop[:,:] != 0, a_breihe, resbreihetop[:,:])     # alpha für baumreihe
+        resbreiheb = np.where(resbreihetop[:,:] != 0, b_breihe, resbreihetop[:,:])     # beta für baumreihe
+        resebgeba = np.where(resebgebtop[:,:] != 0, a_ebgebu, resebgebtop[:,:])        # alpha für ebgeb
+        resebgebb = np.where(resebgebtop[:,:] != 0, b_ebgebu, resebgebtop[:,:])        # beta für ebgeb
+        canalpha = np.maximum.reduce([resforesta,resbreihea,resebgeba])
+        canbeta = np.maximum.reduce([resforestb,resbreiheb,resebgebb])
+        
+        #create an LAI array
+        laiforest = np.where(resforesttop[:,:] != 0, lai_forest, resforesttop[:,:])
+        laibreihe = np.where(resbreihetop[:,:] != 0, lai_breihe, resbreihetop[:,:])
+        laiebgeb = np.where(resebgebtop[:,:] != 0, lai_ebgebu, resebgebtop[:,:])        
+        lai = np.maximum.reduce([laiforest, laibreihe, laiebgeb])
+        
+        maxtreeheight = np.max(canopyheight) #evaluate maximum tree height for zlad array generation
+        
+        zlad= mst.createzlad(maxtreeheight, zres) #create zlad array
+        ladarr = np.ones((len(zlad), canopyheight.shape[0], canopyheight.shape[1]))*mst.fillvalues['tree_data'] #create empty lad array
+        
+        chdztop = np.round(canopyheight/zres,0).astype(int)
+        chidxtop = np.where( (chdztop[:,:]==0), -9999, chdztop[:,:]) #index of zlad height that needs to be filled
+        chdzbot = np.round(canopybottom/zres,0).astype(int)
+        chidxbot = np.where( (chdzbot[:,:]==0), 0, chdzbot[:,:]) #index of zlad height that needs to be filled
+        
+        #create actual lad array
+        from scipy.stats import beta
+        for i in range(ladarr.shape[1]):
+            for j in range(ladarr.shape[2]):
+                # if not np.isnan(chidxtop[i,j]):
+                if not chidxtop[i,j] == -9999:
+                    botindex = int(chidxbot[i,j])
+                    topindex = int(chidxtop[i,j])+1
+                    pdf = beta.pdf(x=np.arange(0,1,(1/(topindex-botindex))),a=canalpha[i,j],b=canbeta[i,j])
+                    ladarr[botindex:topindex,i,j] = pdf/pdf.max()*lai[i,j]/canopyheight[i,j]
+    
+        vegarr = np.where(canopyid[:,:] != 0, 3, vegarr[:,:])
+        canopyid = np.where(canopyid[:,:] == 0, mst.fillvalues['tree_id'], canopyid[:,:])
+    
+    vegarr = np.where( (vegarr[:,:]==-127) & (watarr[:,:]==-127) & (pavarr[:,:]==-127), bulkvegclass, vegarr[:,:]) #fill unassigned vegetation types to bare soil.
+
+    if flags['docropfields'] == True:
+        cropheight = gdt.rasterandcuttlm(crops, subdir_rasteredshp+'felder'+str(ischild)+'.asc', 
+                                       xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_TOP')
+        vegarr = np.where( (vegarr[:,:]== bulkvegclass) & (cropheight[:,:] != -9999), 2, vegarr[:,:])
+
     if flags['dostreetsbb'] == True:
         paved = gdt.rasterandcuttlm(pavementareas, outpath+'pavement'+str(ischild)+'.asc',xmin,xmax,ymin,ymax,xres,yres, burnatt='OBJEKTART')
         vegarr = np.where( paved[:,:] != -9999 , mst.fillvalues['vegetation_type'], vegarr[:,:])
@@ -201,77 +292,11 @@ if flags['dotlmbb'] == True:
     #create surface fraction array
     sfrarr = mst.makesurffractarray(vegarr,pavarr,watarr)
 
-##### treat LAD
-if flags['dolad'] == True:
-    try:
-        os.mkdir(subdir_rasteredshp)
-    except:
-        pass    
-    
-    resforesttop = gdt.rasterandcuttlm(resolvedforestshp, subdir_rasteredshp+'resolvedforesttop'+str(ischild)+'.asc', 
+if flags['dobuildings2d'] == True:  
+    gebhoehe = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudehoehe'+str(ischild)+'.asc', 
                                     xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_TOP')
-    resforestbot = gdt.rasterandcuttlm(resolvedforestshp, subdir_rasteredshp+'resolvedforestbot'+str(ischild)+'.asc', 
-                                    xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_BOT')
-    resforestid = gdt.rasterandcuttlm(resolvedforestshp, subdir_rasteredshp+'resolvedforestid'+str(ischild)+'.asc', 
+    gebid = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudeid'+str(ischild)+'.asc', 
                                     xmin, xmax, ymin, ymax, xres, yres, burnatt='ID')
-    resbreihetop = gdt.rasterandcuttlm(treerowsshp, subdir_rasteredshp+'resolvedbreihentop'+str(ischild)+'.asc', 
-                                    xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_TOP')
-    resbreihebot = gdt.rasterandcuttlm(treerowsshp, subdir_rasteredshp+'resolvedbreihenbot'+str(ischild)+'.asc', 
-                                    xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_BOT')
-    resbreiheid = gdt.rasterandcuttlm(treerowsshp, subdir_rasteredshp+'resolvedbreihenid'+str(ischild)+'.asc', 
-                                    xmin, xmax, ymin, ymax, xres, yres, burnatt='ID')
-    resebgebtop = gdt.rasterandcuttlm(singletreesshp, subdir_rasteredshp+'resolvedebgebtop'+str(ischild)+'.asc', 
-                                    xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_TOP')
-    resebgebbot = gdt.rasterandcuttlm(singletreesshp, subdir_rasteredshp+'resolvedebgebbot'+str(ischild)+'.asc', 
-                                    xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_BOT')
-    resebgebid = gdt.rasterandcuttlm(singletreesshp, subdir_rasteredshp+'resolvedebgebid'+str(ischild)+'.asc', 
-                                    xmin, xmax, ymin, ymax, xres, yres, burnatt='ID')
-    
-    canopyheight = np.maximum.reduce([resforesttop, resbreihetop, resebgebtop])
-    canopybottom = np.maximum.reduce([resforestbot, resbreihebot, resebgebbot])
-    canopyid = np.maximum.reduce([resforestid, resbreiheid, resebgebid])
-    
-    #create arrays for alpha and beta and reduce to one layer.
-    resforesta = np.where(resforesttop[:,:] != 0, a_forest, resforesttop[:,:])     # alpha für forest
-    resforestb = np.where(resforesttop[:,:] != 0, b_forest, resforesttop[:,:])     # beta für forest
-    resbreihea = np.where(resbreihetop[:,:] != 0, a_breihe, resbreihetop[:,:])     # alpha für baumreihe
-    resbreiheb = np.where(resbreihetop[:,:] != 0, b_breihe, resbreihetop[:,:])     # beta für baumreihe
-    resebgeba = np.where(resebgebtop[:,:] != 0, a_ebgebu, resebgebtop[:,:])        # alpha für ebgeb
-    resebgebb = np.where(resebgebtop[:,:] != 0, b_ebgebu, resebgebtop[:,:])        # beta für ebgeb
-    canalpha = np.maximum.reduce([resforesta,resbreihea,resebgeba])
-    canbeta = np.maximum.reduce([resforestb,resbreiheb,resebgebb])
-    
-    #create an LAI array
-    laiforest = np.where(resforesttop[:,:] != 0, lai_forest, resforesttop[:,:])
-    laibreihe = np.where(resbreihetop[:,:] != 0, lai_breihe, resbreihetop[:,:])
-    laiebgeb = np.where(resebgebtop[:,:] != 0, lai_ebgebu, resebgebtop[:,:])        
-    lai = np.maximum.reduce([laiforest, laibreihe, laiebgeb])
-    
-    maxtreeheight = np.max(canopyheight) #evaluate maximum tree height for zlad array generation
-    
-    zlad= mst.createzlad(maxtreeheight, zres) #create zlad array
-    ladarr = np.ones((len(zlad), canopyheight.shape[0], canopyheight.shape[1]))*mst.fillvalues['tree_data'] #create empty lad array
-    
-    chdztop = np.round(canopyheight/zres,0).astype(int)
-    chidxtop = np.where( (chdztop[:,:]==0), -9999, chdztop[:,:]) #index of zlad height that needs to be filled
-    chdzbot = np.round(canopybottom/zres,0).astype(int)
-    chidxbot = np.where( (chdzbot[:,:]==0), 0, chdzbot[:,:]) #index of zlad height that needs to be filled
-    
-    #create actual lad array
-    from scipy.stats import beta
-    for i in range(ladarr.shape[1]):
-        for j in range(ladarr.shape[2]):
-            # if not np.isnan(chidxtop[i,j]):
-            if not chidxtop[i,j] == -9999:
-                botindex = int(chidxbot[i,j])
-                topindex = int(chidxtop[i,j])+1
-                pdf = beta.pdf(x=np.arange(0,1,(1/(topindex-botindex))),a=canalpha[i,j],b=canbeta[i,j])
-                ladarr[botindex:topindex,i,j] = pdf/pdf.max()*lai[i,j]/canopyheight[i,j]
-
-    vegarr = np.where(canopyid[:,:] != 0, 3, vegarr[:,:])
-    canopyid = np.where(canopyid[:,:] == 0, mst.fillvalues['tree_id'], canopyid[:,:])
-
-
 
 ######### create static netcdf file
 static = xr.Dataset()
@@ -313,8 +338,13 @@ if flags['dolad'] == True:
     tree_id = mst.createDataArrays(canopyid, ['y','x'], [y,x])
     mst.setNeededAttributes(tree_id,'tree_id')
     static['tree_id'] = tree_id
-# if flags['dobuildings2d'] == True:
-#     continue
+if flags['dobuildings2d'] == True:
+    buildings_2d = mst.createDataArrays(gebhoehe, ['y','x'], [y,x])
+    mst.setNeededAttributes(buildings_2d, 'buildings_2d')
+    static['buildings_2d'] = buildings_2d
+    building_id = mst.createDataArrays(gebid, ['y','x'], [y,x])
+    mst.setNeededAttributes(building_id, 'building_id')
+    static['building_id'] = building_id
 
 
 
@@ -340,6 +370,7 @@ ymax = ymax1
 xres = xres1
 yres = yres1
 zres = zres1
+bulkvegclass = bulkvegclass1
 
 if flags['dolad'] == True:
     lai_forest = lai_forest1; lai_breihe = lai_breihe1; lai_ebgebu = lai_ebgebu1
@@ -377,6 +408,85 @@ if flags['dotlmbb'] == True:
     bbdat = gdt.rasterandcuttlm(bb, outpath+'bb'+str(ischild)+'.asc',xmin,xmax,ymin,ymax,xres,yres, burnatt='OBJEKTART')
     vegarr, pavarr, watarr, soilarr = mst.mapbbclasses(bbdat)  #map tlm bodenbedeckungs-kategorien to the palm definitions.
     
+
+##### treat LAD
+    if flags['dolad'] == True:
+        try:
+            os.mkdir(subdir_rasteredshp)
+        except:
+            pass    
+        
+        resforesttop = gdt.rasterandcuttlm(resolvedforestshp, subdir_rasteredshp+'resolvedforesttop'+str(ischild)+'.asc', 
+                                        xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_TOP')
+        resforestbot = gdt.rasterandcuttlm(resolvedforestshp, subdir_rasteredshp+'resolvedforestbot'+str(ischild)+'.asc', 
+                                        xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_BOT')
+        resforestid = gdt.rasterandcuttlm(resolvedforestshp, subdir_rasteredshp+'resolvedforestid'+str(ischild)+'.asc', 
+                                        xmin, xmax, ymin, ymax, xres, yres, burnatt='ID')
+        resbreihetop = gdt.rasterandcuttlm(treerowsshp, subdir_rasteredshp+'resolvedbreihentop'+str(ischild)+'.asc', 
+                                        xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_TOP')
+        resbreihebot = gdt.rasterandcuttlm(treerowsshp, subdir_rasteredshp+'resolvedbreihenbot'+str(ischild)+'.asc', 
+                                        xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_BOT')
+        resbreiheid = gdt.rasterandcuttlm(treerowsshp, subdir_rasteredshp+'resolvedbreihenid'+str(ischild)+'.asc', 
+                                        xmin, xmax, ymin, ymax, xres, yres, burnatt='ID')
+        resebgebtop = gdt.rasterandcuttlm(singletreesshp, subdir_rasteredshp+'resolvedebgebtop'+str(ischild)+'.asc', 
+                                        xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_TOP')
+        resebgebbot = gdt.rasterandcuttlm(singletreesshp, subdir_rasteredshp+'resolvedebgebbot'+str(ischild)+'.asc', 
+                                        xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_BOT')
+        resebgebid = gdt.rasterandcuttlm(singletreesshp, subdir_rasteredshp+'resolvedebgebid'+str(ischild)+'.asc', 
+                                        xmin, xmax, ymin, ymax, xres, yres, burnatt='ID')
+        
+        canopyheight = np.maximum.reduce([resforesttop, resbreihetop, resebgebtop])
+        canopybottom = np.maximum.reduce([resforestbot, resbreihebot, resebgebbot])
+        canopyid = np.maximum.reduce([resforestid, resbreiheid, resebgebid])
+        
+        #create arrays for alpha and beta and reduce to one layer.
+        resforesta = np.where(resforesttop[:,:] != 0, a_forest, resforesttop[:,:])     # alpha für forest
+        resforestb = np.where(resforesttop[:,:] != 0, b_forest, resforesttop[:,:])     # beta für forest
+        resbreihea = np.where(resbreihetop[:,:] != 0, a_breihe, resbreihetop[:,:])     # alpha für baumreihe
+        resbreiheb = np.where(resbreihetop[:,:] != 0, b_breihe, resbreihetop[:,:])     # beta für baumreihe
+        resebgeba = np.where(resebgebtop[:,:] != 0, a_ebgebu, resebgebtop[:,:])        # alpha für ebgeb
+        resebgebb = np.where(resebgebtop[:,:] != 0, b_ebgebu, resebgebtop[:,:])        # beta für ebgeb
+        canalpha = np.maximum.reduce([resforesta,resbreihea,resebgeba])
+        canbeta = np.maximum.reduce([resforestb,resbreiheb,resebgebb])
+        
+        #create an LAI array
+        laiforest = np.where(resforesttop[:,:] != 0, lai_forest, resforesttop[:,:])
+        laibreihe = np.where(resbreihetop[:,:] != 0, lai_breihe, resbreihetop[:,:])
+        laiebgeb = np.where(resebgebtop[:,:] != 0, lai_ebgebu, resebgebtop[:,:])        
+        lai = np.maximum.reduce([laiforest, laibreihe, laiebgeb])
+        
+        maxtreeheight = np.max(canopyheight) #evaluate maximum tree height for zlad array generation
+        
+        zlad= mst.createzlad(maxtreeheight, zres) #create zlad array
+        ladarr = np.ones((len(zlad), canopyheight.shape[0], canopyheight.shape[1]))*mst.fillvalues['tree_data'] #create empty lad array
+        
+        chdztop = np.round(canopyheight/zres,0).astype(int)
+        chidxtop = np.where( (chdztop[:,:]==0), -9999, chdztop[:,:]) #index of zlad height that needs to be filled
+        chdzbot = np.round(canopybottom/zres,0).astype(int)
+        chidxbot = np.where( (chdzbot[:,:]==0), 0, chdzbot[:,:]) #index of zlad height that needs to be filled
+        
+        #create actual lad array
+        from scipy.stats import beta
+        for i in range(ladarr.shape[1]):
+            for j in range(ladarr.shape[2]):
+                # if not np.isnan(chidxtop[i,j]):
+                if not chidxtop[i,j] == -9999:
+                    botindex = int(chidxbot[i,j])
+                    topindex = int(chidxtop[i,j])+1
+                    pdf = beta.pdf(x=np.arange(0,1,(1/(topindex-botindex))),a=canalpha[i,j],b=canbeta[i,j])
+                    ladarr[botindex:topindex,i,j] = pdf/pdf.max()*lai[i,j]/canopyheight[i,j]
+    
+        vegarr = np.where(canopyid[:,:] != -9999, 3, vegarr[:,:])
+        canopyid = np.where(canopyid[:,:] == 0, mst.fillvalues['tree_id'], canopyid[:,:])
+    
+    vegarr = np.where( (vegarr[:,:]==-127) & (watarr[:,:]==-127) & (pavarr[:,:]==-127), bulkvegclass, vegarr[:,:]) #fill unassigned vegetation types to bare soil.
+    
+    if flags['docropfields'] == True:
+        cropheight = gdt.rasterandcuttlm(crops, subdir_rasteredshp+'felder'+str(ischild)+'.asc', 
+                                       xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_TOP')
+        vegarr = np.where( (vegarr[:,:]==bulkvegclass) & (cropheight[:,:] != -9999), 2, vegarr[:,:])
+    
+    
     if flags['dostreetsbb'] == True:
         paved = gdt.rasterandcuttlm(pavementareas, outpath+'pavement'+str(ischild)+'.asc',xmin,xmax,ymin,ymax,xres,yres, burnatt='OBJEKTART')
         vegarr = np.where( paved[:,:] != -9999 , mst.fillvalues['vegetation_type'], vegarr[:,:])
@@ -385,78 +495,12 @@ if flags['dotlmbb'] == True:
         pavarr = np.where ( pavarr[:,:] != -9999, 1, mst.fillvalues['pavement_type']) #TODO: mit einem map dict auch pavements richtig klassifizieren.
     #create surface fraction array
     sfrarr = mst.makesurffractarray(vegarr,pavarr,watarr)
-
-##### treat LAD
-if flags['dolad'] == True:
-    try:
-        os.mkdir(subdir_rasteredshp)
-    except:
-        pass    
     
-    resforesttop = gdt.rasterandcuttlm(resolvedforestshp, subdir_rasteredshp+'resolvedforesttop'+str(ischild)+'.asc', 
+if flags['dobuildings2d'] == True:  
+    gebhoehe = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudehoehe'+str(ischild)+'.asc', 
                                     xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_TOP')
-    resforestbot = gdt.rasterandcuttlm(resolvedforestshp, subdir_rasteredshp+'resolvedforestbot'+str(ischild)+'.asc', 
-                                    xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_BOT')
-    resforestid = gdt.rasterandcuttlm(resolvedforestshp, subdir_rasteredshp+'resolvedforestid'+str(ischild)+'.asc', 
+    gebid = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudeid'+str(ischild)+'.asc', 
                                     xmin, xmax, ymin, ymax, xres, yres, burnatt='ID')
-    resbreihetop = gdt.rasterandcuttlm(treerowsshp, subdir_rasteredshp+'resolvedbreihentop'+str(ischild)+'.asc', 
-                                    xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_TOP')
-    resbreihebot = gdt.rasterandcuttlm(treerowsshp, subdir_rasteredshp+'resolvedbreihenbot'+str(ischild)+'.asc', 
-                                    xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_BOT')
-    resbreiheid = gdt.rasterandcuttlm(treerowsshp, subdir_rasteredshp+'resolvedbreihenid'+str(ischild)+'.asc', 
-                                    xmin, xmax, ymin, ymax, xres, yres, burnatt='ID')
-    resebgebtop = gdt.rasterandcuttlm(singletreesshp, subdir_rasteredshp+'resolvedebgebtop'+str(ischild)+'.asc', 
-                                    xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_TOP')
-    resebgebbot = gdt.rasterandcuttlm(singletreesshp, subdir_rasteredshp+'resolvedebgebbot'+str(ischild)+'.asc', 
-                                    xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_BOT')
-    resebgebid = gdt.rasterandcuttlm(singletreesshp, subdir_rasteredshp+'resolvedebgebid'+str(ischild)+'.asc', 
-                                    xmin, xmax, ymin, ymax, xres, yres, burnatt='ID')
-    
-    canopyheight = np.maximum.reduce([resforesttop, resbreihetop, resebgebtop])
-    canopybottom = np.maximum.reduce([resforestbot, resbreihebot, resebgebbot])
-    canopyid = np.maximum.reduce([resforestid, resbreiheid, resebgebid])
-    
-    #create arrays for alpha and beta and reduce to one layer.
-    resforesta = np.where(resforesttop[:,:] != 0, a_forest, resforesttop[:,:])     # alpha für forest
-    resforestb = np.where(resforesttop[:,:] != 0, b_forest, resforesttop[:,:])     # beta für forest
-    resbreihea = np.where(resbreihetop[:,:] != 0, a_breihe, resbreihetop[:,:])     # alpha für baumreihe
-    resbreiheb = np.where(resbreihetop[:,:] != 0, b_breihe, resbreihetop[:,:])     # beta für baumreihe
-    resebgeba = np.where(resebgebtop[:,:] != 0, a_ebgebu, resebgebtop[:,:])        # alpha für ebgeb
-    resebgebb = np.where(resebgebtop[:,:] != 0, b_ebgebu, resebgebtop[:,:])        # beta für ebgeb
-    canalpha = np.maximum.reduce([resforesta,resbreihea,resebgeba])
-    canbeta = np.maximum.reduce([resforestb,resbreiheb,resebgebb])
-    
-    #create an LAI array
-    laiforest = np.where(resforesttop[:,:] != 0, lai_forest, resforesttop[:,:])
-    laibreihe = np.where(resbreihetop[:,:] != 0, lai_breihe, resbreihetop[:,:])
-    laiebgeb = np.where(resebgebtop[:,:] != 0, lai_ebgebu, resebgebtop[:,:])        
-    lai = np.maximum.reduce([laiforest, laibreihe, laiebgeb])
-    
-    maxtreeheight = np.max(canopyheight) #evaluate maximum tree height for zlad array generation
-    
-    zlad= mst.createzlad(maxtreeheight, zres) #create zlad array
-    ladarr = np.ones((len(zlad), canopyheight.shape[0], canopyheight.shape[1]))*mst.fillvalues['tree_data'] #create empty lad array
-    
-    chdztop = np.round(canopyheight/zres,0).astype(int)
-    chidxtop = np.where( (chdztop[:,:]==0), -9999, chdztop[:,:]) #index of zlad height that needs to be filled
-    chdzbot = np.round(canopybottom/zres,0).astype(int)
-    chidxbot = np.where( (chdzbot[:,:]==0), 0, chdzbot[:,:]) #index of zlad height that needs to be filled
-    
-    #create actual lad array
-    from scipy.stats import beta
-    for i in range(ladarr.shape[1]):
-        for j in range(ladarr.shape[2]):
-            # if not np.isnan(chidxtop[i,j]):
-            if not chidxtop[i,j] == -9999:
-                botindex = int(chidxbot[i,j])
-                topindex = int(chidxtop[i,j])+1
-                pdf = beta.pdf(x=np.arange(0,1,(1/(topindex-botindex))),a=canalpha[i,j],b=canbeta[i,j])
-                ladarr[botindex:topindex,i,j] = pdf/pdf.max()*lai[i,j]/canopyheight[i,j]
-
-    vegarr = np.where(canopyid[:,:] != -9999, 3, vegarr[:,:])
-    canopyid = np.where(canopyid[:,:] == 0, mst.fillvalues['tree_id'], canopyid[:,:])
-
-
 
 ######### create static netcdf file
 static = xr.Dataset()
@@ -498,8 +542,13 @@ if flags['dolad'] == True:
     tree_id = mst.createDataArrays(canopyid, ['y','x'], [y,x])
     mst.setNeededAttributes(tree_id,'tree_id')
     static['tree_id'] = tree_id
-# if flags['dobuildings2d'] == True:
-#     continue
+if flags['dobuildings2d'] == True:
+    buildings_2d = mst.createDataArrays(gebhoehe, ['y','x'], [y,x])
+    mst.setNeededAttributes(buildings_2d, 'buildings_2d')
+    static['buildings_2d'] = buildings_2d
+    building_id = mst.createDataArrays(gebid, ['y','x'], [y,x])
+    mst.setNeededAttributes(building_id, 'building_id')
+    static['building_id'] = building_id
 
 
 encodingdict = mst.setupencodingdict(flags)
@@ -524,6 +573,7 @@ ymax = ymax2
 xres = xres2
 yres = yres2
 zres = zres2
+bulkvegclass = bulkvegclass2
 
 if flags['dolad'] == True:
     lai_forest = lai_forest2; lai_breihe = lai_breihe2; lai_ebgebu = lai_ebgebu2
@@ -561,6 +611,85 @@ if flags['dotlmbb'] == True:
     bbdat = gdt.rasterandcuttlm(bb, outpath+'bb'+str(ischild)+'.asc',xmin,xmax,ymin,ymax,xres,yres, burnatt='OBJEKTART')
     vegarr, pavarr, watarr, soilarr = mst.mapbbclasses(bbdat)  #map tlm bodenbedeckungs-kategorien to the palm definitions.
     
+
+
+##### treat LAD
+    if flags['dolad'] == True:
+        try:
+            os.mkdir(subdir_rasteredshp)
+        except:
+            pass    
+        
+        resforesttop = gdt.rasterandcuttlm(resolvedforestshp, subdir_rasteredshp+'resolvedforesttop'+str(ischild)+'.asc', 
+                                        xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_TOP')
+        resforestbot = gdt.rasterandcuttlm(resolvedforestshp, subdir_rasteredshp+'resolvedforestbot'+str(ischild)+'.asc', 
+                                        xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_BOT')
+        resforestid = gdt.rasterandcuttlm(resolvedforestshp, subdir_rasteredshp+'resolvedforestid'+str(ischild)+'.asc', 
+                                        xmin, xmax, ymin, ymax, xres, yres, burnatt='ID')
+        resbreihetop = gdt.rasterandcuttlm(treerowsshp, subdir_rasteredshp+'resolvedbreihentop'+str(ischild)+'.asc', 
+                                        xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_TOP')
+        resbreihebot = gdt.rasterandcuttlm(treerowsshp, subdir_rasteredshp+'resolvedbreihenbot'+str(ischild)+'.asc', 
+                                        xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_BOT')
+        resbreiheid = gdt.rasterandcuttlm(treerowsshp, subdir_rasteredshp+'resolvedbreihenid'+str(ischild)+'.asc', 
+                                        xmin, xmax, ymin, ymax, xres, yres, burnatt='ID')
+        resebgebtop = gdt.rasterandcuttlm(singletreesshp, subdir_rasteredshp+'resolvedebgebtop'+str(ischild)+'.asc', 
+                                        xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_TOP')
+        resebgebbot = gdt.rasterandcuttlm(singletreesshp, subdir_rasteredshp+'resolvedebgebbot'+str(ischild)+'.asc', 
+                                        xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_BOT')
+        resebgebid = gdt.rasterandcuttlm(singletreesshp, subdir_rasteredshp+'resolvedebgebid'+str(ischild)+'.asc', 
+                                        xmin, xmax, ymin, ymax, xres, yres, burnatt='ID')
+        
+        canopyheight = np.maximum.reduce([resforesttop, resbreihetop, resebgebtop])
+        canopybottom = np.maximum.reduce([resforestbot, resbreihebot, resebgebbot])
+        canopyid = np.maximum.reduce([resforestid, resbreiheid, resebgebid])
+        
+        #create arrays for alpha and beta and reduce to one layer.
+        resforesta = np.where(resforesttop[:,:] != 0, a_forest, resforesttop[:,:])     # alpha für forest
+        resforestb = np.where(resforesttop[:,:] != 0, b_forest, resforesttop[:,:])     # beta für forest
+        resbreihea = np.where(resbreihetop[:,:] != 0, a_breihe, resbreihetop[:,:])     # alpha für baumreihe
+        resbreiheb = np.where(resbreihetop[:,:] != 0, b_breihe, resbreihetop[:,:])     # beta für baumreihe
+        resebgeba = np.where(resebgebtop[:,:] != 0, a_ebgebu, resebgebtop[:,:])        # alpha für ebgeb
+        resebgebb = np.where(resebgebtop[:,:] != 0, b_ebgebu, resebgebtop[:,:])        # beta für ebgeb
+        canalpha = np.maximum.reduce([resforesta,resbreihea,resebgeba])
+        canbeta = np.maximum.reduce([resforestb,resbreiheb,resebgebb])
+        
+        #create an LAI array
+        laiforest = np.where(resforesttop[:,:] != 0, lai_forest, resforesttop[:,:])
+        laibreihe = np.where(resbreihetop[:,:] != 0, lai_breihe, resbreihetop[:,:])
+        laiebgeb = np.where(resebgebtop[:,:] != 0, lai_ebgebu, resebgebtop[:,:])        
+        lai = np.maximum.reduce([laiforest, laibreihe, laiebgeb])
+        
+        maxtreeheight = np.max(canopyheight) #evaluate maximum tree height for zlad array generation
+        
+        zlad= mst.createzlad(maxtreeheight, zres) #create zlad array
+        ladarr = np.ones((len(zlad), canopyheight.shape[0], canopyheight.shape[1]))*mst.fillvalues['tree_data'] #create empty lad array
+        
+        chdztop = np.round(canopyheight/zres,0).astype(int)
+        chidxtop = np.where( (chdztop[:,:]==0), -9999, chdztop[:,:]) #index of zlad height that needs to be filled
+        chdzbot = np.round(canopybottom/zres,0).astype(int)
+        chidxbot = np.where( (chdzbot[:,:]==0), 0, chdzbot[:,:]) #index of zlad height that needs to be filled
+        
+        #create actual lad array
+        from scipy.stats import beta
+        for i in range(ladarr.shape[1]):
+            for j in range(ladarr.shape[2]):
+                # if not np.isnan(chidxtop[i,j]):
+                if not chidxtop[i,j] == -9999:
+                    botindex = int(chidxbot[i,j])
+                    topindex = int(chidxtop[i,j])+1
+                    pdf = beta.pdf(x=np.arange(0,1,(1/(topindex-botindex))),a=canalpha[i,j],b=canbeta[i,j])
+                    ladarr[botindex:topindex,i,j] = pdf/pdf.max()*lai[i,j]/canopyheight[i,j]
+    
+        vegarr = np.where((canopyid[:,:] != -9999), 3, vegarr[:,:])
+        canopyid = np.where(canopyid[:,:] == 0, mst.fillvalues['tree_id'], canopyid[:,:])
+    
+    vegarr = np.where( (vegarr[:,:]==-127) & (watarr[:,:]==-127) & (pavarr[:,:]==-127), bulkvegclass, vegarr[:,:]) #fill unassigned vegetation types to bare soil.
+
+    if flags['docropfields'] == True:
+        cropheight = gdt.rasterandcuttlm(crops, subdir_rasteredshp+'felder'+str(ischild)+'.asc', 
+                                       xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_TOP')
+        vegarr = np.where( (vegarr[:,:]==bulkvegclass) & (cropheight[:,:] != -9999), 2, vegarr[:,:])
+
     if flags['dostreetsbb'] == True:
         paved = gdt.rasterandcuttlm(pavementareas, outpath+'pavement'+str(ischild)+'.asc',xmin,xmax,ymin,ymax,xres,yres, burnatt='OBJEKTART')
         vegarr = np.where( paved[:,:] != -9999 , mst.fillvalues['vegetation_type'], vegarr[:,:])
@@ -570,84 +699,13 @@ if flags['dotlmbb'] == True:
     #create surface fraction array
     sfrarr = mst.makesurffractarray(vegarr,pavarr,watarr)
 
-##### treat LAD
-if flags['dolad'] == True:
-    try:
-        os.mkdir(subdir_rasteredshp)
-    except:
-        pass    
-    
-    resforesttop = gdt.rasterandcuttlm(resolvedforestshp, subdir_rasteredshp+'resolvedforesttop'+str(ischild)+'.asc', 
-                                    xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_TOP')
-    resforestbot = gdt.rasterandcuttlm(resolvedforestshp, subdir_rasteredshp+'resolvedforestbot'+str(ischild)+'.asc', 
-                                    xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_BOT')
-    resforestid = gdt.rasterandcuttlm(resolvedforestshp, subdir_rasteredshp+'resolvedforestid'+str(ischild)+'.asc', 
-                                    xmin, xmax, ymin, ymax, xres, yres, burnatt='ID')
-    resbreihetop = gdt.rasterandcuttlm(treerowsshp, subdir_rasteredshp+'resolvedbreihentop'+str(ischild)+'.asc', 
-                                    xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_TOP')
-    resbreihebot = gdt.rasterandcuttlm(treerowsshp, subdir_rasteredshp+'resolvedbreihenbot'+str(ischild)+'.asc', 
-                                    xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_BOT')
-    resbreiheid = gdt.rasterandcuttlm(treerowsshp, subdir_rasteredshp+'resolvedbreihenid'+str(ischild)+'.asc', 
-                                    xmin, xmax, ymin, ymax, xres, yres, burnatt='ID')
-    resebgebtop = gdt.rasterandcuttlm(singletreesshp, subdir_rasteredshp+'resolvedebgebtop'+str(ischild)+'.asc', 
-                                    xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_TOP')
-    resebgebbot = gdt.rasterandcuttlm(singletreesshp, subdir_rasteredshp+'resolvedebgebbot'+str(ischild)+'.asc', 
-                                    xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_BOT')
-    resebgebid = gdt.rasterandcuttlm(singletreesshp, subdir_rasteredshp+'resolvedebgebid'+str(ischild)+'.asc', 
-                                    xmin, xmax, ymin, ymax, xres, yres, burnatt='ID')
-    
-    canopyheight = np.maximum.reduce([resforesttop, resbreihetop, resebgebtop])
-    canopybottom = np.maximum.reduce([resforestbot, resbreihebot, resebgebbot])
-    canopyid = np.maximum.reduce([resforestid, resbreiheid, resebgebid])
-    
-    #create arrays for alpha and beta and reduce to one layer.
-    resforesta = np.where(resforesttop[:,:] != 0, a_forest, resforesttop[:,:])     # alpha für forest
-    resforestb = np.where(resforesttop[:,:] != 0, b_forest, resforesttop[:,:])     # beta für forest
-    resbreihea = np.where(resbreihetop[:,:] != 0, a_breihe, resbreihetop[:,:])     # alpha für baumreihe
-    resbreiheb = np.where(resbreihetop[:,:] != 0, b_breihe, resbreihetop[:,:])     # beta für baumreihe
-    resebgeba = np.where(resebgebtop[:,:] != 0, a_ebgebu, resebgebtop[:,:])        # alpha für ebgeb
-    resebgebb = np.where(resebgebtop[:,:] != 0, b_ebgebu, resebgebtop[:,:])        # beta für ebgeb
-    canalpha = np.maximum.reduce([resforesta,resbreihea,resebgeba])
-    canbeta = np.maximum.reduce([resforestb,resbreiheb,resebgebb])
-    
-    #create an LAI array
-    laiforest = np.where(resforesttop[:,:] != 0, lai_forest, resforesttop[:,:])
-    laibreihe = np.where(resbreihetop[:,:] != 0, lai_breihe, resbreihetop[:,:])
-    laiebgeb = np.where(resebgebtop[:,:] != 0, lai_ebgebu, resebgebtop[:,:])        
-    lai = np.maximum.reduce([laiforest, laibreihe, laiebgeb])
-    
-    maxtreeheight = np.max(canopyheight) #evaluate maximum tree height for zlad array generation
-    
-    zlad= mst.createzlad(maxtreeheight, zres) #create zlad array
-    ladarr = np.ones((len(zlad), canopyheight.shape[0], canopyheight.shape[1]))*mst.fillvalues['tree_data'] #create empty lad array
-    
-    chdztop = np.round(canopyheight/zres,0).astype(int)
-    chidxtop = np.where( (chdztop[:,:]==0), -9999, chdztop[:,:]) #index of zlad height that needs to be filled
-    chdzbot = np.round(canopybottom/zres,0).astype(int)
-    chidxbot = np.where( (chdzbot[:,:]==0), 0, chdzbot[:,:]) #index of zlad height that needs to be filled
-    
-    #create actual lad array
-    from scipy.stats import beta
-    for i in range(ladarr.shape[1]):
-        for j in range(ladarr.shape[2]):
-            # if not np.isnan(chidxtop[i,j]):
-            if not chidxtop[i,j] == -9999:
-                botindex = int(chidxbot[i,j])
-                topindex = int(chidxtop[i,j])+1
-                pdf = beta.pdf(x=np.arange(0,1,(1/(topindex-botindex))),a=canalpha[i,j],b=canbeta[i,j])
-                ladarr[botindex:topindex,i,j] = pdf/pdf.max()*lai[i,j]/canopyheight[i,j]
 
-    vegarr = np.where(canopyid[:,:] != -9999, 3, vegarr[:,:])
-    canopyid = np.where(canopyid[:,:] == 0, mst.fillvalues['tree_id'], canopyid[:,:])
 
 if flags['dobuildings2d'] == True:  
     gebhoehe = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudehoehe'+str(ischild)+'.asc', 
                                     xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_TOP')
     gebid = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudeid'+str(ischild)+'.asc', 
                                     xmin, xmax, ymin, ymax, xres, yres, burnatt='ID')
-
-
-
 
 
 ######### create static netcdf file
