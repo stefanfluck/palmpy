@@ -194,10 +194,10 @@ if flags['dotlmbb'] == True:
     
     if flags['dostreetsbb'] == True:
         paved = gdt.rasterandcuttlm(pavementareas, outpath+'pavement'+str(ischild)+'.asc',xmin,xmax,ymin,ymax,xres,yres, burnatt='OBJEKTART')
-        vegarr = np.where( paved[:,:] != 0 , mst.fillvalues['vegetation_type'], vegarr[:,:])
-        watarr = np.where( paved[:,:] != 0 , mst.fillvalues['water_type'], watarr[:,:])
+        vegarr = np.where( paved[:,:] != -9999 , mst.fillvalues['vegetation_type'], vegarr[:,:])
+        watarr = np.where( paved[:,:] != -9999 , mst.fillvalues['water_type'], watarr[:,:])
         pavarr = paved
-        pavarr = np.where ( pavarr[:,:] != 0, 1, mst.fillvalues['pavement_type']) #TODO: mit einem map dict auch pavements richtig klassifizieren.
+        pavarr = np.where ( pavarr[:,:] != -9999, 1, mst.fillvalues['pavement_type']) #TODO: mit einem map dict auch pavements richtig klassifizieren.
     #create surface fraction array
     sfrarr = mst.makesurffractarray(vegarr,pavarr,watarr)
 
@@ -379,10 +379,10 @@ if flags['dotlmbb'] == True:
     
     if flags['dostreetsbb'] == True:
         paved = gdt.rasterandcuttlm(pavementareas, outpath+'pavement'+str(ischild)+'.asc',xmin,xmax,ymin,ymax,xres,yres, burnatt='OBJEKTART')
-        vegarr = np.where( paved[:,:] != 0 , mst.fillvalues['vegetation_type'], vegarr[:,:])
-        watarr = np.where( paved[:,:] != 0 , mst.fillvalues['water_type'], watarr[:,:])
+        vegarr = np.where( paved[:,:] != -9999 , mst.fillvalues['vegetation_type'], vegarr[:,:])
+        watarr = np.where( paved[:,:] != -9999 , mst.fillvalues['water_type'], watarr[:,:])
         pavarr = paved
-        pavarr = np.where ( pavarr[:,:] != 0, 1, mst.fillvalues['pavement_type']) #TODO: mit einem map dict auch pavements richtig klassifizieren.
+        pavarr = np.where ( pavarr[:,:] != -9999, 1, mst.fillvalues['pavement_type']) #TODO: mit einem map dict auch pavements richtig klassifizieren.
     #create surface fraction array
     sfrarr = mst.makesurffractarray(vegarr,pavarr,watarr)
 
@@ -453,7 +453,7 @@ if flags['dolad'] == True:
                 pdf = beta.pdf(x=np.arange(0,1,(1/(topindex-botindex))),a=canalpha[i,j],b=canbeta[i,j])
                 ladarr[botindex:topindex,i,j] = pdf/pdf.max()*lai[i,j]/canopyheight[i,j]
 
-    vegarr = np.where(canopyid[:,:] != 0, 3, vegarr[:,:])
+    vegarr = np.where(canopyid[:,:] != -9999, 3, vegarr[:,:])
     canopyid = np.where(canopyid[:,:] == 0, mst.fillvalues['tree_id'], canopyid[:,:])
 
 
@@ -563,10 +563,10 @@ if flags['dotlmbb'] == True:
     
     if flags['dostreetsbb'] == True:
         paved = gdt.rasterandcuttlm(pavementareas, outpath+'pavement'+str(ischild)+'.asc',xmin,xmax,ymin,ymax,xres,yres, burnatt='OBJEKTART')
-        vegarr = np.where( paved[:,:] != 0 , mst.fillvalues['vegetation_type'], vegarr[:,:])
-        watarr = np.where( paved[:,:] != 0 , mst.fillvalues['water_type'], watarr[:,:])
+        vegarr = np.where( paved[:,:] != -9999 , mst.fillvalues['vegetation_type'], vegarr[:,:])
+        watarr = np.where( paved[:,:] != -9999 , mst.fillvalues['water_type'], watarr[:,:])
         pavarr = paved
-        pavarr = np.where ( pavarr[:,:] != 0, 1, mst.fillvalues['pavement_type']) #TODO: mit einem map dict auch pavements richtig klassifizieren.
+        pavarr = np.where ( pavarr[:,:] != -9999, 1, mst.fillvalues['pavement_type']) #TODO: mit einem map dict auch pavements richtig klassifizieren.
     #create surface fraction array
     sfrarr = mst.makesurffractarray(vegarr,pavarr,watarr)
 
@@ -637,7 +637,7 @@ if flags['dolad'] == True:
                 pdf = beta.pdf(x=np.arange(0,1,(1/(topindex-botindex))),a=canalpha[i,j],b=canbeta[i,j])
                 ladarr[botindex:topindex,i,j] = pdf/pdf.max()*lai[i,j]/canopyheight[i,j]
 
-    vegarr = np.where(canopyid[:,:] != 0, 3, vegarr[:,:])
+    vegarr = np.where(canopyid[:,:] != -9999, 3, vegarr[:,:])
     canopyid = np.where(canopyid[:,:] == 0, mst.fillvalues['tree_id'], canopyid[:,:])
 
 if flags['dobuildings2d'] == True:  

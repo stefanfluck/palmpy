@@ -103,7 +103,7 @@ def rasterandcuttlm(filein, fileout, xmin, xmax, ymin, ymax, xres, yres, burnatt
     srclayer = srcds.GetLayer()
     x_res = int((xmax - xmin) / xres)
     y_res = int((ymax - ymin) / yres)
-    trgds = gdal.GetDriverByName('GTiff').Create('tmp.tif', x_res,y_res,1,gdal.GDT_Float64)
+    trgds = gdal.GetDriverByName('GTiff').Create('tmp.tif', x_res,y_res,1,gdal.GDT_Float32)
     trgds.SetGeoTransform((xmin,xres,0,ymax,0,-xres))
     band = trgds.GetRasterBand(1)
     band.SetNoDataValue(-9999)
