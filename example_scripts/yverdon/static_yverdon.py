@@ -251,10 +251,11 @@ xres = xres0
 yres = yres0
 zres = zres0
 
-lai_forest = lai_forest0; lai_breihe = lai_breihe0; lai_ebgebu = lai_ebgebu0
-a_forest = a_forest0; b_forest = b_forest0
-a_breihe = a_breihe0; b_breihe = b_breihe0
-a_ebgebu = a_ebgebu0; b_ebgebu = b_ebgebu0
+if flags['dolad'] == True:
+    lai_forest = lai_forest0; lai_breihe = lai_breihe0; lai_ebgebu = lai_ebgebu0
+    a_forest = a_forest0; b_forest = b_forest0
+    a_breihe = a_breihe0; b_breihe = b_breihe0
+    a_ebgebu = a_ebgebu0; b_ebgebu = b_ebgebu0
 
 
 infodict = {'version':           1,
@@ -278,7 +279,7 @@ if cutorthoimg == True:
 ##### treat terrain
 if flags['doterrain'] == True:
     ztdat = gdt.cutalti(dhm, outpath+'dhm0.asc',xmin,xmax,ymin,ymax,xres,yres)
-    ztdat, origin_z = mst.shifttopodown(ztdat,ischild,shift=origin_z) #shift the domain downwards
+    ztdat, origin_z = mst.shifttopodown(ztdat,ischild) #shift the domain downwards
     infodict['origin_z'] = origin_z
 
 ##### treat tlm-bb bulk parametrization
@@ -434,10 +435,11 @@ xres = xres1
 yres = yres1
 zres = zres1
 
-lai_forest = lai_forest1; lai_breihe = lai_breihe1; lai_ebgebu = lai_ebgebu1
-a_forest = a_forest1; b_forest = b_forest1
-a_breihe = a_breihe1; b_breihe = b_breihe1
-a_ebgebu = a_ebgebu1; b_ebgebu = b_ebgebu1
+if flags['dolad'] == True:
+    lai_forest = lai_forest1; lai_breihe = lai_breihe1; lai_ebgebu = lai_ebgebu1
+    a_forest = a_forest1; b_forest = b_forest1
+    a_breihe = a_breihe1; b_breihe = b_breihe1
+    a_ebgebu = a_ebgebu1; b_ebgebu = b_ebgebu1
 
 
 infodict = {'version':           1,
