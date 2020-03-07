@@ -38,7 +38,7 @@ resolvedforestshp = 'C:\\Users\\stefa\\Desktop\\preprocessed_shp\\yverdoncut_bb_
 treerowsshp =       'C:\\Users\\stefa\\Desktop\\preprocessed_shp\\yverdoncut_breihe_mod_puff.shp'
 singletreesshp =    'C:\\Users\\stefa\\Desktop\\preprocessed_shp\\yverdoncut_ebgeb_mod_puff.shp'
 pavementareas =     'C:\\Users\\stefa\\Desktop\\preprocessed_shp\\yverdoncut_strasse_vkareal_eisenbahn_versflaechen.shp'
-
+gebaeudefoots =     'C:\\Users\\stefa\\Desktop\\preprocessed_shp\\yverdoncut_gebfoot_mod.shp'
 
 #OUTPUT
 subdir_rasteredshp = str(Path.home() / 'Desktop' / 'preprocessed_shp' / 'rasteredshp')+'\\' #where rastered shp shall be saved
@@ -639,6 +639,15 @@ if flags['dolad'] == True:
 
     vegarr = np.where(canopyid[:,:] != 0, 3, vegarr[:,:])
     canopyid = np.where(canopyid[:,:] == 0, mst.fillvalues['tree_id'], canopyid[:,:])
+
+if flags['dobuildings2d'] == True:  
+    gebhohe = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudehoehe'+str(ischild)+'.asc', 
+                                    xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_TOP')
+    gebid = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudeid'+str(ischild)+'.asc', 
+                                    xmin, xmax, ymin, ymax, xres, yres, burnatt='ID')
+
+
+
 
 
 ######### create static netcdf file
