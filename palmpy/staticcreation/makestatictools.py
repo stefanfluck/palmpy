@@ -932,7 +932,7 @@ def setupencodingdict(flags):
         encodingdict['tree_id'] = {'dtype':'int32'}
     if flags['dobuildings2d'] == True:
         encodingdict['buildings_2d'] = {'dtype':'float32'}
-        encodingdict['building_id'] = {'dtype':'int8'}
+        encodingdict['building_id'] = {'dtype':'int32'}
     if flags['dobuildings3d'] == True:
         encodingdict['buildings_3d'] = {'dtype':'uint8'}
         encodingdict['building_id'] = {'dtype':'int8'}

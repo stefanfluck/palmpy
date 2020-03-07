@@ -133,7 +133,7 @@ flags2 = {'doterrain':       True,
           'dotlmbb':         True,
           'dostreetsbb':     True,
           'dolad':           True, #for now: resolved tree file, treerows file and singletree file needed
-          'dobuildings2d':   False,
+          'dobuildings2d':   True,
           'dobuildings3d':   False,
           'dovegpars':       False,
           'doalbedopars':    False,
@@ -641,7 +641,7 @@ if flags['dolad'] == True:
     canopyid = np.where(canopyid[:,:] == 0, mst.fillvalues['tree_id'], canopyid[:,:])
 
 if flags['dobuildings2d'] == True:  
-    gebhohe = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudehoehe'+str(ischild)+'.asc', 
+    gebhoehe = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudehoehe'+str(ischild)+'.asc', 
                                     xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_TOP')
     gebid = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudeid'+str(ischild)+'.asc', 
                                     xmin, xmax, ymin, ymax, xres, yres, burnatt='ID')
@@ -690,8 +690,13 @@ if flags['dolad'] == True:
     tree_id = mst.createDataArrays(canopyid, ['y','x'], [y,x])
     mst.setNeededAttributes(tree_id,'tree_id')
     static['tree_id'] = tree_id
-# if flags['dobuildings2d'] == True:
-#     continue
+if flags['dobuildings2d'] == True:
+    buildings_2d = mst.createDataArrays(gebhoehe, ['y','x'], [y,x])
+    mst.setNeededAttributes(buildings_2d, 'buildings_2d')
+    static['buildings_2d'] = buildings_2d
+    building_id = mst.createDataArrays(gebid, ['y','x'], [y,x])
+    mst.setNeededAttributes(building_id, 'building_id')
+    static['building_id'] = building_id
 
 
 encodingdict = mst.setupencodingdict(flags)
