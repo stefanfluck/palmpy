@@ -12,6 +12,7 @@ import sys
 import os
 import configparser as cfp
 import numpy as np
+import matplotlib.pyplot as plt
 
 modulepath = str(Path.home() / 'Documents' / 'Python Scripts' / 'ZAV-PALM-Scripts')
 if modulepath not in sys.path:
@@ -150,6 +151,21 @@ flags2 = {'doterrain':       True,
           'doalbedopars':    False,
           'dostreettypes':   False
           }
+
+
+#visualize domain boundaries
+import matplotlib.patches as patches
+import matplotlib.pyplot as plt
+gdt.cutortho(ortho, outpath+filename+'_baseortho.tif', xmin0,xmax0,ymin0,ymax0,10,10)
+fig = plt.figure()
+ax = fig.gca()
+img = plt.imread(outpath+filename+'_baseortho.tif')
+ax.imshow(img)
+rect1 = patches.Rectangle((llx1/10,lly1/10), xaus1/10,yaus1/10, linewidth=1, edgecolor='r', facecolor='none')
+rect2 = patches.Rectangle((llx2/10+llx1/10,lly2/10+lly1/10), xaus2/10,yaus2/10, linewidth=1, edgecolor='r', facecolor='none')
+ax.add_patch(rect1)
+ax.add_patch(rect2)
+plt.show()
 
 #%%#######################################################
 ## This section creates the parent static file.
