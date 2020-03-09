@@ -317,6 +317,9 @@ def mapbbclasses(bbarr):
         
     return vegarr,pavarr,watarr,soilarr
 
+def makesoilarray(vegarr,pavarr):
+    
+
 
 def makesurffractarray(vegarr,pavarr,watarr):
     '''
