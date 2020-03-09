@@ -295,30 +295,62 @@ def mapbbclasses(bbarr):
     watarr[bbarr==10]  = 1 #stehendes gewaesser > lake
 
     #soiltype array
-    soilarr = np.ones(bbarr.shape)*fillvalues['soil_type']
-    soilarr[bbarr==0] = 2 #medium
-    soilarr[bbarr==1] = 1 #coarse
-    soilarr[bbarr==5] = 2 #
-    soilarr[bbarr==6] = 2 #
-    soilarr[bbarr==7] = 1 #
-    soilarr[bbarr==9] = 1 #
-    soilarr[bbarr==11] = 1 #
-    soilarr[bbarr==12] = 1 #
-    soilarr[bbarr==13] = 1 #
+    # soilarr = np.ones(bbarr.shape)*fillvalues['soil_type']
+    # soilarr[bbarr==0] = 2 #medium
+    # soilarr[bbarr==1] = 1 #coarse
+    # soilarr[bbarr==5] = 2 #
+    # soilarr[bbarr==6] = 2 #
+    # soilarr[bbarr==7] = 1 #
+    # soilarr[bbarr==9] = 1 #
+    # soilarr[bbarr==11] = 1 #
+    # soilarr[bbarr==12] = 1 #
+    # soilarr[bbarr==13] = 1 #
 
        
     print('Unique veget. types:\t'+str(np.unique(vegarr)))
     print('Unique pavement types:\t'+ str(np.unique(pavarr)))
     print('Unique water types:\t'+str(np.unique(watarr)))
-    print('Unique soil types:\t'+str(np.unique(soilarr)))
+    # print('Unique soil types:\t'+str(np.unique(soilarr)))
     
     #pavearr can be processed further in other functions with more tlm datasets.
     #if modified -> change function header info.
         
-    return vegarr,pavarr,watarr,soilarr
+    return vegarr,pavarr,watarr #,soilarr
+
 
 def makesoilarray(vegarr,pavarr):
+    '''
+    Creates Soilarray from vegarr and pavement array. Everywhere where vegetation_type and pavement_type are nonzero values
+    a soiltype class needs to be specified.
+
+    Parameters
+    ----------
+    vegarr : np.array
+        vegetation type array in palm classification.
+    pavarr : np.array
+        pavement type array in palm classification.
+
+    Returns
+    -------
+    soilarr : np.array
+        soil array classificaton.
+
+    '''
+    soilarr = np.ones(vegarr.shape)*fillvalues['soil_type']
+    soilarr = np.where( (vegarr[:,:] != fillvalues['vegetation_type'] ), 2, soilarr[:,:])
     
+    soilarr = np.where( (vegarr[:,:] == 1), 1, soilarr[:,:])
+    soilarr = np.where( (vegarr[:,:] == 16), 2, soilarr[:,:])
+    soilarr = np.where( (vegarr[:,:] == 9), 1, soilarr[:,:])
+    soilarr = np.where( (vegarr[:,:] == 3), 1, soilarr[:,:])
+    soilarr = np.where( (vegarr[:,:] == 13), 1, soilarr[:,:])
+    soilarr = np.where( (vegarr[:,:] == 14), 1, soilarr[:,:])
+    soilarr = np.where( (vegarr[:,:] == 17), 1, soilarr[:,:])
+    soilarr = np.where( (vegarr[:,:] == 18), 1, soilarr[:,:])
+    
+    soilarr = np.where( (pavarr[:,:] == 1), 2, soilarr[:,:])
+    #TODO: Add more exact pavement classifications fpr soils
+    return soilarr
 
 
 def makesurffractarray(vegarr,pavarr,watarr):

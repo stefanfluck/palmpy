@@ -218,7 +218,7 @@ if flags['doterrain'] == True:
 ##### treat tlm-bb bulk parametrization
 if flags['dotlmbb'] == True:
     bbdat = gdt.rasterandcuttlm(bb, outpath+'bb'+str(ischild)+'.asc',xmin,xmax,ymin,ymax,xres,yres, burnatt='OBJEKTART')
-    vegarr, pavarr, watarr, soilarr = mst.mapbbclasses(bbdat)  #map tlm bodenbedeckungs-kategorien to the palm definitions.
+    vegarr, pavarr, watarr = mst.mapbbclasses(bbdat)  #map tlm bodenbedeckungs-kategorien to the palm definitions.
     
 
 
@@ -306,6 +306,7 @@ if flags['dotlmbb'] == True:
         pavarr = paved
         pavarr = np.where ( pavarr[:,:] != -9999, 1, mst.fillvalues['pavement_type']) #TODO: mit einem map dict auch pavements richtig klassifizieren.
     #create surface fraction array
+    soilarr = mst.makesoilarray(vegarr,pavarr)    
     sfrarr = mst.makesurffractarray(vegarr,pavarr,watarr)
 
 if flags['dobuildings2d'] == True:  
@@ -422,7 +423,7 @@ if flags['doterrain'] == True:
 ##### treat tlm-bb bulk parametrization
 if flags['dotlmbb'] == True:
     bbdat = gdt.rasterandcuttlm(bb, outpath+'bb'+str(ischild)+'.asc',xmin,xmax,ymin,ymax,xres,yres, burnatt='OBJEKTART')
-    vegarr, pavarr, watarr, soilarr = mst.mapbbclasses(bbdat)  #map tlm bodenbedeckungs-kategorien to the palm definitions.
+    vegarr, pavarr, watarr = mst.mapbbclasses(bbdat)  #map tlm bodenbedeckungs-kategorien to the palm definitions.
     
 
 ##### treat LAD
@@ -510,6 +511,7 @@ if flags['dotlmbb'] == True:
         pavarr = paved
         pavarr = np.where ( pavarr[:,:] != -9999, 1, mst.fillvalues['pavement_type']) #TODO: mit einem map dict auch pavements richtig klassifizieren.
     #create surface fraction array
+    soilarr = mst.makesoilarray(vegarr,pavarr)
     sfrarr = mst.makesurffractarray(vegarr,pavarr,watarr)
     
 if flags['dobuildings2d'] == True:  
@@ -625,7 +627,7 @@ if flags['doterrain'] == True:
 ##### treat tlm-bb bulk parametrization
 if flags['dotlmbb'] == True:
     bbdat = gdt.rasterandcuttlm(bb, outpath+'bb'+str(ischild)+'.asc',xmin,xmax,ymin,ymax,xres,yres, burnatt='OBJEKTART')
-    vegarr, pavarr, watarr, soilarr = mst.mapbbclasses(bbdat)  #map tlm bodenbedeckungs-kategorien to the palm definitions.
+    vegarr, pavarr, watarr = mst.mapbbclasses(bbdat)  #map tlm bodenbedeckungs-kategorien to the palm definitions.
     
 
 
@@ -713,6 +715,7 @@ if flags['dotlmbb'] == True:
         pavarr = paved
         pavarr = np.where ( pavarr[:,:] != -9999, 1, mst.fillvalues['pavement_type']) #TODO: mit einem map dict auch pavements richtig klassifizieren.
     #create surface fraction array
+    soilarr = mst.makesoilarray(vegarr,pavarr)
     sfrarr = mst.makesurffractarray(vegarr,pavarr,watarr)
 
 
