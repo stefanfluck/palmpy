@@ -295,9 +295,9 @@ def mapbbclasses(bbarr):
     watarr[bbarr==10]  = 1 #stehendes gewaesser > lake
 
        
-    print('Unique veget. types:\t'+str(np.unique(vegarr)))
-    print('Unique pavement types:\t'+ str(np.unique(pavarr)))
-    print('Unique water types:\t'+str(np.unique(watarr)))
+    # print('Unique veget. types:\t'+str(np.unique(vegarr)))
+    # print('Unique pavement types:\t'+ str(np.unique(pavarr)))
+    # print('Unique water types:\t'+str(np.unique(watarr)))
            
     return vegarr,pavarr,watarr #,soilarr
 
