@@ -156,10 +156,10 @@ flags2 = {'doterrain':       True,
 #visualize domain boundaries
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
-gdt.cutortho(ortho, outpath+filename+'_baseortho.tif', xmin0,xmax0,ymin0,ymax0,10,10)
+gdt.cutortho(ortho, outpath+filenames+'_baseortho.tif', xmin0,xmax0,ymin0,ymax0,10,10)
 fig = plt.figure()
 ax = fig.gca()
-img = plt.imread(outpath+filename+'_baseortho.tif')
+img = plt.imread(outpath+filenames+'_baseortho.tif')
 ax.imshow(img)
 rect1 = patches.Rectangle((llx1/10,lly1/10), xaus1/10,yaus1/10, linewidth=1, edgecolor='r', facecolor='none')
 rect2 = patches.Rectangle((llx2/10+llx1/10,lly2/10+lly1/10), xaus2/10,yaus2/10, linewidth=1, edgecolor='r', facecolor='none')
@@ -800,7 +800,7 @@ print('Child Domain 1'+':\tnx/ny/nz dx/dy/dz  =  '+str(int(nx1-1))+'/'+str(int(n
 if totalnumberofdomains>=2:
     print('Child Domain 2'+':\tnx/ny/nz dx/dy/dz  =  '+str(int(nx2-1))+'/'+str(int(ny2-1))+'/'+str(int(nz2))+
           '\t'+str(xres2)+'/'+str(yres2)+'/'+str(zres2) +
-          '\nNest 2 llx-Position Coordinates for &nesting_parameters (x,y): '+str(llx2)+', '+str(lly2)+'\n\n')
+          '\nNest 2 llx-Position Coordinates for &nesting_parameters (x,y): '+str(llx1+llx2)+', '+str(lly1+lly2)+'\n\n')
 
 
 cellcount0=nx0*ny0*nz0
