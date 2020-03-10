@@ -32,15 +32,15 @@ origin_time = '2019-06-07 12:00:00 +02'
 cutorthoimg = True  # provide orthoimages for parent and child domains
 
 #GEODATA FILES (if not available, write None)
-ortho = "C:\\Users\\stefa\\Desktop\\preprocessed_shp\\swissimage2.5cutlarger.tif"
-dhm = "C:\\Users\\stefa\\Desktop\\preprocessed_shp\\swissALTI3Dcut.tif"
-bb = "C:\\Users\\stefa\\Desktop\\preprocessed_shp\\yverdoncut_bb.shp"
-resolvedforestshp = 'C:\\Users\\stefa\\Desktop\\preprocessed_shp\\yverdoncut_bb_waldonly.shp'
-treerowsshp =       'C:\\Users\\stefa\\Desktop\\preprocessed_shp\\yverdoncut_breihe_mod_puff.shp'
-singletreesshp =    'C:\\Users\\stefa\\Desktop\\preprocessed_shp\\yverdoncut_ebgeb_mod_puff.shp'
-pavementareas =     'C:\\Users\\stefa\\Desktop\\preprocessed_shp\\yverdoncut_strasse_vkareal_eisenbahn_versflaechen.shp'
-gebaeudefoots =     'C:\\Users\\stefa\\Desktop\\preprocessed_shp\\yverdoncut_gebfoot_mod.shp'
-crops=              'C:\\Users\\stefa\\Desktop\\preprocessed_shp\\yverdon_felder.shp'
+ortho = str(Path.home()) + "\\Desktop\\preprocessed_shp\\swissimage2.5cutlarger.tif"
+dhm = str(Path.home()) + "\\Desktop\\preprocessed_shp\\swissALTI3Dcut.tif"
+bb = str(Path.home()) + "\\Desktop\\preprocessed_shp\\yverdoncut_bb.shp"
+resolvedforestshp = str(Path.home()) + "\\Desktop\\preprocessed_shp\\yverdoncut_bb_waldonly.shp'
+treerowsshp =       str(Path.home()) + "\\Desktop\\preprocessed_shp\\yverdoncut_breihe_mod_puff.shp'
+singletreesshp =    str(Path.home()) + "\\Desktop\\preprocessed_shp\\yverdoncut_ebgeb_mod_puff.shp'
+pavementareas =     str(Path.home()) + "\\Desktop\\preprocessed_shp\\yverdoncut_strasse_vkareal_eisenbahn_versflaechen.shp'
+gebaeudefoots =     str(Path.home()) + "\\Desktop\\preprocessed_shp\\yverdoncut_gebfoot_mod.shp'
+crops=              str(Path.home()) + "\\Desktop\\preprocessed_shp\\yverdon_felder.shp'
 
 
 #OUTPUT
@@ -132,11 +132,11 @@ lly2     =   ymin2-ymin1                            # ll-corner y coords in pare
 mst.checknxyzvalid(nx2,ny2,nz2)                     # childchecks
 mst.checknestcoordsvalid(xres1,xres2,llx2,lly2)     # childchecks
 
-bulkvegclass2 = 1
+bulkvegclass2 = 1 #bulk classification of vegetation (PALM class. system). Is applied to cells without geodata classification
 
 #LAD PARAMETERS CHILD 2
 lai_forest2 = 8; lai_breihe2 = 10; lai_ebgebu2 = 8;
-a_forest2 = 2;   b_forest2 = 1.2
+a_forest2 = 2;   b_forest2 = 1.2 #shape parameters alpha and beta. run mst.showbetadistribution() for possible parameters
 a_breihe2 = 1.3; b_breihe2 = 1.1
 a_ebgebu2 = 4;   b_ebgebu2 = 2
 
@@ -161,13 +161,13 @@ fig = plt.figure()
 ax = fig.gca()
 img = plt.imread(outpath+filenames+'_baseortho.tif')
 ax.imshow(img)
-rect1 = patches.Rectangle((llx1/10,lly1/10), xaus1/10,yaus1/10, linewidth=1, edgecolor='r', facecolor='none')
-rect2 = patches.Rectangle((llx2/10+llx1/10,lly2/10+lly1/10), xaus2/10,yaus2/10, linewidth=1, edgecolor='r', facecolor='none')
+rect1 = patches.Rectangle((llx1/10,yaus0/10-(lly1/10)-(yaus1/10)), xaus1/10,yaus1/10, linewidth=1, edgecolor='r', facecolor='none')
 ax.add_patch(rect1)
+rect2 = patches.Rectangle((llx2/10,(yaus0/10-(lly2/10)-(yaus2/10))), xaus2/10,yaus2/10, linewidth=1, edgecolor='r', facecolor='none')
 ax.add_patch(rect2)
 plt.show()
 
-#%%#######################################################
+#%%##################### PARENT ##################################
 ## This section creates the parent static file.
 
 #assign variables:
@@ -179,10 +179,10 @@ xmin = xmin0 #in LV03 Koordinaten, lower left corner
 xmax = xmax0
 ymin = ymin0 #in LV03 Koordinaten, lower left corner
 ymax = ymax0
-xres = xres0
+xres = xres0 #resolution in x,y and z
 yres = yres0
 zres = zres0
-bulkvegclass = bulkvegclass0
+bulkvegclass = bulkvegclass0 
 
 if flags['dolad'] == True:
     lai_forest = lai_forest0; lai_breihe = lai_breihe0; lai_ebgebu = lai_ebgebu0
@@ -372,7 +372,7 @@ mst.outputstaticfile(static,outpath+filename, encodingdict) #output the static f
 
 
 
-#%%#######################################################
+#%%#################### CHILD1 ###################################
 ## This section creates the child 1 static file.
 
 #assign variables:
@@ -576,7 +576,7 @@ mst.outputstaticfile(static,outpath+filename, encodingdict) #output the static f
 
 
 
-#%%#######################################################
+#%%###################### CHILD2 #################################
 ## This section creates the child 2 static file.
 
 #assign variables:
