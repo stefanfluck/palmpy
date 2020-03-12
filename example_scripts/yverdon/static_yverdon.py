@@ -35,12 +35,12 @@ cutorthoimg = True  # provide orthoimages for parent and child domains
 ortho = str(Path.home()) + "\\Desktop\\preprocessed_shp\\swissimage2.5cutlarger.tif"
 dhm = str(Path.home()) + "\\Desktop\\preprocessed_shp\\swissALTI3Dcut.tif"
 bb = str(Path.home()) + "\\Desktop\\preprocessed_shp\\yverdoncut_bb.shp"
-resolvedforestshp = str(Path.home()) + "\\Desktop\\preprocessed_shp\\yverdoncut_bb_waldonly.shp'
-treerowsshp =       str(Path.home()) + "\\Desktop\\preprocessed_shp\\yverdoncut_breihe_mod_puff.shp'
-singletreesshp =    str(Path.home()) + "\\Desktop\\preprocessed_shp\\yverdoncut_ebgeb_mod_puff.shp'
-pavementareas =     str(Path.home()) + "\\Desktop\\preprocessed_shp\\yverdoncut_strasse_vkareal_eisenbahn_versflaechen.shp'
-gebaeudefoots =     str(Path.home()) + "\\Desktop\\preprocessed_shp\\yverdoncut_gebfoot_mod.shp'
-crops=              str(Path.home()) + "\\Desktop\\preprocessed_shp\\yverdon_felder.shp'
+resolvedforestshp = str(Path.home()) + "\\Desktop\\preprocessed_shp\\yverdoncut_bb_waldonly.shp"
+treerowsshp =       str(Path.home()) + "\\Desktop\\preprocessed_shp\\yverdoncut_breihe_mod_puff.shp"
+singletreesshp =    str(Path.home()) + "\\Desktop\\preprocessed_shp\\yverdoncut_ebgeb_mod_puff.shp"
+pavementareas =     str(Path.home()) + "\\Desktop\\preprocessed_shp\\yverdoncut_strasse_vkareal_eisenbahn_versflaechen.shp"
+gebaeudefoots =     str(Path.home()) + "\\Desktop\\preprocessed_shp\\yverdoncut_gebfoot_mod.shp"
+crops=              str(Path.home()) + "\\Desktop\\preprocessed_shp\\yverdon_felder.shp"
 
 
 #OUTPUT
@@ -64,7 +64,7 @@ ny0      =  (ymax0-ymin0)/yres0                     # number of gridpoints in y
 nz0      =  zmax0/zres0                             # number of gridpoints in z
 mst.checknxyzvalid(nx0,ny0,nz0)                     # parentchecks
 
-bulkvegclass0 = 1
+bulkvegclass0 = 3
 
 flags0 = {'doterrain':       True,
           'dotlmbb':         True,
@@ -220,7 +220,15 @@ if flags['dotlmbb'] == True:
     bbdat = gdt.rasterandcuttlm(bb, outpath+'bb'+str(ischild)+'.asc',xmin,xmax,ymin,ymax,xres,yres, burnatt='OBJEKTART')
     vegarr, pavarr, watarr = mst.mapbbclasses(bbdat)  #map tlm bodenbedeckungs-kategorien to the palm definitions.
     
+##### BLOCK FOR MODIFICATIONS TO VEGPARS AND ALBEDOPARS
 
+    # vegpars = mst.createparsarrays(bbdat.shape[1], bbdat.shape[0])[0]
+    # albedopars = mst.createparsarrays(bbdat.shape[1], bbdat.shape[0])[5]
+
+    # vegpars,albedopars = mst.setalbedovalue(albpars, vegpars, bbdat, 9, 1, -1)
+    # vegpars = mst.modifyparsarray(vegpars,9,2093,bbdat,9)
+    # vegpars = mst.modifyparsarray(vegpars,11,0,bbdat,9)
+    
 
 ##### treat LAD
     if flags['dolad'] == True:
@@ -345,9 +353,13 @@ if flags['dotlmbb'] == True:
 if flags['dovegpars'] == True:
     nvegetation_pars =  mst.createstaticcoords(vegarr.shape[0],vegarr.shape[1],xres)[3]
     vegetation_pars =  mst.createDataArrays(vegpars, ['nvegetation_pars','y','x'],[nvegetation_pars,y,x])
+    mst.setNeededAttributes(vegetation_pars,'vegetation_pars')
+    static['vegetation_pars']=vegetation_pars
 if flags['doalbedopars'] == True:
     nalbedo_pars = mst.createstaticcoords(vegarr.shape[0],vegarr.shape[1],xres)[4]
     albedo_pars =  mst.createDataArrays(albedopars, ['nalbedo_pars','y','x'],[nalbedo_pars,y,x])
+    mst.setNeededAttributes(albedo_pars,'albedo_pars')
+    static['albedo_pars'] = albedo_pars
 if flags['dolad'] == True:
     lad = mst.createDataArrays(ladarr,['zlad', 'y', 'x'], [zlad,y,x])
     mst.setNeededAttributes(lad, 'lad')
@@ -425,6 +437,15 @@ if flags['dotlmbb'] == True:
     bbdat = gdt.rasterandcuttlm(bb, outpath+'bb'+str(ischild)+'.asc',xmin,xmax,ymin,ymax,xres,yres, burnatt='OBJEKTART')
     vegarr, pavarr, watarr = mst.mapbbclasses(bbdat)  #map tlm bodenbedeckungs-kategorien to the palm definitions.
     
+
+##### BLOCK FOR MODIFICATIONS TO VEGPARS AND ALBEDOPARS
+
+    # vegpars = mst.createparsarrays(bbdat.shape[1], bbdat.shape[0])[0]
+    # albedopars = mst.createparsarrays(bbdat.shape[1], bbdat.shape[0])[5]
+
+    # vegpars,albedopars = mst.setalbedovalue(albpars, vegpars, bbdat, 9, 1, -1)
+    # vegpars = mst.modifyparsarray(vegpars,9,2093,bbdat,9)
+    # vegpars = mst.modifyparsarray(vegpars,11,0,bbdat,9)
 
 ##### treat LAD
     if flags['dolad'] == True:
@@ -550,9 +571,13 @@ if flags['dotlmbb'] == True:
 if flags['dovegpars'] == True:
     nvegetation_pars =  mst.createstaticcoords(vegarr.shape[0],vegarr.shape[1],xres)[3]
     vegetation_pars =  mst.createDataArrays(vegpars, ['nvegetation_pars','y','x'],[nvegetation_pars,y,x])
+    mst.setNeededAttributes(vegetation_pars,'vegetation_pars')
+    static['vegetation_pars']=vegetation_pars
 if flags['doalbedopars'] == True:
     nalbedo_pars = mst.createstaticcoords(vegarr.shape[0],vegarr.shape[1],xres)[4]
     albedo_pars =  mst.createDataArrays(albedopars, ['nalbedo_pars','y','x'],[nalbedo_pars,y,x])
+    mst.setNeededAttributes(albedo_pars,'albedo_pars')
+    static['albedo_pars'] = albedo_pars
 if flags['dolad'] == True:
     lad = mst.createDataArrays(ladarr,['zlad', 'y', 'x'], [zlad,y,x])
     mst.setNeededAttributes(lad, 'lad')
@@ -629,7 +654,15 @@ if flags['dotlmbb'] == True:
     bbdat = gdt.rasterandcuttlm(bb, outpath+'bb'+str(ischild)+'.asc',xmin,xmax,ymin,ymax,xres,yres, burnatt='OBJEKTART')
     vegarr, pavarr, watarr = mst.mapbbclasses(bbdat)  #map tlm bodenbedeckungs-kategorien to the palm definitions.
     
+    
+##### BLOCK FOR MODIFICATIONS TO VEGPARS AND ALBEDOPARS
 
+    # vegpars = mst.createparsarrays(bbdat.shape[1], bbdat.shape[0])[0]
+    # albedopars = mst.createparsarrays(bbdat.shape[1], bbdat.shape[0])[5]
+
+    # vegpars,albedopars = mst.setalbedovalue(albpars, vegpars, bbdat, 9, 1, -1)
+    # vegpars = mst.modifyparsarray(vegpars,9,2093,bbdat,9)
+    # vegpars = mst.modifyparsarray(vegpars,11,0,bbdat,9)
 
 ##### treat LAD
     if flags['dolad'] == True:
@@ -757,9 +790,13 @@ if flags['dotlmbb'] == True:
 if flags['dovegpars'] == True:
     nvegetation_pars =  mst.createstaticcoords(vegarr.shape[0],vegarr.shape[1],xres)[3]
     vegetation_pars =  mst.createDataArrays(vegpars, ['nvegetation_pars','y','x'],[nvegetation_pars,y,x])
+    mst.setNeededAttributes(vegetation_pars,'vegetation_pars')
+    static['vegetation_pars']=vegetation_pars
 if flags['doalbedopars'] == True:
     nalbedo_pars = mst.createstaticcoords(vegarr.shape[0],vegarr.shape[1],xres)[4]
     albedo_pars =  mst.createDataArrays(albedopars, ['nalbedo_pars','y','x'],[nalbedo_pars,y,x])
+    mst.setNeededAttributes(albedo_pars,'albedo_pars')
+    static['albedo_pars'] = albedo_pars
 if flags['dolad'] == True:
     lad = mst.createDataArrays(ladarr,['zlad', 'y', 'x'], [zlad,y,x])
     mst.setNeededAttributes(lad, 'lad')
