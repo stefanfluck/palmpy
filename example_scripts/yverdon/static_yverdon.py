@@ -225,7 +225,7 @@ if flags['dotlmbb'] == True:
     # vegpars = mst.createparsarrays(bbdat.shape[1], bbdat.shape[0])[0]
     # albedopars = mst.createparsarrays(bbdat.shape[1], bbdat.shape[0])[5]
 
-    # vegpars,albedopars = mst.setalbedovalue(albpars, vegpars, bbdat, 9, 1, -1)
+    # vegpars,albedopars = mst.setalbedovalue(albedopars, vegpars, bbdat, 9, 1, -1)
     # vegpars = mst.modifyparsarray(vegpars,9,2093,bbdat,9)
     # vegpars = mst.modifyparsarray(vegpars,11,0,bbdat,9)
     
@@ -443,7 +443,7 @@ if flags['dotlmbb'] == True:
     # vegpars = mst.createparsarrays(bbdat.shape[1], bbdat.shape[0])[0]
     # albedopars = mst.createparsarrays(bbdat.shape[1], bbdat.shape[0])[5]
 
-    # vegpars,albedopars = mst.setalbedovalue(albpars, vegpars, bbdat, 9, 1, -1)
+    # vegpars,albedopars = mst.setalbedovalue(albedopars, vegpars, bbdat, 9, 1, -1)
     # vegpars = mst.modifyparsarray(vegpars,9,2093,bbdat,9)
     # vegpars = mst.modifyparsarray(vegpars,11,0,bbdat,9)
 
@@ -660,7 +660,7 @@ if flags['dotlmbb'] == True:
     # vegpars = mst.createparsarrays(bbdat.shape[1], bbdat.shape[0])[0]
     # albedopars = mst.createparsarrays(bbdat.shape[1], bbdat.shape[0])[5]
 
-    # vegpars,albedopars = mst.setalbedovalue(albpars, vegpars, bbdat, 9, 1, -1)
+    # vegpars,albedopars = mst.setalbedovalue(albedopars, vegpars, bbdat, 9, 1, -1)
     # vegpars = mst.modifyparsarray(vegpars,9,2093,bbdat,9)
     # vegpars = mst.modifyparsarray(vegpars,11,0,bbdat,9)
 
