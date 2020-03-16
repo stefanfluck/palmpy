@@ -932,8 +932,8 @@ def setupencodingdict(flags):
         encoding dict with needed conversions.
 
     '''
-    encodingdict = {'x':  {'dtype': 'float32'}, 
-                    'y':  {'dtype': 'float32'}}
+    encodingdict = {'x':  {'dtype': 'float64'}, 
+                    'y':  {'dtype': 'float64'}}
     if flags['doterrain'] == True:
         encodingdict['zt'] = {'dtype': 'float32'}
     if flags['dotlmbb'] == True:
