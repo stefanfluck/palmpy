@@ -156,14 +156,15 @@ flags2 = {'doterrain':       True,
 #visualize domain boundaries
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
-gdt.cutortho(ortho, outpath+filenames+'_baseortho.tif', xmin0,xmax0,ymin0,ymax0,10,10)
+res = 5
+gdt.cutortho(ortho, outpath+filenames+'_baseortho.tif', xmin0,xmax0,ymin0,ymax0,res,res)
 fig = plt.figure()
 ax = fig.gca()
 img = plt.imread(outpath+filenames+'_baseortho.tif')
 ax.imshow(img)
-rect1 = patches.Rectangle((llx1/10,yaus0/10-(lly1/10)-(yaus1/10)), xaus1/10,yaus1/10, linewidth=1, edgecolor='r', facecolor='none')
+rect1 = patches.Rectangle((llx1/res,(yaus0-lly1-yaus1)/res), xaus1/res,yaus1/res, linewidth=1, edgecolor='r', facecolor='none')
 ax.add_patch(rect1)
-rect2 = patches.Rectangle((llx2/10,(yaus0/10-(lly2/10)-(yaus2/10))), xaus2/10,yaus2/10, linewidth=1, edgecolor='r', facecolor='none')
+rect2 = patches.Rectangle(((llx2+llx1)/res,(yaus0-lly1-lly2-yaus2)/res), xaus2/res,yaus2/res, linewidth=1, edgecolor='r', facecolor='none')
 ax.add_patch(rect2)
 plt.show()
 
