@@ -167,6 +167,7 @@ ax.add_patch(rect1)
 rect2 = patches.Rectangle(((llx2+llx1)/res,(yaus0-lly1-lly2-yaus2)/res), xaus2/res,yaus2/res, linewidth=1, edgecolor='r', facecolor='none')
 ax.add_patch(rect2)
 plt.show()
+plt.grid()
 
 #%%##################### PARENT ##################################
 ## This section creates the parent static file.
