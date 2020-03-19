@@ -844,7 +844,7 @@ mst.outputstaticfile(static,outpath+filename, encodingdict) #output the static f
 
 
 
-print('Setup the following parameters in the namelists:\n'+
+print('\n\nSetup the following parameters in the namelists:\n'+
       'Parent Domain'+':\tnx/ny/nz dx/dy/dz  =  '+str(int(nx0-1))+'/'+str(int(ny0-1))+'/'+str(int(nz0))+
       '\t'+str(xres0)+'/'+str(yres0)+'/'+str(zres0)+'\n')
 
