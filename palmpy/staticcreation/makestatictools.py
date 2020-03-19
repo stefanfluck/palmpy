@@ -774,7 +774,8 @@ def setNeededAttributes(dataarray, staticvariable):
         
     if staticvariable == 'buildings_2d':
         dataarray.attrs['_FillValue'] = fillvalues[staticvariable]
-        dataarray.attrs['long_name'] = 'vegetation parameters'         
+        dataarray.attrs['long_name'] = 'vegetation parameters' 
+        dataarray.attrs['lod'] = int(1)      
      
     if staticvariable == 'building_id':
         dataarray.attrs['_FillValue'] = fillvalues[staticvariable]

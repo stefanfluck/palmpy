@@ -299,7 +299,7 @@ if flags['dotlmbb'] == True:
                     pdf = beta.pdf(x=np.arange(0,1,(1/(topindex-botindex))),a=canalpha[i,j],b=canbeta[i,j])
                     ladarr[botindex:topindex,i,j] = pdf/pdf.max()*lai[i,j]/canopyheight[i,j]
     
-        vegarr = np.where(canopyid[:,:] != 0, 3, vegarr[:,:])
+        vegarr = np.where((canopyid[:,:] != -9999) & (watarr[:,:] == -127), 3, vegarr[:,:])
         canopyid = np.where(canopyid[:,:] == 0, mst.fillvalues['tree_id'], canopyid[:,:])
     
     vegarr = np.where( (vegarr[:,:]==-127) & (watarr[:,:]==-127) & (pavarr[:,:]==-127), bulkvegclass, vegarr[:,:]) #fill unassigned vegetation types to bare soil.
@@ -521,7 +521,7 @@ if flags['dotlmbb'] == True:
                     pdf = beta.pdf(x=np.arange(0,1,(1/(topindex-botindex))),a=canalpha[i,j],b=canbeta[i,j])
                     ladarr[botindex:topindex,i,j] = pdf/pdf.max()*lai[i,j]/canopyheight[i,j]
     
-        vegarr = np.where(canopyid[:,:] != -9999, 3, vegarr[:,:])
+        vegarr = np.where((canopyid[:,:] != -9999) & (watarr[:,:] == -127), 3, vegarr[:,:])
         canopyid = np.where(canopyid[:,:] == 0, mst.fillvalues['tree_id'], canopyid[:,:])
     
     vegarr = np.where( (vegarr[:,:]==-127) & (watarr[:,:]==-127) & (pavarr[:,:]==-127), bulkvegclass, vegarr[:,:]) #fill unassigned vegetation types to bare soil.
@@ -746,7 +746,7 @@ if flags['dotlmbb'] == True:
                     pdf = beta.pdf(x=np.arange(0,1,(1/(topindex-botindex))),a=canalpha[i,j],b=canbeta[i,j])
                     ladarr[botindex:topindex,i,j] = pdf/pdf.max()*lai[i,j]/canopyheight[i,j]
     
-        vegarr = np.where((canopyid[:,:] != -9999), 3, vegarr[:,:])
+        vegarr = np.where((canopyid[:,:] != -9999) & (watarr[:,:] == -127), 3, vegarr[:,:])
         canopyid = np.where(canopyid[:,:] == 0, mst.fillvalues['tree_id'], canopyid[:,:])
     
     vegarr = np.where( (vegarr[:,:]==-127) & (watarr[:,:]==-127) & (pavarr[:,:]==-127), bulkvegclass, vegarr[:,:]) #fill unassigned vegetation types to bare soil.
