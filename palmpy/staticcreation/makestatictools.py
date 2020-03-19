@@ -275,7 +275,7 @@ def mapbbclasses(bbarr):
     '''
     import numpy as np
     
-    #vegetation array
+    #vegetation array, was done before knowing np.vectorization(dict.get)(inarr)
     vegarr = np.ones(bbarr.shape)*fillvalues['vegetation_type']#-127
     vegarr[bbarr==0]   = 3  # unclassified > short grass
     vegarr[bbarr==1]   = 9  # fels > desert
@@ -300,6 +300,8 @@ def mapbbclasses(bbarr):
     # print('Unique water types:\t'+str(np.unique(watarr)))
            
     return vegarr,pavarr,watarr #,soilarr
+
+
 
 
 def makesoilarray(vegarr,pavarr):
@@ -647,6 +649,59 @@ def setalbedovalue(albedopars, vegpars, filterarr, filtervalue, newvalue, npar):
         albedopars[npar,:,:]  = zeroarr
     
     return vegpars,albedopars
+
+
+
+def mapstreettypes(roadarr):
+    '''
+    map street classes from swisstlm (0-22) to approximately the ones from palm
+    categorization. resembles openstreetmap classes. Best guess applied in 
+    mapping dictionary.
+    required for chem emission parametrization
+                
+    Parameters
+    ----------
+    roadarr : np.array
+        tlm objektarten für roads. fillvalue shall be -9999.
+    
+    Returns
+    -------
+    street_type : np.array
+        street_types array with palm classification for road types.   
+    
+    '''
+    
+    import numpy as np
+    mapdict = {-9999 : fillvalues['street_type'],
+               0    : 18,
+               1    : 18,
+               2    : 17,
+               3    : 7,
+               4    : 16,
+               5    : 9,
+               6    : 9,
+               8    : 13,
+               9    : 11, 
+               10   : 8, 
+               11   : 8, 
+               12   : 7,
+               13   : 7,
+               14   : fillvalues['street_type'],
+               15   : 4,
+               16   : 3,
+               17   : 3,
+               18   : 3,
+               19   : 3,
+               20   : 13,
+               21   : 15,
+               22   : 3}
+    street_type = np.vectorize(mapdict.get)(roadarr)
+    return street_type
+
+
+
+
+
 
 
 def createstaticcoords(xsize, ysize, pixelsize):

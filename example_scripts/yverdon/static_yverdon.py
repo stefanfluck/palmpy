@@ -40,8 +40,8 @@ treerowsshp =       str(Path.home()) + "\\Desktop\\preprocessed_shp\\yverdoncut_
 singletreesshp =    str(Path.home()) + "\\Desktop\\preprocessed_shp\\yverdoncut_ebgeb_mod_puff.shp"
 pavementareas =     str(Path.home()) + "\\Desktop\\preprocessed_shp\\yverdoncut_strasse_vkareal_eisenbahn_versflaechen.shp"
 gebaeudefoots =     str(Path.home()) + "\\Desktop\\preprocessed_shp\\yverdoncut_gebfoot_mod.shp"
-crops=              str(Path.home()) + "\\Desktop\\preprocessed_shp\\yverdon_felder.shp"
-
+crops =             str(Path.home()) + "\\Desktop\\preprocessed_shp\\yverdon_felder.shp"
+streetsonly =       str(Path.home()) + "\\Desktop\\preprocessed_shp\\yverdoncut_strasse_mod_puff.shp"
 
 #OUTPUT
 subdir_rasteredshp = str(Path.home() / 'Desktop' / 'preprocessed_shp' / 'rasteredshp')+'\\' #where rastered shp shall be saved
@@ -83,7 +83,7 @@ ischild1       =   1
 xaus1,yaus1    =   3072.0, 3072.0                   # dimensions of domain in meter
 xmin1,ymin1    =   poi2x-xaus1/2, poi2y+512-yaus1/2       # lower left corner (origin) coordinates
 xmax1, ymax1   =   xmin1+xaus1, ymin1+yaus1         # calculation of upper right corner coords
-zmax1          =   3072.0                            # vertical extent
+zmax1          =   3040.0                            # vertical extent
 xres1,yres1,zres1    =  16.0, 16.0, 16.0            # resolutions
 
 nx1      =  (xmax1-xmin1)/xres1                     # number of gridpoints in x
@@ -112,7 +112,7 @@ flags1 = {'doterrain':       True,
           'dobuildings3d':   False,
           'dovegpars':       False,
           'doalbedopars':    False,
-          'dostreettypes':   False
+          'dostreettypes':   True,
           }
 
 ##################### child 2 ###########################
@@ -149,7 +149,7 @@ flags2 = {'doterrain':       True,
           'dobuildings3d':   False,
           'dovegpars':       False,
           'doalbedopars':    False,
-          'dostreettypes':   False
+          'dostreettypes':   True,
           }
 
 
@@ -327,6 +327,14 @@ if flags['dobuildings2d'] == True:
     gebtyp = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudetyp'+str(ischild)+'.asc', 
                                     xmin, xmax, ymin, ymax, xres, yres, burnatt='BLDGTYP')
     gebtyp = np.where((gebtyp[:,:]==-9999.), mst.fillvalues['building_type'], gebtyp[:,:])
+
+if flags['dostreettypes'] == True:
+    roadarr = gdt.rasterandcuttlm(streetsonly, subdir_rasteredshp+'gebaeudehoehe'+str(ischild)+'.asc', 
+                                    xmin, xmax, ymin, ymax, xres, yres, burnatt='OBJEKTART')
+    roadarr = mst.mapstreettypes(roadarr)    
+    
+    
+    
     
 ######### create static netcdf file
 static = xr.Dataset()
@@ -382,7 +390,10 @@ if flags['dobuildings2d'] == True:
     building_type = mst.createDataArrays(gebtyp, ['y','x'], [y,x])
     mst.setNeededAttributes(building_type, 'building_type')
     static['building_type'] = building_type
-
+if flags['dostreettypes'] == True:
+    street_type = mst.createDataArrays(roadarr, ['y','x'], [y,x])
+    mst.setNeededAttributes(street_type,'street_type')
+    static['street_type'] = street_type
 
 encodingdict = mst.setupencodingdict(flags)
 mst.setGlobalAttributes(static,infodict) #set global attributes
@@ -551,6 +562,12 @@ if flags['dobuildings2d'] == True:
                                     xmin, xmax, ymin, ymax, xres, yres, burnatt='BLDGTYP')
     gebtyp = np.where((gebtyp[:,:]==-9999.), mst.fillvalues['building_type'], gebtyp[:,:])
 
+if flags['dostreettypes'] == True:
+    roadarr = gdt.rasterandcuttlm(streetsonly, subdir_rasteredshp+'gebaeudehoehe'+str(ischild)+'.asc', 
+                                    xmin, xmax, ymin, ymax, xres, yres, burnatt='OBJEKTART')
+    roadarr = mst.mapstreettypes(roadarr)
+    
+
 
 
 ######### create static netcdf file
@@ -607,6 +624,10 @@ if flags['dobuildings2d'] == True:
     building_type = mst.createDataArrays(gebtyp, ['y','x'], [y,x])
     mst.setNeededAttributes(building_type, 'building_type')
     static['building_type'] = building_type
+if flags['dostreettypes'] == True:
+    street_type = mst.createDataArrays(roadarr, ['y','x'], [y,x])
+    mst.setNeededAttributes(street_type,'street_type')
+    static['street_type'] = street_type
 
 
 encodingdict = mst.setupencodingdict(flags)
@@ -766,8 +787,6 @@ if flags['dotlmbb'] == True:
     soilarr = mst.makesoilarray(vegarr,pavarr)
     sfrarr = mst.makesurffractarray(vegarr,pavarr,watarr)
 
-
-
 if flags['dobuildings2d'] == True:  
     gebhoehe = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudehoehe'+str(ischild)+'.asc', 
                                     xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_TOP')
@@ -776,6 +795,13 @@ if flags['dobuildings2d'] == True:
     gebtyp = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudetyp'+str(ischild)+'.asc', 
                                     xmin, xmax, ymin, ymax, xres, yres, burnatt='BLDGTYP')
     gebtyp = np.where((gebtyp[:,:]==-9999.), mst.fillvalues['building_type'], gebtyp[:,:])
+
+if flags['dostreettypes'] == True:
+    roadarr = gdt.rasterandcuttlm(streetsonly, subdir_rasteredshp+'gebaeudehoehe'+str(ischild)+'.asc', 
+                                    xmin, xmax, ymin, ymax, xres, yres, burnatt='OBJEKTART')
+    roadarr = mst.mapstreettypes(roadarr)
+
+
 
 ######### create static netcdf file
 static = xr.Dataset()
@@ -831,6 +857,11 @@ if flags['dobuildings2d'] == True:
     building_type = mst.createDataArrays(gebtyp, ['y','x'], [y,x])
     mst.setNeededAttributes(building_type, 'building_type')
     static['building_type'] = building_type
+if flags['dostreettypes'] == True:
+    street_type = mst.createDataArrays(roadarr, ['y','x'], [y,x])
+    mst.setNeededAttributes(street_type,'street_type')
+    static['street_type'] = street_type
+
 
 encodingdict = mst.setupencodingdict(flags)
 mst.setGlobalAttributes(static,infodict) #set global attributes
