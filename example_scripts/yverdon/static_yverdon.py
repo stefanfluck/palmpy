@@ -167,7 +167,7 @@ ax.add_patch(rect1)
 rect2 = patches.Rectangle(((llx2+llx1)/res,(yaus0-lly1-lly2-yaus2)/res), xaus2/res,yaus2/res, linewidth=1, edgecolor='r', facecolor='none')
 ax.add_patch(rect2)
 plt.show()
-plt.grid()
+#plt.grid()
 
 #%%##################### PARENT ##################################
 ## This section creates the parent static file.
@@ -324,7 +324,10 @@ if flags['dobuildings2d'] == True:
                                     xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_TOP')
     gebid = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudeid'+str(ischild)+'.asc', 
                                     xmin, xmax, ymin, ymax, xres, yres, burnatt='ID')
-
+    gebtyp = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudetyp'+str(ischild)+'.asc', 
+                                    xmin, xmax, ymin, ymax, xres, yres, burnatt='BLDGTYP')
+    gebtyp = np.where((gebtyp[:,:]==-9999.), mst.fillvalues['building_type'], gebtyp[:,:])
+    
 ######### create static netcdf file
 static = xr.Dataset()
 x,y = mst.createstaticcoords(vegarr.shape[0],vegarr.shape[1],xres)[0:2]
@@ -376,7 +379,9 @@ if flags['dobuildings2d'] == True:
     building_id = mst.createDataArrays(gebid, ['y','x'], [y,x])
     mst.setNeededAttributes(building_id, 'building_id')
     static['building_id'] = building_id
-
+    building_type = mst.createDataArrays(gebtyp, ['y','x'], [y,x])
+    mst.setNeededAttributes(building_type, 'building_type')
+    static['building_type'] = building_type
 
 
 encodingdict = mst.setupencodingdict(flags)
@@ -542,6 +547,11 @@ if flags['dobuildings2d'] == True:
                                     xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_TOP')
     gebid = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudeid'+str(ischild)+'.asc', 
                                     xmin, xmax, ymin, ymax, xres, yres, burnatt='ID')
+    gebtyp = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudetyp'+str(ischild)+'.asc', 
+                                    xmin, xmax, ymin, ymax, xres, yres, burnatt='BLDGTYP')
+    gebtyp = np.where((gebtyp[:,:]==-9999.), mst.fillvalues['building_type'], gebtyp[:,:])
+
+
 
 ######### create static netcdf file
 static = xr.Dataset()
@@ -594,6 +604,9 @@ if flags['dobuildings2d'] == True:
     building_id = mst.createDataArrays(gebid, ['y','x'], [y,x])
     mst.setNeededAttributes(building_id, 'building_id')
     static['building_id'] = building_id
+    building_type = mst.createDataArrays(gebtyp, ['y','x'], [y,x])
+    mst.setNeededAttributes(building_type, 'building_type')
+    static['building_type'] = building_type
 
 
 encodingdict = mst.setupencodingdict(flags)
@@ -760,7 +773,9 @@ if flags['dobuildings2d'] == True:
                                     xmin, xmax, ymin, ymax, xres, yres, burnatt='HEIGHT_TOP')
     gebid = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudeid'+str(ischild)+'.asc', 
                                     xmin, xmax, ymin, ymax, xres, yres, burnatt='ID')
-
+    gebtyp = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudetyp'+str(ischild)+'.asc', 
+                                    xmin, xmax, ymin, ymax, xres, yres, burnatt='BLDGTYP')
+    gebtyp = np.where((gebtyp[:,:]==-9999.), mst.fillvalues['building_type'], gebtyp[:,:])
 
 ######### create static netcdf file
 static = xr.Dataset()
@@ -813,7 +828,9 @@ if flags['dobuildings2d'] == True:
     building_id = mst.createDataArrays(gebid, ['y','x'], [y,x])
     mst.setNeededAttributes(building_id, 'building_id')
     static['building_id'] = building_id
-
+    building_type = mst.createDataArrays(gebtyp, ['y','x'], [y,x])
+    mst.setNeededAttributes(building_type, 'building_type')
+    static['building_type'] = building_type
 
 encodingdict = mst.setupencodingdict(flags)
 mst.setGlobalAttributes(static,infodict) #set global attributes

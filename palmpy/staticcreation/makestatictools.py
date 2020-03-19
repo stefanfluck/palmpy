@@ -689,9 +689,9 @@ def createstaticcoords(xsize, ysize, pixelsize):
     npavement_pars = np.arange(0,4)
     nsoil_pars = np.arange(0,8)
     nwater_pars = np.arange(0,7)
-    npavement_subsurface_pars = np.arange(0,2)
+#    npavement_subsurface_pars = np.arange(0,2)
     nbuilding_pars = np.arange(0,136)
-    nbuilding_surface_pars = np.arange(0,28)
+#    nbuilding_surface_pars = np.arange(0,28)
     
     return x, y, nsurface_fraction, nvegetation_pars, nalbedo_pars, npavement_pars, nsoil_pars, nwater_pars, nbuilding_pars
 
