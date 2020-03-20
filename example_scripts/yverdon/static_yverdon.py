@@ -299,9 +299,9 @@ if flags['dotlmbb'] == True:
         zlad= mst.createzlad(maxtreeheight, zres) #create zlad array
         ladarr = np.ones((len(zlad), canopyheight.shape[0], canopyheight.shape[1]))*mst.fillvalues['tree_data'] #create empty lad array
         
-        chdztop = np.round(canopyheight/zres,0).astype(int)
+        chdztop = np.where(canopyheight[:,:]==-9999., canopyheight[:,:], np.round(canopyheight/zres,0).astype(int))
         chidxtop = np.where( (chdztop[:,:]==0), -9999, chdztop[:,:]) #index of zlad height that needs to be filled
-        chdzbot = np.round(canopybottom/zres,0).astype(int)
+        chdzbot = np.where(canopybottom[:,:]==-9999., canopybottom[:,:], np.round(canopybottom/zres,0).astype(int))
         chidxbot = np.where( (chdzbot[:,:]==0), 0, chdzbot[:,:]) #index of zlad height that needs to be filled
         
         #create actual lad array
@@ -532,9 +532,9 @@ if flags['dotlmbb'] == True:
         zlad= mst.createzlad(maxtreeheight, zres) #create zlad array
         ladarr = np.ones((len(zlad), canopyheight.shape[0], canopyheight.shape[1]))*mst.fillvalues['tree_data'] #create empty lad array
         
-        chdztop = np.round(canopyheight/zres,0).astype(int)
+        chdztop = np.where(canopyheight[:,:]==-9999., canopyheight[:,:], np.round(canopyheight/zres,0).astype(int))
         chidxtop = np.where( (chdztop[:,:]==0), -9999, chdztop[:,:]) #index of zlad height that needs to be filled
-        chdzbot = np.round(canopybottom/zres,0).astype(int)
+        chdzbot = np.where(canopybottom[:,:]==-9999., canopybottom[:,:], np.round(canopybottom/zres,0).astype(int))
         chidxbot = np.where( (chdzbot[:,:]==0), 0, chdzbot[:,:]) #index of zlad height that needs to be filled
         
         #create actual lad array
@@ -767,9 +767,9 @@ if flags['dotlmbb'] == True:
         zlad= mst.createzlad(maxtreeheight, zres) #create zlad array
         ladarr = np.ones((len(zlad), canopyheight.shape[0], canopyheight.shape[1]))*mst.fillvalues['tree_data'] #create empty lad array
         
-        chdztop = np.round(canopyheight/zres,0).astype(int)
+        chdztop = np.where(canopyheight[:,:]==-9999., canopyheight[:,:], np.round(canopyheight/zres,0).astype(int))
         chidxtop = np.where( (chdztop[:,:]==0), -9999, chdztop[:,:]) #index of zlad height that needs to be filled
-        chdzbot = np.round(canopybottom/zres,0).astype(int)
+        chdzbot = np.where(canopybottom[:,:]==-9999., canopybottom[:,:], np.round(canopybottom/zres,0).astype(int))
         chidxbot = np.where( (chdzbot[:,:]==0), 0, chdzbot[:,:]) #index of zlad height that needs to be filled
         
         #create actual lad array
