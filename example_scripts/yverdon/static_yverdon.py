@@ -343,21 +343,21 @@ x,y = mst.createstaticcoords(vegarr.shape[0],vegarr.shape[1],xres)[0:2]
 
 #create coordinates, create data Array and then assign to static dataset and append the encodingdict.
 if flags['doterrain'] == True:
-    zt = mst.createDataArrays(ztdat,['y','x'],[y,x])
-    mst.setNeededAttributes(zt, 'zt')
+    zt = mst.createdataarrays(ztdat,['y','x'],[y,x])
+    mst.setneededattributes(zt, 'zt')
     static['zt'] = zt
 if flags['dotlmbb'] == True:
     nsurface_fraction = mst.createstaticcoords(vegarr.shape[0],vegarr.shape[1],xres)[2]
-    vegetation_type = mst.createDataArrays(vegarr,['y','x'],[y,x])
-    pavement_type = mst.createDataArrays(pavarr,['y','x'],[y,x])
-    water_type = mst.createDataArrays(watarr,['y','x'],[y,x])
-    soil_type = mst.createDataArrays(soilarr,['y','x'],[y,x])
-    surface_fraction = mst.createDataArrays(sfrarr,['nsurface_fraction','y','x'],[nsurface_fraction,y,x])
-    mst.setNeededAttributes(vegetation_type,'vegetation_type')
-    mst.setNeededAttributes(pavement_type,'pavement_type')
-    mst.setNeededAttributes(water_type,'water_type')
-    mst.setNeededAttributes(soil_type,'soil_type')
-    mst.setNeededAttributes(surface_fraction,'surface_fraction')
+    vegetation_type = mst.createdataarrays(vegarr,['y','x'],[y,x])
+    pavement_type = mst.createdataarrays(pavarr,['y','x'],[y,x])
+    water_type = mst.createdataarrays(watarr,['y','x'],[y,x])
+    soil_type = mst.createdataarrays(soilarr,['y','x'],[y,x])
+    surface_fraction = mst.createdataarrays(sfrarr,['nsurface_fraction','y','x'],[nsurface_fraction,y,x])
+    mst.setneededattributes(vegetation_type,'vegetation_type')
+    mst.setneededattributes(pavement_type,'pavement_type')
+    mst.setneededattributes(water_type,'water_type')
+    mst.setneededattributes(soil_type,'soil_type')
+    mst.setneededattributes(surface_fraction,'surface_fraction')
     static['vegetation_type'] = vegetation_type
     static['water_type'] = water_type
     static['soil_type'] = soil_type
@@ -365,38 +365,38 @@ if flags['dotlmbb'] == True:
     static['surface_fraction'] = surface_fraction
 if flags['dovegpars'] == True:
     nvegetation_pars =  mst.createstaticcoords(vegarr.shape[0],vegarr.shape[1],xres)[3]
-    vegetation_pars =  mst.createDataArrays(vegpars, ['nvegetation_pars','y','x'],[nvegetation_pars,y,x])
-    mst.setNeededAttributes(vegetation_pars,'vegetation_pars')
+    vegetation_pars =  mst.createdataarrays(vegpars, ['nvegetation_pars','y','x'],[nvegetation_pars,y,x])
+    mst.setneededattributes(vegetation_pars,'vegetation_pars')
     static['vegetation_pars']=vegetation_pars
 if flags['doalbedopars'] == True:
     nalbedo_pars = mst.createstaticcoords(vegarr.shape[0],vegarr.shape[1],xres)[4]
-    albedo_pars =  mst.createDataArrays(albedopars, ['nalbedo_pars','y','x'],[nalbedo_pars,y,x])
-    mst.setNeededAttributes(albedo_pars,'albedo_pars')
+    albedo_pars =  mst.createdataarrays(albedopars, ['nalbedo_pars','y','x'],[nalbedo_pars,y,x])
+    mst.setneededattributes(albedo_pars,'albedo_pars')
     static['albedo_pars'] = albedo_pars
 if flags['dolad'] == True:
-    lad = mst.createDataArrays(ladarr,['zlad', 'y', 'x'], [zlad,y,x])
-    mst.setNeededAttributes(lad, 'lad')
+    lad = mst.createdataarrays(ladarr,['zlad', 'y', 'x'], [zlad,y,x])
+    mst.setneededattributes(lad, 'lad')
     static['lad'] = lad
-    tree_id = mst.createDataArrays(canopyid, ['y','x'], [y,x])
-    mst.setNeededAttributes(tree_id,'tree_id')
+    tree_id = mst.createdataarrays(canopyid, ['y','x'], [y,x])
+    mst.setneededattributes(tree_id,'tree_id')
     static['tree_id'] = tree_id
 if flags['dobuildings2d'] == True:
-    buildings_2d = mst.createDataArrays(gebhoehe, ['y','x'], [y,x])
-    mst.setNeededAttributes(buildings_2d, 'buildings_2d')
+    buildings_2d = mst.createdataarrays(gebhoehe, ['y','x'], [y,x])
+    mst.setneededattributes(buildings_2d, 'buildings_2d')
     static['buildings_2d'] = buildings_2d
-    building_id = mst.createDataArrays(gebid, ['y','x'], [y,x])
-    mst.setNeededAttributes(building_id, 'building_id')
+    building_id = mst.createdataarrays(gebid, ['y','x'], [y,x])
+    mst.setneededattributes(building_id, 'building_id')
     static['building_id'] = building_id
-    building_type = mst.createDataArrays(gebtyp, ['y','x'], [y,x])
-    mst.setNeededAttributes(building_type, 'building_type')
+    building_type = mst.createdataarrays(gebtyp, ['y','x'], [y,x])
+    mst.setneededattributes(building_type, 'building_type')
     static['building_type'] = building_type
 if flags['dostreettypes'] == True:
-    street_type = mst.createDataArrays(roadarr, ['y','x'], [y,x])
-    mst.setNeededAttributes(street_type,'street_type')
+    street_type = mst.createdataarrays(roadarr, ['y','x'], [y,x])
+    mst.setneededattributes(street_type,'street_type')
     static['street_type'] = street_type
 
 encodingdict = mst.setupencodingdict(flags)
-mst.setGlobalAttributes(static,infodict) #set global attributes
+mst.setglobalattributes(static,infodict) #set global attributes
 
 mst.outputstaticfile(static,outpath+filename, encodingdict) #output the static file
 
@@ -577,21 +577,21 @@ x,y = mst.createstaticcoords(vegarr.shape[0],vegarr.shape[1],xres)[0:2]
 
 #create coordinates, create data Array and then assign to static dataset and append the encodingdict.
 if flags['doterrain'] == True:
-    zt = mst.createDataArrays(ztdat,['y','x'],[y,x])
-    mst.setNeededAttributes(zt, 'zt')
+    zt = mst.createdataarrays(ztdat,['y','x'],[y,x])
+    mst.setneededattributes(zt, 'zt')
     static['zt'] = zt
 if flags['dotlmbb'] == True:
     nsurface_fraction = mst.createstaticcoords(vegarr.shape[0],vegarr.shape[1],xres)[2]
-    vegetation_type = mst.createDataArrays(vegarr,['y','x'],[y,x])
-    pavement_type = mst.createDataArrays(pavarr,['y','x'],[y,x])
-    water_type = mst.createDataArrays(watarr,['y','x'],[y,x])
-    soil_type = mst.createDataArrays(soilarr,['y','x'],[y,x])
-    surface_fraction = mst.createDataArrays(sfrarr,['nsurface_fraction','y','x'],[nsurface_fraction,y,x])
-    mst.setNeededAttributes(vegetation_type,'vegetation_type')
-    mst.setNeededAttributes(pavement_type,'pavement_type')
-    mst.setNeededAttributes(water_type,'water_type')
-    mst.setNeededAttributes(soil_type,'soil_type')
-    mst.setNeededAttributes(surface_fraction,'surface_fraction')
+    vegetation_type = mst.createdataarrays(vegarr,['y','x'],[y,x])
+    pavement_type = mst.createdataarrays(pavarr,['y','x'],[y,x])
+    water_type = mst.createdataarrays(watarr,['y','x'],[y,x])
+    soil_type = mst.createdataarrays(soilarr,['y','x'],[y,x])
+    surface_fraction = mst.createdataarrays(sfrarr,['nsurface_fraction','y','x'],[nsurface_fraction,y,x])
+    mst.setneededattributes(vegetation_type,'vegetation_type')
+    mst.setneededattributes(pavement_type,'pavement_type')
+    mst.setneededattributes(water_type,'water_type')
+    mst.setneededattributes(soil_type,'soil_type')
+    mst.setneededattributes(surface_fraction,'surface_fraction')
     static['vegetation_type'] = vegetation_type
     static['water_type'] = water_type
     static['soil_type'] = soil_type
@@ -599,39 +599,39 @@ if flags['dotlmbb'] == True:
     static['surface_fraction'] = surface_fraction
 if flags['dovegpars'] == True:
     nvegetation_pars =  mst.createstaticcoords(vegarr.shape[0],vegarr.shape[1],xres)[3]
-    vegetation_pars =  mst.createDataArrays(vegpars, ['nvegetation_pars','y','x'],[nvegetation_pars,y,x])
-    mst.setNeededAttributes(vegetation_pars,'vegetation_pars')
+    vegetation_pars =  mst.createdataarrays(vegpars, ['nvegetation_pars','y','x'],[nvegetation_pars,y,x])
+    mst.setneededattributes(vegetation_pars,'vegetation_pars')
     static['vegetation_pars']=vegetation_pars
 if flags['doalbedopars'] == True:
     nalbedo_pars = mst.createstaticcoords(vegarr.shape[0],vegarr.shape[1],xres)[4]
-    albedo_pars =  mst.createDataArrays(albedopars, ['nalbedo_pars','y','x'],[nalbedo_pars,y,x])
-    mst.setNeededAttributes(albedo_pars,'albedo_pars')
+    albedo_pars =  mst.createdataarrays(albedopars, ['nalbedo_pars','y','x'],[nalbedo_pars,y,x])
+    mst.setneededattributes(albedo_pars,'albedo_pars')
     static['albedo_pars'] = albedo_pars
 if flags['dolad'] == True:
-    lad = mst.createDataArrays(ladarr,['zlad', 'y', 'x'], [zlad,y,x])
-    mst.setNeededAttributes(lad, 'lad')
+    lad = mst.createdataarrays(ladarr,['zlad', 'y', 'x'], [zlad,y,x])
+    mst.setneededattributes(lad, 'lad')
     static['lad'] = lad
-    tree_id = mst.createDataArrays(canopyid, ['y','x'], [y,x])
-    mst.setNeededAttributes(tree_id,'tree_id')
+    tree_id = mst.createdataarrays(canopyid, ['y','x'], [y,x])
+    mst.setneededattributes(tree_id,'tree_id')
     static['tree_id'] = tree_id
 if flags['dobuildings2d'] == True:
-    buildings_2d = mst.createDataArrays(gebhoehe, ['y','x'], [y,x])
-    mst.setNeededAttributes(buildings_2d, 'buildings_2d')
+    buildings_2d = mst.createdataarrays(gebhoehe, ['y','x'], [y,x])
+    mst.setneededattributes(buildings_2d, 'buildings_2d')
     static['buildings_2d'] = buildings_2d
-    building_id = mst.createDataArrays(gebid, ['y','x'], [y,x])
-    mst.setNeededAttributes(building_id, 'building_id')
+    building_id = mst.createdataarrays(gebid, ['y','x'], [y,x])
+    mst.setneededattributes(building_id, 'building_id')
     static['building_id'] = building_id
-    building_type = mst.createDataArrays(gebtyp, ['y','x'], [y,x])
-    mst.setNeededAttributes(building_type, 'building_type')
+    building_type = mst.createdataarrays(gebtyp, ['y','x'], [y,x])
+    mst.setneededattributes(building_type, 'building_type')
     static['building_type'] = building_type
 if flags['dostreettypes'] == True:
-    street_type = mst.createDataArrays(roadarr, ['y','x'], [y,x])
-    mst.setNeededAttributes(street_type,'street_type')
+    street_type = mst.createdataarrays(roadarr, ['y','x'], [y,x])
+    mst.setneededattributes(street_type,'street_type')
     static['street_type'] = street_type
 
 
 encodingdict = mst.setupencodingdict(flags)
-mst.setGlobalAttributes(static,infodict) #set global attributes
+mst.setglobalattributes(static,infodict) #set global attributes
 
 mst.outputstaticfile(static,outpath+filename, encodingdict) #output the static file
 
@@ -810,21 +810,21 @@ x,y = mst.createstaticcoords(vegarr.shape[0],vegarr.shape[1],xres)[0:2]
 
 #create coordinates, create data Array and then assign to static dataset and append the encodingdict.
 if flags['doterrain'] == True:
-    zt = mst.createDataArrays(ztdat,['y','x'],[y,x])
-    mst.setNeededAttributes(zt, 'zt')
+    zt = mst.createdataarrays(ztdat,['y','x'],[y,x])
+    mst.setneededattributes(zt, 'zt')
     static['zt'] = zt
 if flags['dotlmbb'] == True:
     nsurface_fraction = mst.createstaticcoords(vegarr.shape[0],vegarr.shape[1],xres)[2]
-    vegetation_type = mst.createDataArrays(vegarr,['y','x'],[y,x])
-    pavement_type = mst.createDataArrays(pavarr,['y','x'],[y,x])
-    water_type = mst.createDataArrays(watarr,['y','x'],[y,x])
-    soil_type = mst.createDataArrays(soilarr,['y','x'],[y,x])
-    surface_fraction = mst.createDataArrays(sfrarr,['nsurface_fraction','y','x'],[nsurface_fraction,y,x])
-    mst.setNeededAttributes(vegetation_type,'vegetation_type')
-    mst.setNeededAttributes(pavement_type,'pavement_type')
-    mst.setNeededAttributes(water_type,'water_type')
-    mst.setNeededAttributes(soil_type,'soil_type')
-    mst.setNeededAttributes(surface_fraction,'surface_fraction')
+    vegetation_type = mst.createdataarrays(vegarr,['y','x'],[y,x])
+    pavement_type = mst.createdataarrays(pavarr,['y','x'],[y,x])
+    water_type = mst.createdataarrays(watarr,['y','x'],[y,x])
+    soil_type = mst.createdataarrays(soilarr,['y','x'],[y,x])
+    surface_fraction = mst.createdataarrays(sfrarr,['nsurface_fraction','y','x'],[nsurface_fraction,y,x])
+    mst.setneededattributes(vegetation_type,'vegetation_type')
+    mst.setneededattributes(pavement_type,'pavement_type')
+    mst.setneededattributes(water_type,'water_type')
+    mst.setneededattributes(soil_type,'soil_type')
+    mst.setneededattributes(surface_fraction,'surface_fraction')
     static['vegetation_type'] = vegetation_type
     static['water_type'] = water_type
     static['soil_type'] = soil_type
@@ -832,39 +832,39 @@ if flags['dotlmbb'] == True:
     static['surface_fraction'] = surface_fraction
 if flags['dovegpars'] == True:
     nvegetation_pars =  mst.createstaticcoords(vegarr.shape[0],vegarr.shape[1],xres)[3]
-    vegetation_pars =  mst.createDataArrays(vegpars, ['nvegetation_pars','y','x'],[nvegetation_pars,y,x])
-    mst.setNeededAttributes(vegetation_pars,'vegetation_pars')
+    vegetation_pars =  mst.createdataarrays(vegpars, ['nvegetation_pars','y','x'],[nvegetation_pars,y,x])
+    mst.setneededattributes(vegetation_pars,'vegetation_pars')
     static['vegetation_pars']=vegetation_pars
 if flags['doalbedopars'] == True:
     nalbedo_pars = mst.createstaticcoords(vegarr.shape[0],vegarr.shape[1],xres)[4]
-    albedo_pars =  mst.createDataArrays(albedopars, ['nalbedo_pars','y','x'],[nalbedo_pars,y,x])
-    mst.setNeededAttributes(albedo_pars,'albedo_pars')
+    albedo_pars =  mst.createdataarrays(albedopars, ['nalbedo_pars','y','x'],[nalbedo_pars,y,x])
+    mst.setneededattributes(albedo_pars,'albedo_pars')
     static['albedo_pars'] = albedo_pars
 if flags['dolad'] == True:
-    lad = mst.createDataArrays(ladarr,['zlad', 'y', 'x'], [zlad,y,x])
-    mst.setNeededAttributes(lad, 'lad')
+    lad = mst.createdataarrays(ladarr,['zlad', 'y', 'x'], [zlad,y,x])
+    mst.setneededattributes(lad, 'lad')
     static['lad'] = lad
-    tree_id = mst.createDataArrays(canopyid, ['y','x'], [y,x])
-    mst.setNeededAttributes(tree_id,'tree_id')
+    tree_id = mst.createdataarrays(canopyid, ['y','x'], [y,x])
+    mst.setneededattributes(tree_id,'tree_id')
     static['tree_id'] = tree_id
 if flags['dobuildings2d'] == True:
-    buildings_2d = mst.createDataArrays(gebhoehe, ['y','x'], [y,x])
-    mst.setNeededAttributes(buildings_2d, 'buildings_2d')
+    buildings_2d = mst.createdataarrays(gebhoehe, ['y','x'], [y,x])
+    mst.setneededattributes(buildings_2d, 'buildings_2d')
     static['buildings_2d'] = buildings_2d
-    building_id = mst.createDataArrays(gebid, ['y','x'], [y,x])
-    mst.setNeededAttributes(building_id, 'building_id')
+    building_id = mst.createdataarrays(gebid, ['y','x'], [y,x])
+    mst.setneededattributes(building_id, 'building_id')
     static['building_id'] = building_id
-    building_type = mst.createDataArrays(gebtyp, ['y','x'], [y,x])
-    mst.setNeededAttributes(building_type, 'building_type')
+    building_type = mst.createdataarrays(gebtyp, ['y','x'], [y,x])
+    mst.setneededattributes(building_type, 'building_type')
     static['building_type'] = building_type
 if flags['dostreettypes'] == True:
-    street_type = mst.createDataArrays(roadarr, ['y','x'], [y,x])
-    mst.setNeededAttributes(street_type,'street_type')
+    street_type = mst.createdataarrays(roadarr, ['y','x'], [y,x])
+    mst.setneededattributes(street_type,'street_type')
     static['street_type'] = street_type
 
 
 encodingdict = mst.setupencodingdict(flags)
-mst.setGlobalAttributes(static,infodict) #set global attributes
+mst.setglobalattributes(static,infodict) #set global attributes
 
 mst.outputstaticfile(static,outpath+filename, encodingdict) #output the static file
 

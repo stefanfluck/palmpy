@@ -752,7 +752,7 @@ def createstaticcoords(xsize, ysize, pixelsize):
 
 
 
-def createDataArrays(array, dims, coords):
+def createdataarrays(array, dims, coords):
     '''
     Creates DataArrays. Provide the numpy array, its dimensions as a list of strings in correct order
     ([<3rd>,y,x]) and provide the coordinates as list of variables in same order as dimensions.
@@ -787,7 +787,7 @@ def createDataArrays(array, dims, coords):
     return dataarray
 
 
-def setNeededAttributes(dataarray, staticvariable):    
+def setneededattributes(dataarray, staticvariable):    
     '''
     Sets attributes.
 
@@ -915,7 +915,7 @@ infodict = {'version':           1,
            'rotation_angle':    0.0,
            }
 
-def setGlobalAttributes(static, infodict):
+def setglobalattributes(static, infodict):
     '''
     sets global Attributes to the static dataset accordint to the infordir.
     infodict example: 
