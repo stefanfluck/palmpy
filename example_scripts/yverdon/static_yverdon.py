@@ -14,7 +14,8 @@ import configparser as cfp
 import numpy as np
 import matplotlib.pyplot as plt
 
-modulepath = str(Path.home() / 'Documents' / 'Python Scripts' / 'ZAV-PALM-Scripts')
+modulepath = str(Path.home() / 'Documents' / 
+                 'Python Scripts' / 'ZAV-PALM-Scripts')
 if modulepath not in sys.path:
     sys.path.append(modulepath)
     
@@ -32,19 +33,28 @@ origin_time = '2019-06-07 12:00:00 +02'
 cutorthoimg = True  # provide orthoimages for parent and child domains
 
 #GEODATA FILES (if not available, write None)
-ortho = str(Path.home()) + "\\Desktop\\preprocessed_shp\\swissimage2.5cutlarger.tif"
+ortho = str(Path.home()) + "\\Desktop\\preprocessed_shp\\" \
+                    "swissimage2.5cutlarger.tif"
 dhm = str(Path.home()) + "\\Desktop\\preprocessed_shp\\swissALTI3Dcut.tif"
 bb = str(Path.home()) + "\\Desktop\\preprocessed_shp\\yverdoncut_bb.shp"
-resolvedforestshp = str(Path.home()) + "\\Desktop\\preprocessed_shp\\yverdoncut_bb_waldonly.shp"
-treerowsshp =       str(Path.home()) + "\\Desktop\\preprocessed_shp\\yverdoncut_breihe_mod_puff.shp"
-singletreesshp =    str(Path.home()) + "\\Desktop\\preprocessed_shp\\yverdoncut_ebgeb_mod_puff.shp"
-pavementareas =     str(Path.home()) + "\\Desktop\\preprocessed_shp\\yverdoncut_strasse_vkareal_eisenbahn_versflaechen.shp"
-gebaeudefoots =     str(Path.home()) + "\\Desktop\\preprocessed_shp\\yverdoncut_gebfoot_mod.shp"
-crops =             str(Path.home()) + "\\Desktop\\preprocessed_shp\\yverdon_felder.shp"
-streetsonly =       str(Path.home()) + "\\Desktop\\preprocessed_shp\\yverdoncut_strasse_mod_puff.shp"
+resolvedforestshp = str(Path.home()) + "\\Desktop\\preprocessed_shp\\" \
+                    "yverdoncut_bb_waldonly.shp"
+treerowsshp =       str(Path.home()) + "\\Desktop\\preprocessed_shp\\" \
+                    "yverdoncut_breihe_mod_puff.shp"
+singletreesshp =    str(Path.home()) + "\\Desktop\\preprocessed_shp\\" \
+                    "yverdoncut_ebgeb_mod_puff.shp"
+pavementareas =     str(Path.home()) + "\\Desktop\\preprocessed_shp\\" \
+                    "yverdoncut_strasse_vkareal_eisenbahn_versflaechen.shp"
+gebaeudefoots =     str(Path.home()) + "\\Desktop\\preprocessed_shp\\" \
+                    "yverdoncut_gebfoot_mod.shp"
+crops =             str(Path.home()) + "\\Desktop\\preprocessed_shp\\" \
+                    "yverdon_felder.shp"
+streetsonly =       str(Path.home()) + "\\Desktop\\preprocessed_shp\\" \
+                    "yverdoncut_strasse_mod_puff.shp"
 
 #OUTPUT
-subdir_rasteredshp = str(Path.home() / 'Desktop' / 'preprocessed_shp' / 'rasteredshp')+'\\' #where rastered shp shall be saved
+subdir_rasteredshp = str(Path.home() / 'Desktop' / 'preprocessed_shp' / 
+                         'rasteredshp')+'\\' #where rastered shp shall be saved
 outpath = str(Path.home() / 'Desktop' / 'yverdon_out')+'\\' #where the staticfile shall be saved
 
 #Point of Interest
@@ -83,7 +93,7 @@ ischild1       =   1
 xaus1,yaus1    =   3072.0, 3072.0                   # dimensions of domain in meter
 xmin1,ymin1    =   poi2x-xaus1/2, poi2y+512-yaus1/2       # lower left corner (origin) coordinates
 xmax1, ymax1   =   xmin1+xaus1, ymin1+yaus1         # calculation of upper right corner coords
-zmax1          =   3040.0                            # vertical extent
+zmax1          =   3072.0                            # vertical extent
 xres1,yres1,zres1    =  16.0, 16.0, 16.0            # resolutions
 
 nx1      =  (xmax1-xmin1)/xres1                     # number of gridpoints in x
@@ -157,14 +167,20 @@ flags2 = {'doterrain':       True,
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 res = 5
-gdt.cutortho(ortho, outpath+filenames+'_baseortho.tif', xmin0,xmax0,ymin0,ymax0,res,res)
+gdt.cutortho(ortho, outpath+filenames+'_baseortho.tif', 
+             xmin0,xmax0,ymin0,ymax0,res,res)
+
 fig = plt.figure()
 ax = fig.gca()
 img = plt.imread(outpath+filenames+'_baseortho.tif')
 ax.imshow(img)
-rect1 = patches.Rectangle((llx1/res,(yaus0-lly1-yaus1)/res), xaus1/res,yaus1/res, linewidth=1, edgecolor='r', facecolor='none')
+rect1 = patches.Rectangle((llx1/res,(yaus0-lly1-yaus1)/res), 
+                          xaus1/res,yaus1/res, 
+                          linewidth=1, edgecolor='r', facecolor='none')
 ax.add_patch(rect1)
-rect2 = patches.Rectangle(((llx2+llx1)/res,(yaus0-lly1-lly2-yaus2)/res), xaus2/res,yaus2/res, linewidth=1, edgecolor='r', facecolor='none')
+rect2 = patches.Rectangle(((llx2+llx1)/res,(yaus0-lly1-lly2-yaus2)/res), 
+                          xaus2/res,yaus2/res, 
+                          linewidth=1, edgecolor='r', facecolor='none')
 ax.add_patch(rect2)
 plt.show()
 #plt.grid()
