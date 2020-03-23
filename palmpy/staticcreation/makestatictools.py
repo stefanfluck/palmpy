@@ -866,6 +866,10 @@ def setneededattributes(dataarray, staticvariable):
         dataarray.attrs['_FillValue'] = fillvalues[staticvariable]
         dataarray.attrs['long_name'] = 'tree id'          
 
+    if staticvariable == 'street_type':
+        dataarray.attrs['_FillValue'] = fillvalues[staticvariable]
+        dataarray.attrs['long_name'] = 'street_type'
+          
     return
 
 

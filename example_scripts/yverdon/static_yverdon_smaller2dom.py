@@ -93,8 +93,8 @@ ischild1       =   0
 xaus1,yaus1    =   3072.0, 3072.0                   # dimensions of domain in meter
 xmin1,ymin1    =   poi2x-xaus1/2, poi2y+512-yaus1/2       # lower left corner (origin) coordinates
 xmax1, ymax1   =   xmin1+xaus1, ymin1+yaus1         # calculation of upper right corner coords
-zmax1          =   2048.0                            # vertical extent
-xres1,yres1,zres1    =  8.0, 8.0, 8.0            # resolutions
+zmax1          =   3072.0                            # vertical extent
+xres1,yres1,zres1    =  16.0, 16.0, 16.0            # resolutions
 
 nx1      =  (xmax1-xmin1)/xres1                     # number of gridpoints in x
 ny1      =  (ymax1-ymin1)/yres1                     # number of gridpoints in y
