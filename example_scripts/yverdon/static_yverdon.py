@@ -354,7 +354,7 @@ if flags['dostreettypes'] == True:
     
 ######### create static netcdf file
 static = xr.Dataset()
-x,y = mst.createstaticcoords(vegarr.shape[0],vegarr.shape[1],xres)[0:2]
+x,y = mst.createstaticcoords(vegarr.shape[1],vegarr.shape[0],xres)[0:2]
 
 
 #create coordinates, create data Array and then assign to static dataset and append the encodingdict.
@@ -588,7 +588,7 @@ if flags['dostreettypes'] == True:
 
 ######### create static netcdf file
 static = xr.Dataset()
-x,y = mst.createstaticcoords(vegarr.shape[0],vegarr.shape[1],xres)[0:2]
+x,y = mst.createstaticcoords(vegarr.shape[1],vegarr.shape[0],xres)[0:2]
 
 
 #create coordinates, create data Array and then assign to static dataset and append the encodingdict.
@@ -821,7 +821,7 @@ if flags['dostreettypes'] == True:
 
 ######### create static netcdf file
 static = xr.Dataset()
-x,y = mst.createstaticcoords(vegarr.shape[0],vegarr.shape[1],xres)[0:2]
+x,y = mst.createstaticcoords(vegarr.shape[1],vegarr.shape[0],xres)[0:2]
 
 
 #create coordinates, create data Array and then assign to static dataset and append the encodingdict.
