@@ -483,6 +483,8 @@ def createparsarrays(nx,ny):
     If some are not needed, they can be skipped when calling the function, e.g.
     _,_,_,soil_pars,_,_ = createparsarrays(nx,ny) 
     if only the soil_pars array needs to be created.
+    index 0: vegetation_pars, 1: water_pars 2: pavement_pars, 3: soil_pars
+          4: building_pars, 5:albedo_pars
 
     Parameters
     ----------

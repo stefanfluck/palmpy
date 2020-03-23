@@ -240,8 +240,8 @@ if flags['dotlmbb'] == True:
     
 ##### BLOCK FOR MODIFICATIONS TO VEGPARS AND ALBEDOPARS
 
-    # vegpars = mst.createparsarrays(bbdat.shape[1], bbdat.shape[0])[0]
-    # albedopars = mst.createparsarrays(bbdat.shape[1], bbdat.shape[0])[5]
+    # vegpars = mst.createparsarrays(bbdat.shape[1], bbdat.shape[0])[0] #0 for vegetation parameters
+    # albedopars = mst.createparsarrays(bbdat.shape[1], bbdat.shape[0])[5] #5 for albedo pars
 
     # vegpars,albedopars = mst.setalbedovalue(albedopars, vegpars, bbdat, 9, 1, -1)
     # vegpars = mst.modifyparsarray(vegpars,9,2093,bbdat,9)
