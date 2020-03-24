@@ -10,7 +10,7 @@ import xarray as xr
 from pathlib import Path
 import sys
 import os
-import configparser as cfp
+from configparser import ConfigParser
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -24,6 +24,51 @@ import palmpy.staticcreation.makestatictools as mst
     
 # from palmpy.staticcreation.geodatatools import *
 # from palmpy.staticcreation.makestatictools import *
+
+#%%
+cfp = ConfigParser(allow_no_value=True)
+cfp.read("C:\\Users\\Stefan Fluck\\Documents\\Python Scripts\\ZAV-PALM-Scripts\\example_scripts\\yverdon\\static_yverdon_config.ini")
+
+#parse settings and paths
+filenames = cfp.get('settings','casename', fallback='default')+'_static'
+origin_time = cfp.get('settings', 'origin_time', fallback='2020-08-01 12:00:00 +02')
+totaldomains = cfp.getint('settings', 'totaldomains', fallback=1)
+cutorthoimg = cfp.getboolean('settings', 'cutorthoimg', fallback=False)
+
+ortho =cfp.get('paths', 'orthoimage')
+dhm = cfp.get('paths', 'dhm')
+bb = cfp.get('paths', 'bb')
+resolvedforestshp = cfp.get('paths', 'resolvedforest')
+treerowsshp = cfp.get('paths', 'treerows')
+singletreesshp = cfp.get('paths', 'singletrees')
+pavementareas = cfp.get('paths', 'pavementareas')
+gebaeudefoots = cfp.get('paths', 'gebaeudefoots')
+crops = cfp.get('paths', 'crops')
+streetsonly = cfp.get('paths', 'streetsonly')
+subdir_rasteredshp = cfp.get('paths', 'subdir_rasterdata')
+outpath = cfp.get('paths', 'outpath')
+
+
+ischild = xlen = ylen = xmin = ymin = zmax = xres = yres = zres = []
+doterrain = dotlmbb = dostreetsbb = docropfields = dolad = dobuildings_2d  = []
+dobuildings_3d = dovegpars = doalbedopars = dostreettypes = []
+lai_forest = lai_breihe = lai_ebgebu = a_forest = b_forest = []
+a_breihe = b_breihe = a_ebgebu = b_ebgebu = []
+
+
+for i in range(0,len(cfp.sections())):
+    print(cfp.sections()[i])
+
+
+
+
+
+
+
+
+
+
+
 
 #%% setup
 filenames =   'yverdon_static'
