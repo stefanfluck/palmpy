@@ -230,7 +230,10 @@ if cutorthoimg == True:
 ##### treat terrain
 if flags['doterrain'] == True:
     ztdat = gdt.cutalti(dhm, outpath+'dhm'+str(ischild)+'.asc',xmin,xmax,ymin,ymax,xres,yres)
-    ztdat, origin_z = mst.shifttopodown(ztdat,ischild) #shift the domain downwards
+    if ischild==0:
+        ztdat, origin_z = mst.shifttopodown(ztdat,ischild) #shift the domain downwards
+    else:
+        ztdat, origin_z = mst.shifttopodown(ztdat,ischild,shift=origin_z) #shift the domain downwards
     infodict['origin_z'] = origin_z
 
 ##### treat tlm-bb bulk parametrization
@@ -463,7 +466,10 @@ if cutorthoimg == True:
 ##### treat terrain
 if flags['doterrain'] == True:
     ztdat = gdt.cutalti(dhm, outpath+'dhm'+str(ischild)+'.asc',xmin,xmax,ymin,ymax,xres,yres)
-    ztdat, origin_z = mst.shifttopodown(ztdat,ischild,shift=origin_z) #shift the domain downwards
+    if ischild==0:
+        ztdat, origin_z = mst.shifttopodown(ztdat,ischild) #shift the domain downwards
+    else:
+        ztdat, origin_z = mst.shifttopodown(ztdat,ischild,shift=origin_z) #shift the domain downwards
     infodict['origin_z'] = origin_z
 
 ##### treat tlm-bb bulk parametrization
@@ -698,7 +704,10 @@ if cutorthoimg == True:
 ##### treat terrain
 if flags['doterrain'] == True:
     ztdat = gdt.cutalti(dhm, outpath+'dhm'+str(ischild)+'.asc',xmin,xmax,ymin,ymax,xres,yres)
-    ztdat, origin_z = mst.shifttopodown(ztdat,ischild,shift=origin_z) #shift the domain downwards
+    if ischild==0:
+        ztdat, origin_z = mst.shifttopodown(ztdat,ischild) #shift the domain downwards
+    else:
+        ztdat, origin_z = mst.shifttopodown(ztdat,ischild,shift=origin_z) #shift the domain downwards
     infodict['origin_z'] = origin_z
 
 ##### treat tlm-bb bulk parametrization
