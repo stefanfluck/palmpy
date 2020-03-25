@@ -15,9 +15,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
-    
-
-
 #%% Read config file
 cfp = ConfigParser(allow_no_value=True) #
 
@@ -29,8 +26,7 @@ except:
 
 modulepath = cfp.get('paths', 'modulepath')
 
-# modulepath = str(Path.home() / 'Documents' / 
-#                  'Python Scripts' / 'ZAV-PALM-Scripts')
+# modulepath = str(Path.home() / 'Documents' / 'Python Scripts' / 'ZAV-PALM-Scripts')
 
 if modulepath not in sys.path:
     sys.path.append(modulepath)
@@ -62,6 +58,17 @@ crops = inputfilepath+cfp.get('paths', 'crops')
 streetsonly = inputfilepath+cfp.get('paths', 'streetsonly')
 subdir_rasteredshp = cfp.get('paths', 'subdir_rasterdata')
 outpath = cfp.get('paths', 'outpath')
+
+try:
+    os.mkdir(outpath)
+    print('create outpath')
+except:
+    pass
+try:
+    os.mkdir(subdir_rasteredshp)
+    print('create subdir for rastered data:')
+except:
+    pass    
 
 #initialize all variable lists
 ischild = totaldomains*[None];          xmin = totaldomains*[None]
@@ -145,12 +152,12 @@ for i in range(0,len(cfp.sections())):
         
         
 #visualize domain boundaries
-gdt.cutortho(ortho, outpath+filenames+'_baseortho.tif', 
+gdt.cutortho(ortho, subdir_rasteredshp+filenames+'_baseortho.tif', 
              xmin[0],xmax[0],ymin[0],ymax[0],orthores,orthores)
 
-fig = plt.figure()
+fig = plt.figure(figsize=(12,12))
 ax = fig.gca()
-img = plt.imread(outpath+filenames+'_baseortho.tif')
+img = plt.imread(subdir_rasteredshp+filenames+'_baseortho.tif')
 ax.imshow(img)
 
 for a in range(1,totaldomains):
@@ -158,7 +165,7 @@ for a in range(1,totaldomains):
                           xlen[a]/orthores,ylen[a]/orthores, 
                           linewidth=1, edgecolor='r', facecolor='none')
     ax.add_patch(rect)
-plt.show()
+plt.savefig(outpath+'domainoverview.png')
 
 
 
@@ -183,11 +190,11 @@ for i in range(totaldomains):
     
     #### cut orthoimage if specified above.
     if cutorthoimg == True:
-        gdt.cutortho(ortho, outpath+filename+'_ortho.tif', xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i])
+        gdt.cutortho(ortho, subdir_rasteredshp+filename+'_ortho.tif', xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i])
     
     ##### treat terrain
     if flags[i]['doterrain'] == True:
-        ztdat = gdt.cutalti(dhm, outpath+'dhm'+str(ischild[i])+'.asc',xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i])
+        ztdat = gdt.cutalti(dhm, subdir_rasteredshp+'dhm'+str(ischild[i])+'.asc',xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i])
         if ischild[i]==0:
             ztdat, origin_z = mst.shifttopodown(ztdat,ischild[i]) #shift the domain downwards
         else:
@@ -196,7 +203,7 @@ for i in range(totaldomains):
     
     ##### treat tlm-bb bulk parametrization
     if flags[i]['dotlmbb'] == True:
-        bbdat = gdt.rasterandcuttlm(bb, outpath+'bb'+str(ischild[i])+'.asc',xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i], burnatt='OBJEKTART')
+        bbdat = gdt.rasterandcuttlm(bb, subdir_rasteredshp+'bb'+str(ischild[i])+'.asc',xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i], burnatt='OBJEKTART')
         vegarr, pavarr, watarr = mst.mapbbclasses(bbdat)  #map tlm bodenbedeckungs-kategorien to the palm definitions.
         
     ##### BLOCK FOR MODIFICATIONS TO VEGPARS AND ALBEDOPARS
@@ -210,10 +217,6 @@ for i in range(totaldomains):
     
     ##### treat LAD
         if flags[i]['dolad'] == True:
-            try:
-                os.mkdir(subdir_rasteredshp)
-            except:
-                pass    
             
             resforesttop = gdt.rasterandcuttlm(resolvedforestshp, subdir_rasteredshp+'resolvedforesttop'+str(ischild[i])+'.asc', 
                                             xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_TOP')
@@ -287,7 +290,7 @@ for i in range(totaldomains):
         
         
         if flags[i]['dostreetsbb'] == True:
-            paved = gdt.rasterandcuttlm(pavementareas, outpath+'pavement'+str(ischild[i])+'.asc',xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i], burnatt='OBJEKTART')
+            paved = gdt.rasterandcuttlm(pavementareas, subdir_rasteredshp+'pavement'+str(ischild[i])+'.asc',xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i], burnatt='OBJEKTART')
             vegarr = np.where( paved[:,:] != -9999 , mst.fillvalues['vegetation_type'], vegarr[:,:])
             watarr = np.where( paved[:,:] != -9999 , mst.fillvalues['water_type'], watarr[:,:])
             pavarr = paved
@@ -379,9 +382,35 @@ for i in range(totaldomains):
 
 
 
-#%% finishing actions
+#%% finishing actions and write parameters to a file
+parfile = open(outpath+'parameters.txt', 'w') 
 
-print('\n-----------------------------------------\nSIMULATION SETUP SUMMARY')
+print('-----------------------------------------\nSIMULATION SETUP SUMMARY', file = parfile)
+print('-----------------------------------------', file = parfile)
+domaincells = totaldomains*[0]
+rti = totaldomains*[0]
+
+for n in range(totaldomains):
+    print('\nDomain '+str(n)+':\nParent Domain'+':\tnx/ny/nz dx/dy/dz  =  '+str(int(nx[n]-1))+'/'+str(int(ny[n]-1))+'/'+str(int(nz[n]))+
+      '\t'+str(xres[n])+'/'+str(yres[n])+'/'+str(zres[n]), file = parfile)
+    domaincells[n] = nx[n]*ny[n]*nz[n]
+    # rti[n] = domaincells[n]*setvmag/xres[n]
+    if n > 0:
+        print('ll-Position Coordinates for &nesting_parameters (x,y):\t'+str(llx[n])+', '+str(lly[n]), file = parfile)
+
+print('\nTotal Number of Cells:\t'+"%10.2E" % (sum(domaincells)), file = parfile)
+for m in range(len(domaincells)):
+    print('Domain '+str(m)+':\t\t'+str(domaincells[m])+'\t'+str( round(domaincells[m]/sum(domaincells),4)*100 )+' %', file = parfile)
+
+print('Runtime length score: '+str(round((sum(domaincells)*setvmag/min(xres))/1e6,2)), file = parfile)
+
+# print('\nNormalized by dxzy')
+# for m in range(len(rti)):
+#     print('Domain '+str(m)+':\t\t'+str(rti[m])+'\t'+str( round(rti[m]/sum(rti),4)*100 )+' %')
+
+parfile.close() 
+
+print('\n\n-----------------------------------------\nSIMULATION SETUP SUMMARY')
 print('-----------------------------------------')
 domaincells = totaldomains*[0]
 rti = totaldomains*[0]
@@ -394,25 +423,15 @@ for n in range(totaldomains):
     if n > 0:
         print('ll-Position Coordinates for &nesting_parameters (x,y):\t'+str(llx[n])+', '+str(lly[n]))
 
-
-
 print('\nTotal Number of Cells:\t'+"%10.2E" % (sum(domaincells)))
 for m in range(len(domaincells)):
     print('Domain '+str(m)+':\t\t'+str(domaincells[m])+'\t'+str( round(domaincells[m]/sum(domaincells),4)*100 )+' %')
 
 print('Runtime length score: '+str(round((sum(domaincells)*setvmag/min(xres))/1e6,2)))
 
-
 # print('\nNormalized by dxzy')
 # for m in range(len(rti)):
 #     print('Domain '+str(m)+':\t\t'+str(rti[m])+'\t'+str( round(rti[m]/sum(rti),4)*100 )+' %')
-    
-
-
-
-
-
-
 
 
 
