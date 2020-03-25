@@ -163,7 +163,7 @@ ax.imshow(img)
 for a in range(1,totaldomains):
     rect = patches.Rectangle((llx[a]/orthores,(ylen[0]-lly[a]-ylen[a])/orthores), 
                           xlen[a]/orthores,ylen[a]/orthores, 
-                          linewidth=1, edgecolor='r', facecolor='none')
+                          linewidth=3, edgecolor='r', facecolor='none')
     ax.add_patch(rect)
 plt.savefig(outpath+'domainoverview.png')
 
