@@ -56,7 +56,7 @@ pavementareas = inputfilepath+cfp.get('paths', 'pavementareas')
 gebaeudefoots = inputfilepath+cfp.get('paths', 'gebaeudefoots')
 crops = inputfilepath+cfp.get('paths', 'crops')
 streetsonly = inputfilepath+cfp.get('paths', 'streetsonly')
-subdir_rasteredshp = cfp.get('paths', 'subdir_rasterdata')
+subdir_rasteredshp = cfp.get('paths', 'tmp')
 outpath = cfp.get('paths', 'outpath')
 
 try:
