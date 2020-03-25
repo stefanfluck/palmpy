@@ -15,13 +15,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
-modulepath = str(Path.home() / 'Documents' / 
-                 'Python Scripts' / 'ZAV-PALM-Scripts')
-if modulepath not in sys.path:
-    sys.path.append(modulepath)
-    
-import palmpy.staticcreation.geodatatools as gdt
-import palmpy.staticcreation.makestatictools as mst
     
 
 
@@ -34,6 +27,19 @@ except:
     print('no command line argument given. Using hardcoded config_file path in script.')
     cfp.read("C:\\Users\\Stefan Fluck\\Documents\\Python Scripts\\ZAV-PALM-Scripts\\example_scripts\\yverdon\\static_yverdon_config.ini")
 
+modulepath = cfp.get('paths', 'modulepath')
+
+# modulepath = str(Path.home() / 'Documents' / 
+#                  'Python Scripts' / 'ZAV-PALM-Scripts')
+
+if modulepath not in sys.path:
+    sys.path.append(modulepath)
+    
+import palmpy.staticcreation.geodatatools as gdt
+import palmpy.staticcreation.makestatictools as mst
+
+
+
 #parse settings and paths
 filenames = cfp.get('settings','casename', fallback='default')+'_static'
 origin_time = cfp.get('settings', 'origin_time', fallback='2020-08-01 12:00:00 +02')
@@ -43,17 +49,17 @@ orthores = cfp.getfloat('settings', 'orthores', fallback=5.0)
 rotationangle = cfp.getfloat('settings', 'rotationangle', fallback=0.0)
 setvmag = cfp.getfloat('settings', 'set_vmag', fallback=1.0)
 
-
-ortho =cfp.get('paths', 'orthoimage')
-dhm = cfp.get('paths', 'dhm')
-bb = cfp.get('paths', 'bb')
-resolvedforestshp = cfp.get('paths', 'resolvedforest')
-treerowsshp = cfp.get('paths', 'treerows')
-singletreesshp = cfp.get('paths', 'singletrees')
-pavementareas = cfp.get('paths', 'pavementareas')
-gebaeudefoots = cfp.get('paths', 'gebaeudefoots')
-crops = cfp.get('paths', 'crops')
-streetsonly = cfp.get('paths', 'streetsonly')
+inputfilepath = cfp.get('paths', 'inputfilepath')
+ortho = inputfilepath+cfp.get('paths', 'orthoimage')
+dhm = inputfilepath+cfp.get('paths', 'dhm')
+bb = inputfilepath+cfp.get('paths', 'bb')
+resolvedforestshp = inputfilepath+cfp.get('paths', 'resolvedforest')
+treerowsshp = inputfilepath+cfp.get('paths', 'treerows')
+singletreesshp = inputfilepath+cfp.get('paths', 'singletrees')
+pavementareas = inputfilepath+cfp.get('paths', 'pavementareas')
+gebaeudefoots = inputfilepath+cfp.get('paths', 'gebaeudefoots')
+crops = inputfilepath+cfp.get('paths', 'crops')
+streetsonly = inputfilepath+cfp.get('paths', 'streetsonly')
 subdir_rasteredshp = cfp.get('paths', 'subdir_rasterdata')
 outpath = cfp.get('paths', 'outpath')
 
