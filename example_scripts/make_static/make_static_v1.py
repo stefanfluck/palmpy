@@ -277,10 +277,14 @@ for i in range(totaldomains):
                         topindex = int(chidxtop[k,j])+1
                         pdf = beta.pdf(x=np.arange(0,1,(1/(topindex-botindex))),a=canalpha[k,j],b=canbeta[k,j])
                         ladarr[botindex:topindex,k,j] = pdf/pdf.max()*lai[k,j]/canopyheight[k,j]
-        
+                        
             vegarr = np.where((canopyid[:,:] != -9999) & (watarr[:,:] == -127), 3, vegarr[:,:])
+            vegarr = np.where( (ladarr[0] == mst.fillvalues['lad']) &
+                               (watarr[:,:] == mst.fillvalues['water_type']) &
+                               (canopyid[:,:] != mst.fillvalues['tree_id']), 18, vegarr[:,:]) #where no water and where tree too small to be resolved and where tree_id is present -> set vegtype to deciduous shrubs (18)
             canopyid = np.where(canopyid[:,:] == 0, mst.fillvalues['tree_id'], canopyid[:,:])
-        
+            canopyid = np.where( ladarr[0] == mst.fillvalues['lad'], mst.fillvalues['tree_id'], canopyid[:,:])
+            
         vegarr = np.where( (vegarr[:,:]==-127) & (watarr[:,:]==-127) & (pavarr[:,:]==-127), bulkvegclass[i], vegarr[:,:]) #fill unassigned vegetation types to bare soil.
         
         if flags[i]['docropfields'] == True:
@@ -295,6 +299,7 @@ for i in range(totaldomains):
             watarr = np.where( paved[:,:] != -9999 , mst.fillvalues['water_type'], watarr[:,:])
             pavarr = paved
             pavarr = np.where ( pavarr[:,:] != -9999, 1, mst.fillvalues['pavement_type']) #TODO: mit einem map dict auch pavements richtig klassifizieren.
+       
         #create surface fraction array
         soilarr = mst.makesoilarray(vegarr,pavarr)
         sfrarr = mst.makesurffractarray(vegarr,pavarr,watarr)
