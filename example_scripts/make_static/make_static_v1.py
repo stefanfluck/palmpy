@@ -22,7 +22,8 @@ try:
     cfp.read(sys.argv[1])
 except:
     print('no command line argument given. Using hardcoded config_file path in script.')
-    cfp.read("C:\\Users\\Stefan Fluck\\Documents\\Python Scripts\\ZAV-PALM-Scripts\\example_scripts\\make_static\\make_static.ini")
+    # cfp.read("C:\\Users\\Stefan Fluck\\Documents\\Python Scripts\\ZAV-PALM-Scripts\\example_scripts\\make_static\\make_static.ini")
+    cfp.read("C:\\Users\\Stefan Fluck\\Desktop\\yverdon2dom3.ini")
 
 modulepath = cfp.get('paths', 'modulepath')
 
@@ -44,6 +45,7 @@ cutorthoimg = cfp.getboolean('settings', 'cutorthoimg', fallback=False)
 orthores = cfp.getfloat('settings', 'orthores', fallback=5.0)
 rotationangle = cfp.getfloat('settings', 'rotationangle', fallback=0.0)
 setvmag = cfp.getfloat('settings', 'set_vmag', fallback=1.0)
+simtime = cfp.getfloat('settings', 'simtime', fallback = 14400.0)
 
 inputfilepath = cfp.get('paths', 'inputfilepath')
 ortho = inputfilepath+cfp.get('paths', 'orthoimage')
@@ -174,7 +176,7 @@ plt.savefig(outpath+'domainoverview.png')
 
 #%%generation with for loop
 for i in range(totaldomains):
-    print('\n START CREATING DOMAIN '+str(i))
+    print('\nSTART CREATING DOMAIN '+str(i))
     infodict = {'version':           1,
                 'palm_version':      6.0,
                 'origin_z':          0.0, #is changed further below
@@ -436,18 +438,19 @@ domaincells = totaldomains*[0]
 rti = totaldomains*[0]
 
 for n in range(totaldomains):
-    print('\nDomain '+str(n)+':\nParent Domain'+':\tnx/ny/nz dx/dy/dz  =  '+str(int(nx[n]-1))+'/'+str(int(ny[n]-1))+'/'+str(int(nz[n]))+
-      '\t'+str(xres[n])+'/'+str(yres[n])+'/'+str(zres[n]), file = parfile)
+    print('\nDomain '+str(n)+':', file=parfile)
+    print('\tnx/ny/nz\t\t'+str(int(nx[n]-1))+'/'+str(int(ny[n]-1))+'/'+str(int(nz[n])), file=parfile)
+    print('\tdx/dy/dz\t\t'+str(xres[n])+'/'+str(yres[n])+'/'+str(zres[n]), file=parfile)
     domaincells[n] = nx[n]*ny[n]*nz[n]
     # rti[n] = domaincells[n]*setvmag/xres[n]
     if n > 0:
-        print('ll-Position Coordinates for &nesting_parameters (x,y):\t'+str(llx[n])+', '+str(lly[n]), file = parfile)
+        print('  ll-Position for &nesting_parameters\n\tx,y:\t\t\t'+str(llx[n])+', '+str(lly[n]), file=parfile)
 
-print('\nTotal Number of Cells:\t'+"%10.2E" % (sum(domaincells)), file = parfile)
+print('\nTotal Number of Cells:\t\t'+"%4.2e" % (sum(domaincells)), file=parfile)
 for m in range(len(domaincells)):
-    print('Domain '+str(m)+':\t\t'+str(domaincells[m])+'\t'+str( round(domaincells[m]/sum(domaincells),4)*100 )+' %', file = parfile)
+    print('  Domain '+str(m)+':\t\t\t%4.3e\t= %3.2d %%' % (domaincells[m], round(domaincells[m]/sum(domaincells),4)*100), file=parfile)
 
-print('Runtime length score: '+str(round((sum(domaincells)*setvmag/min(xres))/1e6,2)), file = parfile)
+print('\nRuntime length score:\t\t'+str(round((sum(domaincells)*setvmag/min(xres))/1e6,2)), file = parfile)
 
 # print('\nNormalized by dxzy')
 # for m in range(len(rti)):
@@ -461,29 +464,35 @@ domaincells = totaldomains*[0]
 rti = totaldomains*[0]
 
 for n in range(totaldomains):
-    print('\nDomain '+str(n)+':\nParent Domain'+':\tnx/ny/nz dx/dy/dz  =  '+str(int(nx[n]-1))+'/'+str(int(ny[n]-1))+'/'+str(int(nz[n]))+
-      '\t'+str(xres[n])+'/'+str(yres[n])+'/'+str(zres[n]))
+    print('\nDomain '+str(n)+':')
+    print('\tnx/ny/nz\t\t'+str(int(nx[n]-1))+'/'+str(int(ny[n]-1))+'/'+str(int(nz[n])))
+    print('\tdx/dy/dz\t\t'+str(xres[n])+'/'+str(yres[n])+'/'+str(zres[n]))
     domaincells[n] = nx[n]*ny[n]*nz[n]
     # rti[n] = domaincells[n]*setvmag/xres[n]
     if n > 0:
-        print('ll-Position Coordinates for &nesting_parameters (x,y):\t'+str(llx[n])+', '+str(lly[n]))
+        print('  ll-Position for &nesting_parameters\n\tx,y:\t\t\t'+str(llx[n])+', '+str(lly[n]))
 
-print('\nTotal Number of Cells:\t'+"%10.2E" % (sum(domaincells)))
+print('\nTotal Number of Cells:\t\t'+"%4.2e" % (sum(domaincells)))
 for m in range(len(domaincells)):
-    print('Domain '+str(m)+':\t\t'+str(domaincells[m])+'\t'+str( round(domaincells[m]/sum(domaincells),4)*100 )+' %')
+    print('  Domain '+str(m)+':\t\t\t%4.3e\t= %3.2d %%' % (domaincells[m], round(domaincells[m]/sum(domaincells),4)*100))
 
-print('Runtime length score: '+str(round((sum(domaincells)*setvmag/min(xres))/1e6,2)))
-
-# print('\nNormalized by dxzy')
-# for m in range(len(rti)):
-#     print('Domain '+str(m)+':\t\t'+str(rti[m])+'\t'+str( round(rti[m]/sum(rti),4)*100 )+' %')
+print('\nRuntime length score:\t\t'+str(round((sum(domaincells)*setvmag/min(xres))/1e6,2)))
 
 
+#%% create inifor namelist
 
+namelist = open(outpath+'inifornamelist', 'w')
+print('&inipar nx = {:d}, ny = {:d}, nz = {:d},\n' \
+      '        dx = {:.1f}, dy = {:.1f}, dz = {:.1f},\n    /'.format(int(nx[0])-1, 
+                                                             int(ny[0]-1), 
+                                                             int(nz[0]),
+                                                             xres[0], yres[0], 
+                                                             zres[0]),
+      file=namelist)
+print('&d3par    end_time = {:.1f}\n    /'.format(simtime), file = namelist)
 
+namelist.close() 
 
-
-
-
+print('\nCreated inifor namelist.')
 
 
