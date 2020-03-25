@@ -19,20 +19,20 @@ import matplotlib.patches as patches
 cfp = ConfigParser(allow_no_value=True) #
 
 try:
-    cfp.read(sys.argv[1])
+    cfp.read(sys.argv[1]) #check if commandline argument is given for config file.
 except:
-    print('no command line argument given. Using hardcoded config_file path in script.')
+    print('No command line argument given. Using hardcoded config_file path in script.')
     # cfp.read("C:\\Users\\Stefan Fluck\\Documents\\Python Scripts\\ZAV-PALM-Scripts\\example_scripts\\make_static\\make_static.ini")
     cfp.read("C:\\Users\\Stefan Fluck\\Desktop\\yverdon2dom3.ini")
 
-modulepath = cfp.get('paths', 'modulepath')
+modulepath = cfp.get('paths', 'modulepath') #read modulepath from config file
 
-# modulepath = str(Path.home() / 'Documents' / 'Python Scripts' / 'ZAV-PALM-Scripts')
+# modulepath = str(Path.home() / 'Documents' / 'Python Scripts' / 'ZAV-PALM-Scripts') #uncomment this line to have module path hardcoded.
 
 if modulepath not in sys.path:
-    sys.path.append(modulepath)
+    sys.path.append(modulepath) #add modulepath to system path if not already there.
     
-import palmpy.staticcreation.geodatatools as gdt
+import palmpy.staticcreation.geodatatools as gdt         #import modules for static generation
 import palmpy.staticcreation.makestatictools as mst
 
 
@@ -61,6 +61,7 @@ streetsonly = inputfilepath+cfp.get('paths', 'streetsonly')
 subdir_rasteredshp = cfp.get('paths', 'tmp')
 outpath = cfp.get('paths', 'outpath')
 
+#try to generate output folders, don't if they exist (throws error when creating a folder)
 try:
     os.mkdir(outpath)
     print('create outpath')
@@ -93,6 +94,7 @@ a_ebgebu = totaldomains*[None];         b_ebgebu = totaldomains*[None]
 llx = totaldomains*[0.0];               lly = totaldomains*[0.0]
 flags = totaldomains*[{}]
 
+#iterate over every section name, if it begins with "domain" then there are domain parameters in it. 0-indexed! 0 is parent.
 for i in range(0,len(cfp.sections())):
     section = cfp.sections()[i]
     if section.split('_')[0] == 'domain':
@@ -107,15 +109,15 @@ for i in range(0,len(cfp.sections())):
         xres[index] = cfp.getfloat(section, 'xres', fallback=0.0)
         yres[index] = cfp.getfloat(section, 'yres', fallback=0.0)
         zres[index] = cfp.getfloat(section, 'zres', fallback=0.0)
-        xmax[index] = xmin[index]+xlen[index]
+        xmax[index] = xmin[index]+xlen[index] #compute xmax from xmin and xlen
         ymax[index] = ymin[index]+ylen[index]
-        nx[index] = xlen[index]/xres[index]
+        nx[index] = xlen[index]/xres[index]   #compute number of cells from len and res
         ny[index] = ylen[index]/yres[index]
         nz[index] = zmax[index]/zres[index]
         if index > 0:
-            llx[index] = xmin[index]-xmin[0]
+            llx[index] = xmin[index]-xmin[0]  #compute domain origin distance to parent origin, only for domains that are not parent
             lly[index] = ymin[index]-ymin[0]
-        doterrain[index] = cfp.getboolean(section,'doterrain', fallback=False)
+        doterrain[index] = cfp.getboolean(section,'doterrain', fallback=False)  #read flags from config file
         dotlmbb[index] = cfp.getboolean(section,'dotlmbb', fallback=False)
         dostreetsbb[index] = cfp.getboolean(section,'dostreetsbb', fallback=False)
         docropfields[index] = cfp.getboolean(section,'docropfields', fallback=False)
@@ -126,7 +128,8 @@ for i in range(0,len(cfp.sections())):
         doalbedopars[index] = cfp.getboolean(section,'doalbedopars', fallback=False)
         dostreettypes[index] = cfp.getboolean(section,'dostreettypes', fallback=False)
         
-        bulkvegclass[index] = cfp.getint(section,'bulkvegclass', fallback=None)
+        #method = XXX -> TODO: implement a method selector for lad constant or lad with beta distribution
+        bulkvegclass[index] = cfp.getint(section,'bulkvegclass', fallback=None)   #read canopy variables from config file
         lai_forest[index] = cfp.getfloat(section,'lai_forest', fallback=None)
         lai_breihe[index] = cfp.getfloat(section,'lai_breihe', fallback=None)
         lai_ebgebu[index] = cfp.getfloat(section,'lai_ebgebu', fallback=None)
@@ -137,11 +140,11 @@ for i in range(0,len(cfp.sections())):
         a_ebgebu[index] = cfp.getfloat(section,'a_ebgebu', fallback=None)
         b_ebgebu[index] = cfp.getfloat(section,'b_ebgebu', fallback=None)
         
-        mst.checknxyzvalid(nx[index],ny[index],nz[index])                     
+        mst.checknxyzvalid(nx[index],ny[index],nz[index])   #check if nxyz choice is valids
         if index > 0:
-            mst.checknestcoordsvalid(xres[index-1],xres[index],llx[index],lly[index])    
+            mst.checknestcoordsvalid(xres[index-1],xres[index],llx[index],lly[index])  #for childs check nest coordinates validity
         
-        flags[index] = {'doterrain':       doterrain[index],
+        flags[index] = {'doterrain':       doterrain[index], #create flags dictionary 
                         'dotlmbb':         dotlmbb[index],
                         'dostreetsbb':     dostreetsbb[index], #requires dotlmbb = True
                         'docropfields':    docropfields[index], #requires dotlmbb = true
@@ -153,7 +156,7 @@ for i in range(0,len(cfp.sections())):
                         'dostreettypes':   dostreettypes[index]}
         
         
-#visualize domain boundaries
+#visualize domain boundaries, cut the image new for that with higher res than parent resolution.
 gdt.cutortho(ortho, subdir_rasteredshp+filenames+'_baseortho.tif', 
              xmin[0],xmax[0],ymin[0],ymax[0],orthores,orthores)
 
