@@ -174,7 +174,7 @@ plt.savefig(outpath+'domainoverview.png')
 
 #%%generation with for loop
 for i in range(totaldomains):
-    
+    print('\n START CREATING DOMAIN '+str(i))
     infodict = {'version':           1,
                 'palm_version':      6.0,
                 'origin_z':          0.0, #is changed further below
