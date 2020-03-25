@@ -155,6 +155,9 @@ for i in range(0,len(cfp.sections())):
                         'doalbedopars':    doalbedopars[index],
                         'dostreettypes':   dostreettypes[index]}
         
+        #a = '1,2,3,4' #hint for implementation of vegpars/albedopars
+        #b = a.split(',')
+        #c = list(map(int,b))
         
 #visualize domain boundaries, cut the image new for that with higher res than parent resolution.
 gdt.cutortho(ortho, subdir_rasteredshp+filenames+'_baseortho.tif', 
@@ -180,7 +183,7 @@ plt.savefig(outpath+'domainoverview.png')
 #%%generation with for loop
 for i in range(totaldomains):
     print('\nSTART CREATING DOMAIN '+str(i))
-    infodict = {'version':           1,
+    infodict = {'version':           1, #assemble the infodict, will be added as global attributes to static file.
                 'palm_version':      6.0,
                 'origin_z':          0.0, #is changed further below
                 'origin_y':          ymin[i],
@@ -191,9 +194,9 @@ for i in range(totaldomains):
                 'rotation_angle':    rotationangle}
     
     #childify filename (add _NXX if necessary)
-    filename = mst.childifyfilename(filenames, ischild[i])
+    filename = mst.childifyfilename(filenames, ischild[i]) #adds _N0X to the filename if needed
     
-    #### cut orthoimage if specified above.
+    #### cut orthoimage if specified.
     if cutorthoimg == True:
         gdt.cutortho(ortho, subdir_rasteredshp+filename+'_ortho.tif', xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i])
     
@@ -201,10 +204,10 @@ for i in range(totaldomains):
     if flags[i]['doterrain'] == True:
         ztdat = gdt.cutalti(dhm, subdir_rasteredshp+'dhm'+str(ischild[i])+'.asc',xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i])
         if ischild[i]==0:
-            ztdat, origin_z = mst.shifttopodown(ztdat,ischild[i]) #shift the domain downwards
+            ztdat, origin_z = mst.shifttopodown(ztdat,ischild[i]) #shift the domain downwards to min value if it's the parent domain
         else:
-            ztdat, origin_z = mst.shifttopodown(ztdat,ischild[i],shift=origin_z) #shift the domain downwards
-        infodict['origin_z'] = origin_z
+            ztdat, origin_z = mst.shifttopodown(ztdat,ischild[i],shift=origin_z) #shift the domain downwards with origin_z value of parent if its a child.
+        infodict['origin_z'] = origin_z    #modify the origin_z attribute according to the shift
     
     ##### treat tlm-bb bulk parametrization
     if flags[i]['dotlmbb'] == True:
@@ -222,7 +225,7 @@ for i in range(totaldomains):
     
     ##### treat LAD
         if flags[i]['dolad'] == True:
-            
+            #import canopyfiles
             resforesttop = gdt.rasterandcuttlm(resolvedforestshp, subdir_rasteredshp+'resolvedforesttop'+str(ischild[i])+'.asc', 
                                             xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_TOP')
             resforestbot = gdt.rasterandcuttlm(resolvedforestshp, subdir_rasteredshp+'resolvedforestbot'+str(ischild[i])+'.asc', 
@@ -242,11 +245,11 @@ for i in range(totaldomains):
             resebgebid = gdt.rasterandcuttlm(singletreesshp, subdir_rasteredshp+'resolvedebgebid'+str(ischild[i])+'.asc', 
                                             xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='ID')
             
-            canopyheight = np.maximum.reduce([resforesttop, resbreihetop, resebgebtop])
+            canopyheight = np.maximum.reduce([resforesttop, resbreihetop, resebgebtop]) #analyze all arrays in each pixel and return max value per pixel
             canopybottom = np.maximum.reduce([resforestbot, resbreihebot, resebgebbot])
             canopyid = np.maximum.reduce([resforestid, resbreiheid, resebgebid])
             
-            #create arrays for alpha and beta and reduce to one layer.
+            #create arrays for alpha and beta and reduce to one layer in the end
             resforesta = np.where(resforesttop[:,:] != 0, a_forest[i], resforesttop[:,:])     # alpha für forest
             resforestb = np.where(resforesttop[:,:] != 0, b_forest[i], resforesttop[:,:])     # beta für forest
             resbreihea = np.where(resbreihetop[:,:] != 0, a_breihe[i], resbreihetop[:,:])     # alpha für baumreihe
@@ -256,58 +259,57 @@ for i in range(totaldomains):
             canalpha = np.maximum.reduce([resforesta,resbreihea,resebgeba])
             canbeta = np.maximum.reduce([resforestb,resbreiheb,resebgebb])
             
-            #create an LAI array
+            #create an LAI array, only at pixels where canopy has a height. get maximum lai where forest/reihe/ebgebu overlap
             laiforest = np.where(resforesttop[:,:] != 0, lai_forest[i], resforesttop[:,:])
             laibreihe = np.where(resbreihetop[:,:] != 0, lai_breihe[i], resbreihetop[:,:])
             laiebgeb = np.where(resebgebtop[:,:] != 0, lai_ebgebu[i], resebgebtop[:,:])        
             lai = np.maximum.reduce([laiforest, laibreihe, laiebgeb])
             
-            maxtreeheight = np.max(canopyheight) #evaluate maximum tree height for zlad array generation
+            maxtreeheight = np.max(canopyheight) #evaluate maximum tree height for zlad coordinate generation
             
             zlad= mst.createzlad(maxtreeheight, zres[i]) #create zlad array
             ladarr = np.ones((len(zlad), canopyheight.shape[0], canopyheight.shape[1]))*mst.fillvalues['tree_data'] #create empty lad array
             
-            chdztop = np.where(canopyheight[:,:]==-9999., canopyheight[:,:], np.round(canopyheight[:,:]/zres[i],0).astype(int)) #TODO check if needs canopyheight[:,:] in else statement
-            chidxtop = np.where( (chdztop[:,:]==0), -9999, chdztop[:,:]) #index of zlad height that needs to be filled
-            chdzbot = np.where(canopybottom[:,:]==-9999., canopybottom[:,:], np.round(canopybottom[:,:]/zres[i],0).astype(int))
+            chdztop = np.where(canopyheight[:,:]==-9999., canopyheight[:,:], np.round(canopyheight[:,:]/zres[i],0).astype(int)) # cell indexes that need to be filled with lad.
+            chidxtop = np.where( (chdztop[:,:]==0), -9999, chdztop[:,:]) #index of zlad height that needs to be filled (same as above, leiche)
+            chdzbot = np.where(canopybottom[:,:]==-9999., canopybottom[:,:], np.round(canopybottom[:,:]/zres[i],0).astype(int)) #same for bottom.
             chidxbot = np.where( (chdzbot[:,:]==0), 0, chdzbot[:,:]) #index of zlad height that needs to be filled
             
             #create actual lad array
             from scipy.stats import beta
-            for k in range(ladarr.shape[1]):
+            for k in range(ladarr.shape[1]): #iterate over y and x dimensions
                 for j in range(ladarr.shape[2]):
-                    # if not np.isnan(chidxtop[k,j]):
                     if not chidxtop[k,j] == -9999:
                         botindex = int(chidxbot[k,j])
                         topindex = int(chidxtop[k,j])+1
-                        pdf = beta.pdf(x=np.arange(0,1,(1/(topindex-botindex))),a=canalpha[k,j],b=canbeta[k,j])
-                        ladarr[botindex:topindex,k,j] = pdf/pdf.max()*lai[k,j]/canopyheight[k,j]
+                        pdf = beta.pdf(x=np.arange(0,1,(1/(topindex-botindex))),a=canalpha[k,j],b=canbeta[k,j]) #get a beta distribution (pdf) for given a and b values
+                        ladarr[botindex:topindex,k,j] = pdf/pdf.max()*lai[k,j]/canopyheight[k,j] #scale a by the max pdf value, multiply by lai/treeheight (definition of lad)
                         
-            vegarr = np.where((canopyid[:,:] != -9999) & (watarr[:,:] == -127), 3, vegarr[:,:])
+            vegarr = np.where((canopyid[:,:] != -9999) & (watarr[:,:] == -127), 3, vegarr[:,:]) #where there is a tree id assigned/where a tree is and no water, set land surface to grass
             vegarr = np.where( (ladarr[0] == mst.fillvalues['lad']) &
                                (watarr[:,:] == mst.fillvalues['water_type']) &
                                (canopyid[:,:] != mst.fillvalues['tree_id']), 18, vegarr[:,:]) #where no water and where tree too small to be resolved and where tree_id is present -> set vegtype to deciduous shrubs (18)
-            canopyid = np.where(canopyid[:,:] == 0, mst.fillvalues['tree_id'], canopyid[:,:])
-            canopyid = np.where( ladarr[0] == mst.fillvalues['lad'], mst.fillvalues['tree_id'], canopyid[:,:])
+            canopyid = np.where(canopyid[:,:] == 0, mst.fillvalues['tree_id'], canopyid[:,:]) #where ther is no tree to be found, set canopyid to its fill value
+            canopyid = np.where( ladarr[0] == mst.fillvalues['lad'], mst.fillvalues['tree_id'], canopyid[:,:]) #where no lad is defined, maybe bc its subgridscale, set tree-id to fillvalue too
             
-        vegarr = np.where( (vegarr[:,:]==-127) & (watarr[:,:]==-127) & (pavarr[:,:]==-127), bulkvegclass[i], vegarr[:,:]) #fill unassigned vegetation types to bare soil.
+        vegarr = np.where( (vegarr[:,:]==-127) & (watarr[:,:]==-127) & (pavarr[:,:]==-127), bulkvegclass[i], vegarr[:,:]) #fill unassigned vegetation types to defined bulk vegetation class.
         
         if flags[i]['docropfields'] == True:
             cropheight = gdt.rasterandcuttlm(crops, subdir_rasteredshp+'felder'+str(ischild[i])+'.asc', 
                                            xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_TOP')
-            vegarr = np.where( (vegarr[:,:]==bulkvegclass[i]) & (cropheight[:,:] != -9999), 2, vegarr[:,:])
+            vegarr = np.where( (vegarr[:,:]==bulkvegclass[i]) & (cropheight[:,:] != -9999), 2, vegarr[:,:]) #where vegarr is set to bulk class and crops are found, set class to 2 (crops)
         
         
         if flags[i]['dostreetsbb'] == True:
             paved = gdt.rasterandcuttlm(pavementareas, subdir_rasteredshp+'pavement'+str(ischild[i])+'.asc',xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i], burnatt='OBJEKTART')
-            vegarr = np.where( paved[:,:] != -9999 , mst.fillvalues['vegetation_type'], vegarr[:,:])
-            watarr = np.where( paved[:,:] != -9999 , mst.fillvalues['water_type'], watarr[:,:])
+            vegarr = np.where( paved[:,:] != -9999 , mst.fillvalues['vegetation_type'], vegarr[:,:]) #overwrite vegarr where pavement areas are found with fillvalue
+            watarr = np.where( paved[:,:] != -9999 , mst.fillvalues['water_type'], watarr[:,:]) #overwrite watarr where pavement areas are found with fillvalue
             pavarr = paved
-            pavarr = np.where ( pavarr[:,:] != -9999, 1, mst.fillvalues['pavement_type']) #TODO: mit einem map dict auch pavements richtig klassifizieren.
+            pavarr = np.where ( pavarr[:,:] != -9999, 1, mst.fillvalues['pavement_type']) #pavement_type set where shp is non-fillvalue. TODO: mit einem map dict auch pavements richtig klassifizieren.
        
         #create surface fraction array
-        soilarr = mst.makesoilarray(vegarr,pavarr)
-        sfrarr = mst.makesurffractarray(vegarr,pavarr,watarr)
+        soilarr = mst.makesoilarray(vegarr,pavarr) #finally do soilarray depending on vegarr and pavarr, mapping see makestaticotools in palmpy
+        sfrarr = mst.makesurffractarray(vegarr,pavarr,watarr) #create surfacefraction in end, as now only 0 and 1 fractions are allowed (ca r4400)
         
     if flags[i]['dobuildings2d'] == True:  
         gebhoehe = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudehoehe'+str(ischild[i])+'.asc', 
@@ -316,15 +318,15 @@ for i in range(totaldomains):
                                         xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='ID')
         gebtyp = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudetyp'+str(ischild[i])+'.asc', 
                                         xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='BLDGTYP')
-        gebtyp = np.where((gebtyp[:,:]==-9999.), mst.fillvalues['building_type'], gebtyp[:,:])
+        gebtyp = np.where((gebtyp[:,:]==-9999.), mst.fillvalues['building_type'], gebtyp[:,:]) #change fillvalue to byte, import function defaults to -9999.0
     
     if flags[i]['dobuildings3d'] == True:
         gebtop = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudetop'+str(ischild[i])+'.asc', 
                                         xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_TOP')
         gebbot = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudebot'+str(ischild[i])+'.asc', 
                                         xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_BOT')
-        z = mst.createzcoord(zmax[i],zres[i])
-        bldarr = np.ones((len(z), gebtop.shape[0], gebtop.shape[1]))*np.byte(0)
+        z = mst.createzcoord(zmax[i],zres[i])              #create z coordinate
+        bldarr = np.ones((len(z), gebtop.shape[0], gebtop.shape[1]))*np.byte(0) #create empty buliding3d array
         
         bhdztop = np.where(gebtop[:,:]==-9999., gebtop[:,:], np.round(gebtop[:,:]/zres[i],0).astype(int))
         bhidxtop = np.where( (bhdztop[:,:]==0), -9999, bhdztop[:,:]) #index of zlad height that needs to be filled
@@ -341,13 +343,12 @@ for i in range(totaldomains):
         
         gebid = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudeid'+str(ischild[i])+'.asc', 
                                         xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='ID')
-        gebid = np.where( bldarr[0] == np.byte(0) , mst.fillvalues['building_id'], gebid[:,:] ) #set id to fillvalue where 3d bldg is not resolved
+        gebid = np.where( bldarr[0] == np.byte(0) , mst.fillvalues['building_id'], gebid[:,:] ) #set id to fillvalue where 3d bldg is not resolved/subgrid scale
         gebtyp = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudetyp'+str(ischild[i])+'.asc', 
                                         xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='BLDGTYP')
-        gebtyp = np.where((gebtyp[:,:]==-9999.), mst.fillvalues['building_type'], gebtyp[:,:])
+        gebtyp = np.where((gebtyp[:,:]==-9999.), mst.fillvalues['building_type'], gebtyp[:,:]) #change fillvalue to right one, import fcn defatults to -9999.0
         gebtyp = np.where( bldarr[0] == np.byte(0) , mst.fillvalues['building_type'], gebtyp[:,:] ) #set type to fillvalue where 3d bldg is too small to be resolved.
-        
-    
+            
     if flags[i]['dostreettypes'] == True:
         roadarr = gdt.rasterandcuttlm(streetsonly, subdir_rasteredshp+'gebaeudehoehe'+str(ischild[i])+'.asc', 
                                         xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='OBJEKTART')
@@ -356,27 +357,26 @@ for i in range(totaldomains):
 
     ######### create static netcdf file
     static = xr.Dataset()
-    x,y = mst.createstaticcoords(vegarr.shape[1],vegarr.shape[0],xres[i])[0:2]
-    
+    x,y = mst.createstaticcoords(vegarr.shape[1],vegarr.shape[0],xres[i])[0:2] #create x and y cordinates. TODO: change to nx ny nz where vegarr.shape is still used
     
     #create coordinates, create data Array and then assign to static dataset and append the encodingdict.
     if flags[i]['doterrain'] == True:
-        zt = mst.createdataarrays(ztdat,['y','x'],[y,x])
-        mst.setneededattributes(zt, 'zt')
-        static['zt'] = zt
+        zt = mst.createdataarrays(ztdat,['y','x'],[y,x]) #create xr.DataArray object
+        mst.setneededattributes(zt, 'zt') #set attributes to dataarray object
+        static['zt'] = zt    #add dataarray object to dataset object
     if flags[i]['dotlmbb'] == True:
-        nsurface_fraction = mst.createstaticcoords(vegarr.shape[0],vegarr.shape[1],xres[i])[2]
-        vegetation_type = mst.createdataarrays(vegarr,['y','x'],[y,x])
+        nsurface_fraction = mst.createstaticcoords(vegarr.shape[0],vegarr.shape[1],xres[i])[2] #create coordinates of the item
+        vegetation_type = mst.createdataarrays(vegarr,['y','x'],[y,x])    #create dataarray object
         pavement_type = mst.createdataarrays(pavarr,['y','x'],[y,x])
         water_type = mst.createdataarrays(watarr,['y','x'],[y,x])
         soil_type = mst.createdataarrays(soilarr,['y','x'],[y,x])
         surface_fraction = mst.createdataarrays(sfrarr,['nsurface_fraction','y','x'],[nsurface_fraction,y,x])
-        mst.setneededattributes(vegetation_type,'vegetation_type')
+        mst.setneededattributes(vegetation_type,'vegetation_type')  #set attributes
         mst.setneededattributes(pavement_type,'pavement_type')
         mst.setneededattributes(water_type,'water_type')
         mst.setneededattributes(soil_type,'soil_type')
         mst.setneededattributes(surface_fraction,'surface_fraction')
-        static['vegetation_type'] = vegetation_type
+        static['vegetation_type'] = vegetation_type #merge into dataset object
         static['water_type'] = water_type
         static['soil_type'] = soil_type
         static['pavement_type'] = pavement_type
@@ -422,14 +422,11 @@ for i in range(totaldomains):
         street_type = mst.createdataarrays(roadarr, ['y','x'], [y,x])
         mst.setneededattributes(street_type,'street_type')
         static['street_type'] = street_type
-    
-    
-    encodingdict = mst.setupencodingdict(flags[i])
+        
+    encodingdict = mst.setupencodingdict(flags[i]) #create encoding dictionary for saving the netcdf file (maybe not needed if really all fillvalues and dtypes are set correct!)
     mst.setglobalattributes(static,infodict) #set global attributes
     
-    mst.outputstaticfile(static,outpath+filename, encodingdict) #output the static file
-
-
+    mst.outputstaticfile(static,outpath+filename, encodingdict) #output the static file as netcdf file.
 
 
 #%% finishing actions and write parameters to a file
@@ -452,7 +449,7 @@ for n in range(totaldomains):
 print('\nTotal Number of Cells:\t\t'+"%4.2e" % (sum(domaincells)), file=parfile)
 for m in range(len(domaincells)):
     print('  Domain '+str(m)+':\t\t\t%4.3e\t= %3.2d %%' % (domaincells[m], round(domaincells[m]/sum(domaincells),4)*100), file=parfile)
-
+print('\nTopo shifted down by:\t\t{:.2f} Meter'.format(origin_z), file=parfile)
 print('\nRuntime length score:\t\t'+str(round((sum(domaincells)*setvmag/min(xres))/1e6,2)), file = parfile)
 
 # print('\nNormalized by dxzy')
@@ -479,10 +476,11 @@ print('\nTotal Number of Cells:\t\t'+"%4.2e" % (sum(domaincells)))
 for m in range(len(domaincells)):
     print('  Domain '+str(m)+':\t\t\t%4.3e\t= %3.2d %%' % (domaincells[m], round(domaincells[m]/sum(domaincells),4)*100))
 
+print('\nTopo shifted down by:\t\t{:.2f} Meter'.format(origin_z))
 print('\nRuntime length score:\t\t'+str(round((sum(domaincells)*setvmag/min(xres))/1e6,2)))
 
 
-#%% create inifor namelist
+#%% create inifor namelist and save to file
 
 namelist = open(outpath+'inifornamelist', 'w')
 print('&inipar nx = {:d}, ny = {:d}, nz = {:d},\n' \
