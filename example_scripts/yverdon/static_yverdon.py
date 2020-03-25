@@ -27,7 +27,12 @@ import palmpy.staticcreation.makestatictools as mst
 
 #%% Read config file
 cfp = ConfigParser(allow_no_value=True) #
-cfp.read("C:\\Users\\Stefan Fluck\\Documents\\Python Scripts\\ZAV-PALM-Scripts\\example_scripts\\yverdon\\static_yverdon_config.ini")
+
+try:
+    cfp.read(sys.argv[1])
+except:
+    print('no command line argument given. Using hardcoded config_file path in script.')
+    cfp.read("C:\\Users\\Stefan Fluck\\Documents\\Python Scripts\\ZAV-PALM-Scripts\\example_scripts\\yverdon\\static_yverdon_config.ini")
 
 #parse settings and paths
 filenames = cfp.get('settings','casename', fallback='default')+'_static'
@@ -36,6 +41,8 @@ totaldomains = cfp.getint('settings', 'totaldomains', fallback=1)
 cutorthoimg = cfp.getboolean('settings', 'cutorthoimg', fallback=False)
 orthores = cfp.getfloat('settings', 'orthores', fallback=5.0)
 rotationangle = cfp.getfloat('settings', 'rotationangle', fallback=0.0)
+setvmag = cfp.getfloat('settings', 'set_vmag', fallback=1.0)
+
 
 ortho =cfp.get('paths', 'orthoimage')
 dhm = cfp.get('paths', 'dhm')
@@ -131,8 +138,6 @@ for i in range(0,len(cfp.sections())):
                         'dostreettypes':   dostreettypes[index]}
         
         
-        
-        
 #visualize domain boundaries
 gdt.cutortho(ortho, outpath+filenames+'_baseortho.tif', 
              xmin[0],xmax[0],ymin[0],ymax[0],orthores,orthores)
@@ -148,6 +153,10 @@ for a in range(1,totaldomains):
                           linewidth=1, edgecolor='r', facecolor='none')
     ax.add_patch(rect)
 plt.show()
+
+
+
+
 
 
 #%%generation with for loop
@@ -366,37 +375,36 @@ for i in range(totaldomains):
 
 #%% finishing actions
 
+print('\n-----------------------------------------\nSIMULATION SETUP SUMMARY')
+print('-----------------------------------------')
+domaincells = totaldomains*[0]
+rti = totaldomains*[0]
+
+for n in range(totaldomains):
+    print('\nDomain '+str(n)+':\nParent Domain'+':\tnx/ny/nz dx/dy/dz  =  '+str(int(nx[n]-1))+'/'+str(int(ny[n]-1))+'/'+str(int(nz[n]))+
+      '\t'+str(xres[n])+'/'+str(yres[n])+'/'+str(zres[n]))
+    domaincells[n] = nx[n]*ny[n]*nz[n]
+    # rti[n] = domaincells[n]*setvmag/xres[n]
+    if n > 0:
+        print('ll-Position Coordinates for &nesting_parameters (x,y):\t'+str(llx[n])+', '+str(lly[n]))
 
 
-print('\n\nSetup the following parameters in the namelists:\n'+
-      'Parent Domain'+':\tnx/ny/nz dx/dy/dz  =  '+str(int(nx0-1))+'/'+str(int(ny0-1))+'/'+str(int(nz0))+
-      '\t'+str(xres0)+'/'+str(yres0)+'/'+str(zres0)+'\n')
 
-print('Child Domain 1'+':\tnx/ny/nz dx/dy/dz  =  '+str(int(nx1-1))+'/'+str(int(ny1-1))+'/'+str(int(nz1))+
-      '\t'+str(xres1)+'/'+str(yres1)+'/'+str(zres1) +
-      '\nNest 1 llx-Position Coordinates for &nesting_parameters (x,y): '+str(llx1)+', '+str(lly1)+'\n')
-      
+print('\nTotal Number of Cells:\t'+"%10.2E" % (sum(domaincells)))
+for m in range(len(domaincells)):
+    print('Domain '+str(m)+':\t\t'+str(domaincells[m])+'\t'+str( round(domaincells[m]/sum(domaincells),4)*100 )+' %')
 
-if totalnumberofdomains>=2:
-    print('Child Domain 2'+':\tnx/ny/nz dx/dy/dz  =  '+str(int(nx2-1))+'/'+str(int(ny2-1))+'/'+str(int(nz2))+
-          '\t'+str(xres2)+'/'+str(yres2)+'/'+str(zres2) +
-          '\nNest 2 llx-Position Coordinates for &nesting_parameters (x,y): '+str(llx1+llx2)+', '+str(lly1+lly2)+'\n\n')
+print('Runtime length score: '+str(round((sum(domaincells)*setvmag/min(xres))/1e6,2)))
 
 
-cellcount0=nx0*ny0*nz0
-totcells=cellcount0
-if totalnumberofdomains>=2:
-    cellcount1=nx1*ny1*nz1
-    totcells+=cellcount1
-if totalnumberofdomains>=3:
-    cellcount2=nx2*ny2*nz2
-    totcells+=cellcount2
-print('Total cells: '+str(totcells))
-print('Cells Parent: '+str(cellcount0)+'\t\t'+str(np.round(cellcount0/totcells*100,2))+'%')
-if totalnumberofdomains>=2:
-    print('Cells Child1: '+str(cellcount1)+'\t\t'+str(np.round(cellcount1/totcells*100,2))+'%')
-if totalnumberofdomains>=3:
-    print('Cells Child2: '+str(cellcount2)+'\t'+str(np.round(cellcount2/totcells*100,2))+'%')
+# print('\nNormalized by dxzy')
+# for m in range(len(rti)):
+#     print('Domain '+str(m)+':\t\t'+str(rti[m])+'\t'+str( round(rti[m]/sum(rti),4)*100 )+' %')
+    
+
+
+
+
 
 
 
