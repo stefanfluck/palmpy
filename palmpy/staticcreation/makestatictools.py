@@ -831,8 +831,12 @@ def setneededattributes(dataarray, staticvariable):
         
     if staticvariable == 'buildings_2d':
         dataarray.attrs['_FillValue'] = fillvalues[staticvariable]
-        dataarray.attrs['long_name'] = 'vegetation parameters' 
+        dataarray.attrs['long_name'] = 'building height' 
         dataarray.attrs['lod'] = int(1)      
+
+    if staticvariable == 'buildings_3d':
+        dataarray.attrs['_FillValue'] = fillvalues[staticvariable]
+        dataarray.attrs['long_name'] = 'building flag' 
      
     if staticvariable == 'building_id':
         dataarray.attrs['_FillValue'] = fillvalues[staticvariable]
@@ -1015,9 +1019,11 @@ def setupencodingdict(flags):
     if flags['dobuildings2d'] == True:
         encodingdict['buildings_2d'] = {'dtype':'float32'}
         encodingdict['building_id'] = {'dtype':'int32'}
+        encodingdict['building_type'] = {'dtype':'int8'}
     if flags['dobuildings3d'] == True:
-        encodingdict['buildings_3d'] = {'dtype':'uint8'}
-        encodingdict['building_id'] = {'dtype':'int8'}
+        encodingdict['buildings_3d'] = {'dtype':'int8'}
+        encodingdict['building_id'] = {'dtype':'int32'}
+        encodingdict['building_type'] = {'dtype':'int8'}
     if flags['dostreettypes'] == True:
         encodingdict['street_type'] =  {'dtype':'int8'}
     return encodingdict
@@ -1103,7 +1109,27 @@ def showbetadistribution():
     ax.legend(); ax.grid()
 
 
+#CANOPY IMPLEMENTATION
+def createzcoord(zmax, dz):
+    '''
+    Creates z from a maximum domain height z and a dz.
 
+    Parameters
+    ----------
+    zmax : float
+        domain height.
+    dz : float
+        vertical grid spacing.
+
+    Returns
+    -------
+    z : np.array
+        array of z levels.
+
+    '''
+    z = np.arange(0,np.floor(zmax/dz)*dz+2*dz, dz)
+    z[1:] = z[1:]-0.5*dz
+    return z
 
 
 
