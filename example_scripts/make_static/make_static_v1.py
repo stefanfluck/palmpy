@@ -262,7 +262,7 @@ for i in range(totaldomains):
             zlad= mst.createzlad(maxtreeheight, zres[i]) #create zlad array
             ladarr = np.ones((len(zlad), canopyheight.shape[0], canopyheight.shape[1]))*mst.fillvalues['tree_data'] #create empty lad array
             
-            chdztop = np.where(canopyheight[:,:]==-9999., canopyheight[:,:], np.round(canopyheight/zres[i],0).astype(int))
+            chdztop = np.where(canopyheight[:,:]==-9999., canopyheight[:,:], np.round(canopyheight/zres[i],0).astype(int)) #TODO check if needs canopyheight[:,:] in else statement
             chidxtop = np.where( (chdztop[:,:]==0), -9999, chdztop[:,:]) #index of zlad height that needs to be filled
             chdzbot = np.where(canopybottom[:,:]==-9999., canopybottom[:,:], np.round(canopybottom/zres[i],0).astype(int))
             chidxbot = np.where( (chdzbot[:,:]==0), 0, chdzbot[:,:]) #index of zlad height that needs to be filled
@@ -307,6 +307,34 @@ for i in range(totaldomains):
         gebtyp = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudetyp'+str(ischild[i])+'.asc', 
                                         xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='BLDGTYP')
         gebtyp = np.where((gebtyp[:,:]==-9999.), mst.fillvalues['building_type'], gebtyp[:,:])
+    
+    if flags[i]['dobuildings3d'] == True:
+        gebtop = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudetop'+str(ischild[i])+'.asc', 
+                                        xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_TOP')
+        gebbot = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudebot'+str(ischild[i])+'.asc', 
+                                        xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_BOT')
+        z = mst.createzcoord(zmax[i],zres[i])
+        bldarr = np.ones((len(z), gebtop.shape[0], gebtop.shape[1]))*np.byte(0)
+        
+        bhdztop = np.where(gebtop[:,:]==-9999., gebtop[:,:], np.round(gebtop[:,:]/zres[i],0).astype(int))
+        bhidxtop = np.where( (bhdztop[:,:]==0), -9999, bhdztop[:,:]) #index of zlad height that needs to be filled
+        bhdzbot = np.where(gebbot[:,:]==-9999., gebbot[:,:], np.round(gebbot[:,:]/zres[i],0).astype(int))
+        bhidxbot = np.where( (bhdzbot[:,:]==0), 0, bhdzbot[:,:]) #index of zlad height that needs to be filled
+        
+        for k in range(bldarr.shape[1]):
+               for j in range(bldarr.shape[2]):
+                   # if not np.isnan(chidxtop[k,j]):
+                   if not bhidxtop[k,j] == -9999:
+                       botindex = int(bhidxbot[k,j])
+                       topindex = int(bhidxtop[k,j])+1
+                       bldarr[botindex:topindex,k,j] = np.byte(1)
+        
+        gebid = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudeid'+str(ischild[i])+'.asc', 
+                                        xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='ID')
+        gebtyp = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudetyp'+str(ischild[i])+'.asc', 
+                                        xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='BLDGTYP')
+        gebtyp = np.where((gebtyp[:,:]==-9999.), mst.fillvalues['building_type'], gebtyp[:,:])
+            
     
     if flags[i]['dostreettypes'] == True:
         roadarr = gdt.rasterandcuttlm(streetsonly, subdir_rasteredshp+'gebaeudehoehe'+str(ischild[i])+'.asc', 
@@ -362,6 +390,16 @@ for i in range(totaldomains):
         buildings_2d = mst.createdataarrays(gebhoehe, ['y','x'], [y,x])
         mst.setneededattributes(buildings_2d, 'buildings_2d')
         static['buildings_2d'] = buildings_2d
+        building_id = mst.createdataarrays(gebid, ['y','x'], [y,x])
+        mst.setneededattributes(building_id, 'building_id')
+        static['building_id'] = building_id
+        building_type = mst.createdataarrays(gebtyp, ['y','x'], [y,x])
+        mst.setneededattributes(building_type, 'building_type')
+        static['building_type'] = building_type
+    if flags[i]['dobuildings3d'] == True:
+        buildings_3d = mst.createdataarrays(bldarr, ['z','y','x'], [z,y,x])
+        mst.setneededattributes(buildings_3d, 'buildings_3d')
+        static['buildings_3d'] = buildings_3d
         building_id = mst.createdataarrays(gebid, ['y','x'], [y,x])
         mst.setneededattributes(building_id, 'building_id')
         static['building_id'] = building_id
