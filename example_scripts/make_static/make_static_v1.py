@@ -262,9 +262,9 @@ for i in range(totaldomains):
             zlad= mst.createzlad(maxtreeheight, zres[i]) #create zlad array
             ladarr = np.ones((len(zlad), canopyheight.shape[0], canopyheight.shape[1]))*mst.fillvalues['tree_data'] #create empty lad array
             
-            chdztop = np.where(canopyheight[:,:]==-9999., canopyheight[:,:], np.round(canopyheight/zres[i],0).astype(int)) #TODO check if needs canopyheight[:,:] in else statement
+            chdztop = np.where(canopyheight[:,:]==-9999., canopyheight[:,:], np.round(canopyheight[:,:]/zres[i],0).astype(int)) #TODO check if needs canopyheight[:,:] in else statement
             chidxtop = np.where( (chdztop[:,:]==0), -9999, chdztop[:,:]) #index of zlad height that needs to be filled
-            chdzbot = np.where(canopybottom[:,:]==-9999., canopybottom[:,:], np.round(canopybottom/zres[i],0).astype(int))
+            chdzbot = np.where(canopybottom[:,:]==-9999., canopybottom[:,:], np.round(canopybottom[:,:]/zres[i],0).astype(int))
             chidxbot = np.where( (chdzbot[:,:]==0), 0, chdzbot[:,:]) #index of zlad height that needs to be filled
             
             #create actual lad array
