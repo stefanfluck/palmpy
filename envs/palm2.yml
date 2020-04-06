@@ -1,0 +1,20 @@
+name: palm
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - scipy
+  - xarray
+  - spyder=3.3.6
+  - numpy
+  - gdal
+  - pandas
+  - seaborn
+  - netcdf4
+  - windrose
+  - sympy
+  - pillow
+  - pynco
+  - rasterio
+prefix: C:\Users\stefa\Miniconda3\envs\palm
+
