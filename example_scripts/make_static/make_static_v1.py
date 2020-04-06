@@ -23,7 +23,7 @@ try:
 except:
     print('No command line argument given. Using hardcoded config_file path in script.')
     # cfp.read("C:\\Users\\Stefan Fluck\\Documents\\Python Scripts\\ZAV-PALM-Scripts\\example_scripts\\make_static\\make_static.ini")
-    cfp.read("C:\\Users\\Stefan Fluck\\Desktop\\yverdon2dom3.ini")
+    cfp.read("C:\\Users\\Stefan Fluck\\Desktop\\ladtest.ini")
 
 modulepath = cfp.get('paths', 'modulepath') #read modulepath from config file
 
@@ -325,7 +325,8 @@ for i in range(totaldomains):
                                         xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_TOP')
         gebbot = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudebot'+str(ischild[i])+'.asc', 
                                         xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_BOT')
-        z = mst.createzcoord(zmax[i],zres[i])              #create z coordinate
+        maxbldgheight = np.max(gebtop)+zres[i]
+        z = mst.createzcoord(maxbldgheight,zres[i])              #create z coordinate
         bldarr = np.ones((len(z), gebtop.shape[0], gebtop.shape[1]))*np.byte(0) #create empty buliding3d array
         
         bhdztop = np.where(gebtop[:,:]==-9999., gebtop[:,:], np.round(gebtop[:,:]/zres[i],0).astype(int))
@@ -358,7 +359,7 @@ for i in range(totaldomains):
     ######### create static netcdf file
     static = xr.Dataset()
     x,y = mst.createstaticcoords(vegarr.shape[1],vegarr.shape[0],xres[i])[0:2] #create x and y cordinates. TODO: change to nx ny nz where vegarr.shape is still used
-    
+
     #create coordinates, create data Array and then assign to static dataset and append the encodingdict.
     if flags[i]['doterrain'] == True:
         zt = mst.createdataarrays(ztdat,['y','x'],[y,x]) #create xr.DataArray object
@@ -422,7 +423,11 @@ for i in range(totaldomains):
         street_type = mst.createdataarrays(roadarr, ['y','x'], [y,x])
         mst.setneededattributes(street_type,'street_type')
         static['street_type'] = street_type
-        
+    
+    mst.setneededattributes(static.x,'x')
+    mst.setneededattributes(static.y,'y')
+    mst.setneededattributes(static.z,'z')
+    
     encodingdict = mst.setupencodingdict(flags[i]) #create encoding dictionary for saving the netcdf file (maybe not needed if really all fillvalues and dtypes are set correct!)
     mst.setglobalattributes(static,infodict) #set global attributes
     
