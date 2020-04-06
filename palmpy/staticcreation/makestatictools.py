@@ -837,7 +837,8 @@ def setneededattributes(dataarray, staticvariable):
     if staticvariable == 'buildings_3d':
         dataarray.attrs['_FillValue'] = fillvalues[staticvariable]
         dataarray.attrs['long_name'] = 'building flag' 
-     
+        dataarray.attrs['lod'] = int(2)
+
     if staticvariable == 'building_id':
         dataarray.attrs['_FillValue'] = fillvalues[staticvariable]
         dataarray.attrs['long_name'] = 'building id numbers'      
@@ -873,6 +874,24 @@ def setneededattributes(dataarray, staticvariable):
     if staticvariable == 'street_type':
         dataarray.attrs['_FillValue'] = fillvalues[staticvariable]
         dataarray.attrs['long_name'] = 'street_type'
+
+    if staticvariable == 'x':
+        dataarray.attrs['_FillValue'] = float(-9999.)
+        dataarray.attrs['long_name'] = 'distance to origin in x-direction'
+        dataarray.attrs['axis'] = 'X'
+        dataarray.attrs['units'] = 'meters'
+
+    if staticvariable == 'y':
+        dataarray.attrs['_FillValue'] = float(-9999.)
+        dataarray.attrs['long_name'] = 'distance to origin in y-direction'
+        dataarray.attrs['axis'] = 'Y'
+        dataarray.attrs['units'] = 'meters'
+
+    if staticvariable == 'z':
+        dataarray.attrs['_FillValue'] = float(-9999.)
+        dataarray.attrs['long_name'] = 'distance to origin in z-direction'
+        dataarray.attrs['axis'] = 'Z'
+        dataarray.attrs['units'] = 'meters'
           
     return
 
@@ -963,10 +982,10 @@ def setglobalattributes(static, infodict):
     static.attrs['palm_version'] = infodict['palm_version']
     static.attrs['origin_time'] = infodict['origin_time']
 
-    static.coords['x'].attrs['_FillValue'] = fillvalues['E_UTM']
-    static.coords['x'].attrs['units'] = 'm'
-    static.coords['y'].attrs['_FillValue'] = fillvalues['N_UTM']
-    static.coords['y'].attrs['units'] = 'm'
+#    static.coords['x'].attrs['_FillValue'] = fillvalues['E_UTM']
+#    static.coords['x'].attrs['units'] = 'm'
+#    static.coords['y'].attrs['_FillValue'] = fillvalues['N_UTM']
+#    static.coords['y'].attrs['units'] = 'm'
 
 
 
@@ -1024,6 +1043,7 @@ def setupencodingdict(flags):
         encodingdict['buildings_3d'] = {'dtype':'int8'}
         encodingdict['building_id'] = {'dtype':'int32'}
         encodingdict['building_type'] = {'dtype':'int8'}
+        encodingdict['z'] = {'dtype':'float64'}
     if flags['dostreettypes'] == True:
         encodingdict['street_type'] =  {'dtype':'int8'}
     return encodingdict
