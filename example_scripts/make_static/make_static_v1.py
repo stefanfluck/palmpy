@@ -1,13 +1,9 @@
 """
-create static files just using dhm and tlm bb
-
-TODO: make it so an infinite number of nests can be used. use lists for every parameter instead of 
-      laufnummer-variable names and provide indexes. 
-
+Static File generation script.
+written by Stefan Fluck, fluf@zhaw.ch in FS2020.
 
 """
 import xarray as xr
-from pathlib import Path
 import sys
 import os
 from configparser import ConfigParser
@@ -15,7 +11,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
-#%% Read config file
+#%% Read config file and set flags and values appropriately.
+
 cfp = ConfigParser(allow_no_value=True) #
 
 try:
