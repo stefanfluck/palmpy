@@ -83,6 +83,62 @@ def checknxyzvalid(nx,ny,nz):
     return result
 
 
+def checknxyzisint(nx,ny,nz):
+    '''
+    Checks if supplied nx, ny and nz are integers only.
+    if failed, division of xres and xlen are not integer and the setup cannot work.
+
+    Parameters
+    ----------
+    nx : list
+        list of nx values.
+    ny : list
+        list of ny values.
+    nz : list
+        list of nz values.
+
+    Returns
+    -------
+    result : boolean
+        true if all checks passed.
+
+    '''
+    result = True
+    nxres = True
+    nyres = True
+    nzres = True
+    
+    for i in range(len(nx)):
+        if nx[i]%1 == 0:
+            ires = True
+        else:
+            ires = False
+        nxres *= ires
+        
+    for i in range(len(ny)):
+        if ny[i]%1 == 0:
+            ires = True
+        else:
+            ires = False
+        nyres *= ires
+        
+    for i in range(len(nz)):
+        if nz[i]%1 == 0:
+            ires = True
+        else:
+            ires = False
+        nzres *= ires
+    
+    result = result*nxres*nyres*nzres
+    
+    if result == True:
+        print('Cell count test: nx, ny and nz are all integers. Test PASSED.')
+    else:
+        print('Cell count test: nx,ny or nz is not only integers. Test FAILED.')
+        
+    return result
+
+
 fillvalues = {
    "lat": float(-9999.0),
    "lon": float(-9999.0),
