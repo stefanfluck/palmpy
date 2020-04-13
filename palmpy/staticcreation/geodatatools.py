@@ -108,6 +108,7 @@ def rasterandcuttlm(filein, fileout, xmin, xmax, ymin, ymax, xres, yres, burnatt
     band = trgds.GetRasterBand(1)
     band.SetNoDataValue(-9999)
     gdal.RasterizeLayer(trgds, [1], srclayer, options=['ATTRIBUTE='+burnatt])
+    # gdal.RasterizeLayer(trgds, [1], srclayer, options=['ALL_TOUCHED=TRUE', 'ATTRIBUTE='+burnatt])
     trgds=None
     ds = gdal.Open('tmp.tif')
     ds = gdal.Translate(fileout, ds)
