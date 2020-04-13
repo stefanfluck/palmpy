@@ -156,6 +156,11 @@ for i in range(0,len(cfp.sections())):
         #b = a.split(',')
         #c = list(map(int,b))
         
+#further checks:
+print('\nFinalizing Checks:\n')
+
+mst.checknxyzisint(nx,ny,nz) #checks if nx ny nz values dont have a float part
+        
 #visualize domain boundaries, cut the image new for that with higher res than parent resolution.
 gdt.cutortho(ortho, subdir_rasteredshp+filenames+'_baseortho.tif', 
              xmin[0],xmax[0],ymin[0],ymax[0],orthores,orthores)
@@ -211,10 +216,11 @@ for i in range(totaldomains):
         bbdat = gdt.rasterandcuttlm(bb, subdir_rasteredshp+'bb'+str(ischild[i])+'.asc',xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i], burnatt='OBJEKTART')
         vegarr, pavarr, watarr = mst.mapbbclasses(bbdat)  #map tlm bodenbedeckungs-kategorien to the palm definitions.
         
+        
     ##### BLOCK FOR MODIFICATIONS TO VEGPARS AND ALBEDOPARS
     
-        # vegpars = mst.createparsarrays(bbdat.shape[1], bbdat.shape[0])[0]
-        # albedopars = mst.createparsarrays(bbdat.shape[1], bbdat.shape[0])[5]
+        # vegpars = mst.createparsarrays(nx[i], ny[i])[0]
+        # albedopars = mst.createparsarrays(nx[i], ny[i])[5]
     
         # vegpars,albedopars = mst.setalbedovalue(albedopars, vegpars, bbdat, 9, 1, -1)
         # vegpars = mst.modifyparsarray(vegpars,9,2093,bbdat,9)
@@ -265,7 +271,7 @@ for i in range(totaldomains):
             maxtreeheight = np.max(canopyheight) #evaluate maximum tree height for zlad coordinate generation
             
             zlad= mst.createzlad(maxtreeheight, zres[i]) #create zlad array
-            ladarr = np.ones((len(zlad), canopyheight.shape[0], canopyheight.shape[1]))*mst.fillvalues['tree_data'] #create empty lad array
+            ladarr = np.ones((len(zlad), ny[i], nx[i]))*mst.fillvalues['tree_data'] #create empty lad array
             
             chdztop = np.where(canopyheight[:,:]==-9999., canopyheight[:,:], np.round(canopyheight[:,:]/zres[i],0).astype(int)) # cell indexes that need to be filled with lad.
             chidxtop = np.where( (chdztop[:,:]==0), -9999, chdztop[:,:]) #index of zlad height that needs to be filled (same as above, leiche)
@@ -274,8 +280,8 @@ for i in range(totaldomains):
             
             #create actual lad array
             from scipy.stats import beta
-            for k in range(ladarr.shape[1]): #iterate over y and x dimensions
-                for j in range(ladarr.shape[2]):
+            for k in range(ny[i]): #iterate over y and x dimensions
+                for j in range(nx[i]):
                     if not chidxtop[k,j] == -9999:
                         botindex = int(chidxbot[k,j])
                         topindex = int(chidxtop[k,j])+1
@@ -324,15 +330,15 @@ for i in range(totaldomains):
                                         xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_BOT')
         maxbldgheight = np.max(gebtop)+zres[i]
         z = mst.createzcoord(maxbldgheight,zres[i])              #create z coordinate
-        bldarr = np.ones((len(z), gebtop.shape[0], gebtop.shape[1]))*np.byte(0) #create empty buliding3d array
+        bldarr = np.ones((len(z), ny[i], nx[i]))*np.byte(0) #create empty buliding3d array
         
         bhdztop = np.where(gebtop[:,:]==-9999., gebtop[:,:], np.round(gebtop[:,:]/zres[i],0).astype(int))
         bhidxtop = np.where( (bhdztop[:,:]==0), -9999, bhdztop[:,:]) #index of zlad height that needs to be filled
         bhdzbot = np.where(gebbot[:,:]==-9999., gebbot[:,:], np.round(gebbot[:,:]/zres[i],0).astype(int))
         bhidxbot = np.where( (bhdzbot[:,:]==0), 0, bhdzbot[:,:]) #index of zlad height that needs to be filled
         
-        for k in range(bldarr.shape[1]):
-               for j in range(bldarr.shape[2]):
+        for k in range(ny[i]):
+               for j in range(nx[i]):
                    # if not np.isnan(chidxtop[k,j]):
                    if not bhidxtop[k,j] == -9999:
                        botindex = int(bhidxbot[k,j])
@@ -355,15 +361,15 @@ for i in range(totaldomains):
 
     ######### create static netcdf file
     static = xr.Dataset()
-    x,y = mst.createstaticcoords(vegarr.shape[1],vegarr.shape[0],xres[i])[0:2] #create x and y cordinates. TODO: change to nx ny nz where vegarr.shape is still used
-
+    x,y = mst.createstaticcoords(nx[i],ny[i],xres[i])[0:2] #create x and y cordinates. 
+    
     #create coordinates, create data Array and then assign to static dataset and append the encodingdict.
     if flags[i]['doterrain'] == True:
         zt = mst.createdataarrays(ztdat,['y','x'],[y,x]) #create xr.DataArray object
         mst.setneededattributes(zt, 'zt') #set attributes to dataarray object
         static['zt'] = zt    #add dataarray object to dataset object
     if flags[i]['dotlmbb'] == True:
-        nsurface_fraction = mst.createstaticcoords(vegarr.shape[0],vegarr.shape[1],xres[i])[2] #create coordinates of the item
+        nsurface_fraction = mst.createstaticcoords(ny[i],nx[i],xres[i])[2] #create coordinates of the item
         vegetation_type = mst.createdataarrays(vegarr,['y','x'],[y,x])    #create dataarray object
         pavement_type = mst.createdataarrays(pavarr,['y','x'],[y,x])
         water_type = mst.createdataarrays(watarr,['y','x'],[y,x])
@@ -380,12 +386,12 @@ for i in range(totaldomains):
         static['pavement_type'] = pavement_type
         static['surface_fraction'] = surface_fraction
     if flags[i]['dovegpars'] == True:
-        nvegetation_pars =  mst.createstaticcoords(vegarr.shape[0],vegarr.shape[1],xres[i])[3]
+        nvegetation_pars =  mst.createstaticcoords(ny[i],nx[i],xres[i])[3]
         vegetation_pars =  mst.createdataarrays(vegpars, ['nvegetation_pars','y','x'],[nvegetation_pars,y,x])
         mst.setneededattributes(vegetation_pars,'vegetation_pars')
         static['vegetation_pars']=vegetation_pars
     if flags[i]['doalbedopars'] == True:
-        nalbedo_pars = mst.createstaticcoords(vegarr.shape[0],vegarr.shape[1],xres[i])[4]
+        nalbedo_pars = mst.createstaticcoords(ny[i],nx[i],xres[i])[4]
         albedo_pars =  mst.createdataarrays(albedopars, ['nalbedo_pars','y','x'],[nalbedo_pars,y,x])
         mst.setneededattributes(albedo_pars,'albedo_pars')
         static['albedo_pars'] = albedo_pars
