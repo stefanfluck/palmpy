@@ -19,8 +19,8 @@ try:
     cfp.read(sys.argv[1]) #check if commandline argument is given for config file.
 except:
     print('No command line argument given. Using hardcoded config_file path in script.')
-    # cfp.read("C:\\Users\\Stefan Fluck\\Documents\\Python Scripts\\ZAV-PALM-Scripts\\example_scripts\\make_static\\make_static.ini")
-    cfp.read("C:\\Users\\Stefan Fluck\\Desktop\\ladtest.ini")
+    cfp.read("C:\\Users\\Stefan Fluck\\Documents\\Python Scripts\\ZAV-PALM-Scripts\\example_scripts\\make_static\\make_static.ini")
+    # cfp.read("C:\\Users\\Stefan Fluck\\Desktop\\ladtest.ini")
 
 modulepath = cfp.get('paths', 'modulepath') #read modulepath from config file
 
@@ -421,9 +421,11 @@ for i in range(totaldomains):
         mst.setneededattributes(street_type,'street_type')
         static['street_type'] = street_type
     
-    mst.setneededattributes(static.x,'x')
+    mst.setneededattributes(static.x,'x') #set attributes of basic coordinates x and y
     mst.setneededattributes(static.y,'y')
-    mst.setneededattributes(static.z,'z')
+    
+    if flags[i]['dobuildings3d'] == True:
+        mst.setneededattributes(static.z,'z') #set attributes of coordinate z if buildings are set (only data to require z so far)
     
     encodingdict = mst.setupencodingdict(flags[i]) #create encoding dictionary for saving the netcdf file (maybe not needed if really all fillvalues and dtypes are set correct!)
     mst.setglobalattributes(static,infodict) #set global attributes
