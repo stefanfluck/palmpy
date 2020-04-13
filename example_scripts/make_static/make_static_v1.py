@@ -48,9 +48,20 @@ inputfilepath = cfp.get('paths', 'inputfilepath')
 ortho = inputfilepath+cfp.get('paths', 'orthoimage')
 dhm = inputfilepath+cfp.get('paths', 'dhm')
 bb = inputfilepath+cfp.get('paths', 'bb')
-resolvedforestshp = inputfilepath+cfp.get('paths', 'resolvedforest')
-treerowsshp = inputfilepath+cfp.get('paths', 'treerows')
-singletreesshp = inputfilepath+cfp.get('paths', 'singletrees')
+
+if cfp.get('paths', 'resolvedforest') != '':
+    resolvedforestshp = inputfilepath+cfp.get('paths', 'resolvedforest')
+else:
+    resolvedforestshp = None
+if cfp.get('paths', 'treerows') != '':
+    treerowsshp = inputfilepath+cfp.get('paths', 'treerows')
+else:
+    treerowsshp = None
+if cfp.get('paths', 'singletrees') != '':
+    singletreesshp = inputfilepath+cfp.get('paths', 'singletrees')
+else:
+    singletreesshp = None
+
 pavementareas = inputfilepath+cfp.get('paths', 'pavementareas')
 gebaeudefoots = inputfilepath+cfp.get('paths', 'gebaeudefoots')
 crops = inputfilepath+cfp.get('paths', 'crops')
@@ -160,7 +171,9 @@ for i in range(0,len(cfp.sections())):
 print('\nFinalizing Checks:\n')
 
 mst.checknxyzisint(nx,ny,nz) #checks if nx ny nz values dont have a float part
-        
+nx = list(map(int,nx))
+ny = list(map(int,ny))
+nz = list(map(int,nz))
 #visualize domain boundaries, cut the image new for that with higher res than parent resolution.
 gdt.cutortho(ortho, subdir_rasteredshp+filenames+'_baseortho.tif', 
              xmin[0],xmax[0],ymin[0],ymax[0],orthores,orthores)
@@ -228,25 +241,44 @@ for i in range(totaldomains):
     
     ##### treat LAD
         if flags[i]['dolad'] == True:
+            
             #import canopyfiles
-            resforesttop = gdt.rasterandcuttlm(resolvedforestshp, subdir_rasteredshp+'resolvedforesttop'+str(ischild[i])+'.asc', 
-                                            xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_TOP')
-            resforestbot = gdt.rasterandcuttlm(resolvedforestshp, subdir_rasteredshp+'resolvedforestbot'+str(ischild[i])+'.asc', 
-                                            xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_BOT')
-            resforestid = gdt.rasterandcuttlm(resolvedforestshp, subdir_rasteredshp+'resolvedforestid'+str(ischild[i])+'.asc', 
-                                            xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='ID')
-            resbreihetop = gdt.rasterandcuttlm(treerowsshp, subdir_rasteredshp+'resolvedbreihentop'+str(ischild[i])+'.asc', 
-                                            xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_TOP')
-            resbreihebot = gdt.rasterandcuttlm(treerowsshp, subdir_rasteredshp+'resolvedbreihenbot'+str(ischild[i])+'.asc', 
-                                            xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_BOT')
-            resbreiheid = gdt.rasterandcuttlm(treerowsshp, subdir_rasteredshp+'resolvedbreihenid'+str(ischild[i])+'.asc', 
-                                            xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='ID')
-            resebgebtop = gdt.rasterandcuttlm(singletreesshp, subdir_rasteredshp+'resolvedebgebtop'+str(ischild[i])+'.asc', 
-                                            xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_TOP')
-            resebgebbot = gdt.rasterandcuttlm(singletreesshp, subdir_rasteredshp+'resolvedebgebbot'+str(ischild[i])+'.asc', 
-                                            xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_BOT')
-            resebgebid = gdt.rasterandcuttlm(singletreesshp, subdir_rasteredshp+'resolvedebgebid'+str(ischild[i])+'.asc', 
-                                            xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='ID')
+            if resolvedforestshp != None:
+                resforesttop = gdt.rasterandcuttlm(resolvedforestshp, subdir_rasteredshp+'resolvedforesttop'+str(ischild[i])+'.asc', 
+                                                xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_TOP')
+                resforestbot = gdt.rasterandcuttlm(resolvedforestshp, subdir_rasteredshp+'resolvedforestbot'+str(ischild[i])+'.asc', 
+                                                xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_BOT')
+                resforestid = gdt.rasterandcuttlm(resolvedforestshp, subdir_rasteredshp+'resolvedforestid'+str(ischild[i])+'.asc', 
+                                                xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='ID')
+            else:
+                resforesttop = np.ones((ny[i], nx[i]))*mst.fillvalues['vegetation_height']
+                resforestbot = np.ones((ny[i], nx[i]))*mst.fillvalues['vegetation_height']
+                resforestid = np.ones((ny[i], nx[i]))*mst.fillvalues['vegetation_height']
+                
+            if treerowsshp != None:
+                resbreihetop = gdt.rasterandcuttlm(treerowsshp, subdir_rasteredshp+'resolvedbreihentop'+str(ischild[i])+'.asc', 
+                                                xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_TOP')
+                resbreihebot = gdt.rasterandcuttlm(treerowsshp, subdir_rasteredshp+'resolvedbreihenbot'+str(ischild[i])+'.asc', 
+                                                xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_BOT')
+                resbreiheid = gdt.rasterandcuttlm(treerowsshp, subdir_rasteredshp+'resolvedbreihenid'+str(ischild[i])+'.asc', 
+                                                xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='ID')
+            else:
+                resbreihetop = np.ones((ny[i], nx[i]))*mst.fillvalues['vegetation_height']
+                resbreihebot = np.ones((ny[i], nx[i]))*mst.fillvalues['vegetation_height']
+                resbreiheid = np.ones((ny[i], nx[i]))*mst.fillvalues['vegetation_height']
+                
+            if singletreesshp != None:
+                resebgebtop = gdt.rasterandcuttlm(singletreesshp, subdir_rasteredshp+'resolvedebgebtop'+str(ischild[i])+'.asc', 
+                                                xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_TOP')
+                resebgebbot = gdt.rasterandcuttlm(singletreesshp, subdir_rasteredshp+'resolvedebgebbot'+str(ischild[i])+'.asc', 
+                                                xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_BOT')
+                resebgebid = gdt.rasterandcuttlm(singletreesshp, subdir_rasteredshp+'resolvedebgebid'+str(ischild[i])+'.asc', 
+                                                xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='ID')
+            else:
+                resebgebtop = np.ones((ny[i], nx[i]))*mst.fillvalues['vegetation_height']
+                resebgebbot = np.ones((ny[i], nx[i]))*mst.fillvalues['vegetation_height']
+                resebgebid = np.ones((ny[i], nx[i]))*mst.fillvalues['vegetation_height']
+                
             
             canopyheight = np.maximum.reduce([resforesttop, resbreihetop, resebgebtop]) #analyze all arrays in each pixel and return max value per pixel
             canopybottom = np.maximum.reduce([resforestbot, resbreihebot, resebgebbot])
