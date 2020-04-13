@@ -752,7 +752,8 @@ def mapstreettypes(roadarr):
                19   : 3,
                20   : 13,
                21   : 15,
-               22   : 3}
+               22   : 3,
+               99   : fillvalues['street_type']}
     street_type = np.vectorize(mapdict.get)(roadarr)
     return street_type
 
