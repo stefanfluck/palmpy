@@ -19,8 +19,8 @@ try:
     cfp.read(sys.argv[1]) #check if commandline argument is given for config file.
 except:
     print('No command line argument given. Using hardcoded config_file path in script.')
-    cfp.read("C:\\Users\\Stefan Fluck\\Documents\\Python Scripts\\ZAV-PALM-Scripts\\example_scripts\\make_static\\make_static.ini")
-    # cfp.read("C:\\Users\\Stefan Fluck\\Desktop\\ladtest.ini")
+    # cfp.read("C:\\Users\\Stefan Fluck\\Documents\\Python Scripts\\ZAV-PALM-Scripts\\example_scripts\\make_static\\make_static.ini")
+    cfp.read("C:\\Users\\Stefan Fluck\\Desktop\\yv_ssw_1.ini")
 
 modulepath = cfp.get('paths', 'modulepath') #read modulepath from config file
 
@@ -175,6 +175,7 @@ nx = list(map(int,nx))
 ny = list(map(int,ny))
 nz = list(map(int,nz))
 #visualize domain boundaries, cut the image new for that with higher res than parent resolution.
+#TODO: if query for cutorthoimage.
 gdt.cutortho(ortho, subdir_rasteredshp+filenames+'_baseortho.tif', 
              xmin[0],xmax[0],ymin[0],ymax[0],orthores,orthores)
 
@@ -490,8 +491,9 @@ for n in range(totaldomains):
     print('\tdx/dy/dz\t\t'+str(xres[n])+'/'+str(yres[n])+'/'+str(zres[n]), file=parfile)
     domaincells[n] = nx[n]*ny[n]*nz[n]
     # rti[n] = domaincells[n]*setvmag/xres[n]
+    print(f"\tOrigin E/N:\t\t{xmin[n]}/{ymin[n]}", file=parfile)
     if n > 0:
-        print('  ll-Position for &nesting_parameters\n\tx,y:\t\t\t'+str(llx[n])+', '+str(lly[n]), file=parfile)
+        print('\tll-Position for &nesting_parameters\n\tx,y:\t\t\t'+str(llx[n])+', '+str(lly[n]), file=parfile)
 
 print('\nTotal Number of Cells:\t\t'+"%4.2e" % (sum(domaincells)), file=parfile)
 for m in range(len(domaincells)):
@@ -516,8 +518,9 @@ for n in range(totaldomains):
     print('\tdx/dy/dz\t\t'+str(xres[n])+'/'+str(yres[n])+'/'+str(zres[n]))
     domaincells[n] = nx[n]*ny[n]*nz[n]
     # rti[n] = domaincells[n]*setvmag/xres[n]
+    print(f"\tOrigin E/N:\t\t{xmin[n]}/{ymin[n]}")
     if n > 0:
-        print('  ll-Position for &nesting_parameters\n\tx,y:\t\t\t'+str(llx[n])+', '+str(lly[n]))
+        print('\tll-Position for &nesting_parameters\n\tx,y:\t\t\t'+str(llx[n])+', '+str(lly[n]))
 
 print('\nTotal Number of Cells:\t\t'+"%4.2e" % (sum(domaincells)))
 for m in range(len(domaincells)):
