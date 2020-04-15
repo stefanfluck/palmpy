@@ -100,7 +100,7 @@ a_forest = totaldomains*[None];         b_forest = totaldomains*[None]
 a_breihe = totaldomains*[None];         b_breihe = totaldomains*[None]
 a_ebgebu = totaldomains*[None];         b_ebgebu = totaldomains*[None]
 llx = totaldomains*[0.0];               lly = totaldomains*[0.0]
-flags = totaldomains*[{}]
+flags = totaldomains*[{}];              pavealltouched = totaldomains*[None]
 
 #iterate over every section name, if it begins with "domain" then there are domain parameters in it. 0-indexed! 0 is parent.
 for i in range(0,len(cfp.sections())):
@@ -138,6 +138,7 @@ for i in range(0,len(cfp.sections())):
         
         #method = XXX -> TODO: implement a method selector for lad constant or lad with beta distribution
         bulkvegclass[index] = cfp.getint(section,'bulkvegclass', fallback=None)   #read canopy variables from config file
+        pavealltouched[index] = cfp.getboolean(section, 'pave_alltouched', fallback = False)
         lai_forest[index] = cfp.getfloat(section,'lai_forest', fallback=None)
         lai_breihe[index] = cfp.getfloat(section,'lai_breihe', fallback=None)
         lai_ebgebu[index] = cfp.getfloat(section,'lai_ebgebu', fallback=None)
@@ -337,7 +338,7 @@ for i in range(totaldomains):
         
         
         if flags[i]['dostreetsbb'] == True:
-            paved = gdt.rasterandcuttlm(pavementareas, subdir_rasteredshp+'pavement'+str(ischild[i])+'.asc',xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i], burnatt='OBJEKTART')
+            paved = gdt.rasterandcuttlm(pavementareas, subdir_rasteredshp+'pavement'+str(ischild[i])+'.asc',xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i], burnatt='OBJEKTART', alltouched=pavealltouched[i])
             vegarr = np.where( paved[:,:] != -9999 , mst.fillvalues['vegetation_type'], vegarr[:,:]) #overwrite vegarr where pavement areas are found with fillvalue
             watarr = np.where( paved[:,:] != -9999 , mst.fillvalues['water_type'], watarr[:,:]) #overwrite watarr where pavement areas are found with fillvalue
             pavarr = paved
@@ -388,7 +389,7 @@ for i in range(totaldomains):
             
     if flags[i]['dostreettypes'] == True:
         roadarr = gdt.rasterandcuttlm(streetsonly, subdir_rasteredshp+'streettype'+str(ischild[i])+'.asc', 
-                                        xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='OBJEKTART')
+                                        xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='OBJEKTART', alltouched=pavealltouched[i])
         roadarr = mst.mapstreettypes(roadarr)
         
 
