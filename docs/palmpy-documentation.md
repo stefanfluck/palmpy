@@ -1,5 +1,5 @@
 <header>
-    <font size="+2"><b>palmpy 1.0 Documentation</b></font>
+    <font size="+2"><b>palmpy Framework 1.0 Documentation</b></font>
 </header>
 
 **Table of Contents**
@@ -12,9 +12,7 @@
 
 # Introduction
 
-Welcome to palmpy! This package will help you create static files for your PALM Simulation. It contains various elements that deal with certain aspects of handling data for PALM, initially built around geodata products by swisstopo (*swissALTI3D, swissTLM3D*) and expanded since. Palmpy deals with various aspects of PALM data processing, which can be summarized by the following:
-
- 
+Welcome to palmpy! This package will help you create static files for your PALM simulation. It contains various elements that deal with certain aspects of handling data for PALM, initially built around geodata products by swisstopo (*swissALTI3D, swissTLM3D*) and expanded since. Palmpy assists you in the following tasks:
 
 - input data processing
   - raster data and shapefiles -> _static files
@@ -23,43 +21,48 @@ Welcome to palmpy! This package will help you create static files for your PALM 
   - plotting of *tmp/id.#/RUN_CONTROL* data (available soon)
 - postprocessing of output data
   - regridding (available soon)
-  - plotting (available soon)
 
 
 
-with a clear focus on the first, as it is clearly the most labor-intensive and tedious step of them all. This repo also contains the conda environment needed for all those functions.
+...with a clear focus on the first, as it is clearly the most labor-intensive and tedious step of them all. Part of the Framework are also supporting files, such as conda environment setup files and bash routines, that support PALM simulation activities in general.
 
-Depending on your system, choose the appropriate .yml file. Try to use the one with package version info first
+This Framework is the result of student work at the Center for Aviation, ZHAW School of Engineering in Winterthur and is work in progress.
 
-```
-  conda env create -f palmenv-versinfo.yml -n <newname>
-```
-
-This may not work on systems other than Windows 10 x86.
-
-This repository is a the result of student work at the Center for Aviation, ZHAW School of Engineering in Winterthur and is work in progress.
-
-DISCLAIMER: No liability is assumed regarding the correctness of the provided routines. Users shall check the behavior and reporting of bugs is highly appreciated.
+DISCLAIMER: No liability is assumed regarding the correctness of the provided routines. Users shall check the behavior and the produced results carefull. Reporting of bugs is highly appreciated.
 
 
 
-## How it works
+## Applied Paradigms - how it works
+
+Framework Components
+
+- palmpy Python Package
+- supporting Bash Scripts
+- 
+
+
+
+
 
 collection of functions
 
 make static script to make static file
 
+manual control with python programming language.
 
 
 
 
 
 
------
 
 
 
- <a href="#top">Back to top</a>
+ <p align='right'>
+     <a href="#top">Back to top</a></right>
+</p>
+
+---
 
 <br/>
 
@@ -67,21 +70,68 @@ make static script to make static file
 
 ## Python Environment
 
+It is strongly recommended to set up python with the conda package management ecosystem. There are many ways to do it. Users relatively unfamiliar with python can install the full [Anaconda](https://www.anaconda.com/) software, which comes with the most relevant python packages for doing science, but also with some baggage in form of software. More experienced users, who know what packages they need and are able to install them easily, can install python with a [Miniconda](https://docs.conda.io/en/latest/miniconda.html) installer, which only installs the bare minimum of packages and python on the machine (much smaller download size). Most importantly, the conda package manager is installed as well. 
 
+Once a running conda environment (usually named ``base``, you can check it with entering ``conda env list`` into the Anaconda Prompt (in Windows) or your regular shell (in Linux)) is present. we set up a new environment that contains all necessary packages to run palmpy. Environment are an essential tool when it comes to software development and allows to "freeze" an environment to have defined package versions and dependencies for a particular project. After the following process, an environment "palm" (or however you name it) shall be present in the conda environment list.
+
+
+
+<img src="C:\Users\Stefan Fluck\Documents\Python Scripts\ZAV-PALM-Scripts\docs\palmpy-documentation.assets\image-20200415113429165.png" alt="image-20200415113429165" style="zoom:80%;" />
+
+<center><font size="-1">Different conda environments on a computer.</font></center>
+
+
+
+Depending on your system, choose the appropriate .yml file from the ``env`` folder. Try to use the one with package version info first. This may not work on systems other than Windows 10 x86.
+
+```bash
+  conda env create -f palmenv-versinfo.yml -n <envname>
+```
+
+If it does not work, use the .yml file without version numbers attached to the packages.
+
+
+
+
+
+<p align='right'>
+     <a href="#top">Back to top</a></right>
+</p>
+
+---
 
 
 
 ## Package Installation
 
-where to install it, path specification
+When importing a package in python with ``import package``, python automatically scans its $PATH variable for the required package. Therefore, if we want palmpy to be fount, we need to move the palmpy folder into one of those locations. In order to know, where you should put it, open a python console in your newly created environment (eg. open ``Spyder (envname)`` to open Spyder with your desired environment or open Anaconda promt, run ``conda activate envname``, followed by ``python`` to enter the python interpreter).  Run the following:
+
+```python
+import sys
+print(sys.path)
+```
+
+This will output a list of paths, that are searched for the module. Your best bet is to put the palmpy module folder into your ``...\\Miniconda3\\envs\envname\\lib`` folder.
+
+If you are able to import the module palmpy with ``import palmpy`` and no error appears, the package was installed correctly.
+
+
+
+
+
+
 
 
 
 ## Basic Usage
 
+It is recommended to load the different modules of the palmpy package as follows:
+
+```python
+import palmpy.staticcreation.geodatatools as gdt      # geodata modification tools
+import palmpy.staticcreation.makestatictools as mst   # static generation tools
+import palmpy.postprocessing.tools as ppt             # postprocessing tools
 ```
-This is code. started with ```
-```
 
 
 
@@ -89,9 +139,9 @@ This is code. started with ```
 
 
 
-
-
- <a href="#top">Back to top</a>
+<p align='right'>
+     <a href="#top">Back to top</a></right>
+</p>
 
 ---
 
@@ -266,8 +316,9 @@ inifor -p <path> -d <date> -i <init-mode> -n <namelist> --input-prefix <input-pr
 
 
 
-
- <a href="#top">Back to top</a>
+<p align='right'>
+     <a href="#top">Back to top</a></right>
+</p>
 
 <br/>
 
@@ -287,7 +338,9 @@ Bear in mind, that this is currently only easily doable for netcdf-3 output on t
 
 VAPOR works on the basis of vdc files. NetCDF files can be converted into vdc files with a series of VAPOR command line tools - however, I have not managed to complete the whole process. It should be doable with the commands (in this order) ``cfvdccreate <outputfile> <file.vdc>``, which creates a header file. Then, ``cf2vdc outputfile file.vdc`` should populate the file with data from the nc-file. 
 
-
+<p align='right' font-size='-1'>
+     <a href="#top">Back to top</a></right>
+</p>
 
 
 
