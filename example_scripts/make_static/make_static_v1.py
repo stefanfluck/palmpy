@@ -31,7 +31,7 @@ if modulepath not in sys.path:
     
 import palmpy.staticcreation.geodatatools as gdt         #import modules for static generation
 import palmpy.staticcreation.makestatictools as mst
-
+import palmpy.staticcreation.mapdicts as mpd
 
 
 #parse settings and paths
