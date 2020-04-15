@@ -76,7 +76,7 @@ Once a running conda environment (usually named ``base``, you can check it with 
 
 
 
-<img src="C:\Users\Stefan Fluck\Documents\Python Scripts\ZAV-PALM-Scripts\docs\palmpy-documentation.assets\image-20200415113429165.png" alt="image-20200415113429165" style="zoom:80%;" />
+<img src="palmpy-documentation.assets\image-20200415113429165.png" alt="image-20200415113429165" style="zoom:80%;" />
 
 <center><font size="-1">Different conda environments on a computer.</font></center>
 
