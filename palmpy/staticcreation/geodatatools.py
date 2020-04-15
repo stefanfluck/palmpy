@@ -57,7 +57,7 @@ def cutalti(filein, fileout, xmin, xmax, ymin, ymax, xres, yres):
     array = ds.ReadAsArray()
     return array
     
-def rasterandcuttlm(filein, fileout, xmin, xmax, ymin, ymax, xres, yres, burnatt='OBJEKTART'):
+def rasterandcuttlm(filein, fileout, xmin, xmax, ymin, ymax, xres, yres, burnatt='OBJEKTART', alltouched=False):
     '''
     Takes a swissTLM3D .shp input file (mainly BB), creates a tif file with resolution xres/yres of
     the shp vector data and saves it as tmp.tif. This is loaded again and is transformed to ascii. Direct
@@ -86,10 +86,13 @@ def rasterandcuttlm(filein, fileout, xmin, xmax, ymin, ymax, xres, yres, burnatt
         target resolution in x direction.
     yres : int
         target resolution in y direction. choose symmetrically to xres.
-    burnatt : TYPE, optional
+    burnatt : str, optional
         Which attribute of the TLM dataset to be burned into the array. For most, OBJEKTART is the best choice
         The default is 'OBJEKTART'.
-
+    alltouched : bool, optional
+        selector for rasterization behavior. if alltouched=True, all by shp feature touched pixels are burned with
+        the values of the shp feature. if False, pixel is only rasterized if pixel centroid is within polygon (e.g.).
+    
     Returns
     -------
     array : np.array
@@ -107,8 +110,11 @@ def rasterandcuttlm(filein, fileout, xmin, xmax, ymin, ymax, xres, yres, burnatt
     trgds.SetGeoTransform((xmin,xres,0,ymax,0,-xres))
     band = trgds.GetRasterBand(1)
     band.SetNoDataValue(-9999)
-    gdal.RasterizeLayer(trgds, [1], srclayer, options=['ATTRIBUTE='+burnatt])
-    # gdal.RasterizeLayer(trgds, [1], srclayer, options=['ALL_TOUCHED=TRUE', 'ATTRIBUTE='+burnatt])
+    
+    if alltouched==False:
+        gdal.RasterizeLayer(trgds, [1], srclayer, options=['ATTRIBUTE='+burnatt])
+    else:
+        gdal.RasterizeLayer(trgds, [1], srclayer, options=['ALL_TOUCHED=TRUE', 'ATTRIBUTE='+burnatt])
     trgds=None
     ds = gdal.Open('tmp.tif')
     ds = gdal.Translate(fileout, ds)
