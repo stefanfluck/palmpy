@@ -20,7 +20,7 @@ try:
 except:
     print('No command line argument given. Using hardcoded config_file path in script.')
     # cfp.read("C:\\Users\\Stefan Fluck\\Documents\\Python Scripts\\ZAV-PALM-Scripts\\example_scripts\\make_static\\make_static.ini")
-    cfp.read("C:\\Users\\Stefan Fluck\\Desktop\\yv_ssw_1.ini")
+    cfp.read("C:\\Users\\Stefan Fluck\\Desktop\\yv_ssw_2.ini")
 
 modulepath = cfp.get('paths', 'modulepath') #read modulepath from config file
 
@@ -199,7 +199,7 @@ plt.savefig(outpath+'domainoverview.png')
 
 #%%generation with for loop
 for i in range(totaldomains):
-    print('\nSTART CREATING DOMAIN '+str(i))
+    print('\n\n---------------------------\nSTART CREATING DOMAIN '+str(i))
     infodict = {'version':           1, #assemble the infodict, will be added as global attributes to static file.
                 'palm_version':      6.0,
                 'origin_z':          0.0, #is changed further below
@@ -528,7 +528,7 @@ for m in range(len(domaincells)):
     print('  Domain '+str(m)+':\t\t\t%4.3e\t= %3.2d %%' % (domaincells[m], round(domaincells[m]/sum(domaincells),4)*100))
 
 print('\nTopo shifted down by:\t\t{:.2f} Meter'.format(origin_z))
-print('\nRuntime length score:\t\t'+str(round((sum(domaincells)*setvmag/min(xres))/1e6,2)))
+print('\nRuntime length score:\t\t'+str(round((sum(domaincells)*setvmag/min(xres))/1e06,2)))
 
 
 #%% create inifor namelist and save to file

@@ -109,12 +109,18 @@ If you are able to import the module palmpy with ``import palmpy`` and no error 
 It is recommended to load the different modules of the palmpy package as follows:
 
 ```python
+#static file generation
 import palmpy.staticcreation.geodatatools as gdt      # geodata modification tools
 import palmpy.staticcreation.makestatictools as mst   # static generation tools
+import palmpy.staticcreation.mapdicts as mpd		  # mapping dictionaries for mst
+
+#post processing
 import palmpy.postprocessing.tools as ppt             # postprocessing tools
 ```
 
 
+
+To create a static file, you need the palmpy *geodatatools*, *makestatictools* and the dictionaries for mapping shp-file classes to PALM classes - which are separately available in *mapdicts*. Should a default mapping be not suitable for a particular project, this *mapdict*s file can be modified accordingly. For individual application of palmpy, these dicts can be accessed through python individually.
 
 
 

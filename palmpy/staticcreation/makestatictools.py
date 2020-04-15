@@ -272,35 +272,6 @@ def childifyfilename(fileout, ischild):
         newname = fileout
     return newname
 
-'''
-DICTIONARY MAPPING BODENBEDECKUNG AND OTHER CATEGORIES TO PALM CLASSES. BEST GUESS. IMPORT ARRAY IN 
-STATIC GENERATION SCRIPTS FOR INDIVIDUAL CHANGES.
-'''
-tlmbb2veg = {
-    #vegetation classes
-    int(0):int(3),    # unclassified > short grass
-    int(1):int(9),    # fels > desert
-    int(6):int(16),   # gebueschwald > deciduous shrubs
-    int(7):int(9),    # lockergestein > desert
-    int(9):int(13),   # Gletscher > ice caps and glaciers
-    int(11):int(14),  # Feuchtgebiet > bogs and marshes
-    int(12):int(17),  # Wald > mixed Forest/woodland
-    int(13):int(18),  # Wald offen > interrupted forest
-   }
-
-tlmbb2wat = {
-    int(5):int(2),    #fliessgewaesser > river
-    int(10):int(1),   #stehendes gewaesser > lake
-    }
-
-tlmstr2str = {
-    
-    }
-
-ownclass2palm = {
-    int(1001) : 'etwas für maisfeld'
-    }
-
 
 
 
@@ -350,12 +321,7 @@ def mapbbclasses(bbarr):
     watarr[bbarr==5]   = 2 #fliessgewaesser > river
     watarr[bbarr==10]  = 1 #stehendes gewaesser > lake
 
-       
-    # print('Unique veget. types:\t'+str(np.unique(vegarr)))
-    # print('Unique pavement types:\t'+ str(np.unique(pavarr)))
-    # print('Unique water types:\t'+str(np.unique(watarr)))
-           
-    return vegarr,pavarr,watarr #,soilarr
+    return vegarr,pavarr,watarr 
 
 
 
@@ -364,6 +330,10 @@ def makesoilarray(vegarr,pavarr):
     '''
     Creates Soilarray from vegarr and pavement array. Everywhere where vegetation_type and pavement_type are nonzero values
     a soiltype class needs to be specified.
+    
+    This means, that soil types are generically assigned based on the resulting palm vegetation type!
+    If specific soil information is available, read in the shp files with geodatatools, 
+    create a new dictionary in mapdicts.py and perform mapping function.
 
     Parameters
     ----------
