@@ -1,5 +1,5 @@
 <header>
-    <font size="+2"><b>palmpy Framework 1.0 Documentation</b></font>
+    <font size="+3"><b>palmpy Framework 1.0 Documentation</b></font>
 </header>
 
 **Table of Contents**
@@ -8,7 +8,7 @@
 
 ---
 
-
+<div style="page-break-after: always; break-after: page;"></div>
 
 # Introduction
 
@@ -54,17 +54,9 @@ manual control with python programming language.
 
 
 
-
-
-
-
- <p align='right'>
-     <a href="#top">Back to top</a></right>
-</p>
-
 ---
 
-<br/>
+<div style="page-break-after: always; break-after: page;"></div>
 
 # Installation of palmpy
 
@@ -94,14 +86,6 @@ If it does not work, use the .yml file without version numbers attached to the p
 
 
 
-<p align='right'>
-     <a href="#top">Back to top</a></right>
-</p>
-
----
-
-
-
 ## Package Installation
 
 When importing a package in python with ``import package``, python automatically scans its $PATH variable for the required package. Therefore, if we want palmpy to be fount, we need to move the palmpy folder into one of those locations. In order to know, where you should put it, open a python console in your newly created environment (eg. open ``Spyder (envname)`` to open Spyder with your desired environment or open Anaconda promt, run ``conda activate envname``, followed by ``python`` to enter the python interpreter).  Run the following:
@@ -114,9 +98,6 @@ print(sys.path)
 This will output a list of paths, that are searched for the module. Your best bet is to put the palmpy module folder into your ``...\\Miniconda3\\envs\envname\\lib`` folder.
 
 If you are able to import the module palmpy with ``import palmpy`` and no error appears, the package was installed correctly.
-
-
-
 
 
 
@@ -139,15 +120,9 @@ import palmpy.postprocessing.tools as ppt             # postprocessing tools
 
 
 
-<p align='right'>
-     <a href="#top">Back to top</a></right>
-</p>
-
 ---
 
-
-
-<br/>
+<div style="page-break-after: always; break-after: page;"></div>
 
 # Palmpy Description
 
@@ -243,9 +218,9 @@ insert Table here
 
 
 
+---
 
-
-
+<div style="page-break-after: always; break-after: page;"></div>
 
 # Further Information
 
@@ -316,12 +291,6 @@ inifor -p <path> -d <date> -i <init-mode> -n <namelist> --input-prefix <input-pr
 
 
 
-<p align='right'>
-     <a href="#top">Back to top</a></right>
-</p>
-
-<br/>
-
 
 
 ## VAPOR Visualization
@@ -338,10 +307,11 @@ Bear in mind, that this is currently only easily doable for netcdf-3 output on t
 
 VAPOR works on the basis of vdc files. NetCDF files can be converted into vdc files with a series of VAPOR command line tools - however, I have not managed to complete the whole process. It should be doable with the commands (in this order) ``cfvdccreate <outputfile> <file.vdc>``, which creates a header file. Then, ``cf2vdc outputfile file.vdc`` should populate the file with data from the nc-file. 
 
-<p align='right' font-size='-1'>
-     <a href="#top">Back to top</a></right>
-</p>
 
+
+---
+
+<div style="page-break-after: always; break-after: page;"></div>
 
 
 # Useful Code Snippets
@@ -398,6 +368,14 @@ Industry Standard seems to be ``remapcon`` (conservative), ``remapbil`` is bilin
 
 
 
+
+
+
+
+---
+
+<div style="page-break-after: always; break-after: page;"></div>
+
 # Glossary
 
 
@@ -406,11 +384,6 @@ Industry Standard seems to be ``remapcon`` (conservative), ``remapbil`` is bilin
 
 
 
-
-
-
-
- <a href="#top">Back to top</a>
 
 
 
