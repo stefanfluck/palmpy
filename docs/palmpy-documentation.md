@@ -58,9 +58,29 @@ manual control with python programming language.
 
 <div style="page-break-after: always; break-after: page;"></div>
 
-# Installation of palmpy
+<div style="page-break-after: always; break-after: page;"></div>
 
-## Python Environment
+# Palmpy Description
+
+
+
+
+
+## *geodatatools*
+
+
+
+## *makestatictools*
+
+
+
+## *mapdicts*
+
+
+
+## Installation of palmpy
+
+### Python Environment
 
 It is strongly recommended to set up python with the conda package management ecosystem. There are many ways to do it. Users relatively unfamiliar with python can install the full [Anaconda](https://www.anaconda.com/) software, which comes with the most relevant python packages for doing science, but also with some baggage in form of software. More experienced users, who know what packages they need and are able to install them easily, can install python with a [Miniconda](https://docs.conda.io/en/latest/miniconda.html) installer, which only installs the bare minimum of packages and python on the machine (much smaller download size). Most importantly, the conda package manager is installed as well. 
 
@@ -86,7 +106,7 @@ If it does not work, use the .yml file without version numbers attached to the p
 
 
 
-## Package Installation
+### Package Installation
 
 When importing a package in python with ``import package``, python automatically scans its $PATH variable for the required package. Therefore, if we want palmpy to be fount, we need to move the palmpy folder into one of those locations. In order to know, where you should put it, open a python console in your newly created environment (eg. open ``Spyder (envname)`` to open Spyder with your desired environment or open Anaconda promt, run ``conda activate envname``, followed by ``python`` to enter the python interpreter).  Run the following:
 
@@ -104,7 +124,7 @@ If you are able to import the module palmpy with ``import palmpy`` and no error 
 
 
 
-## Basic Usage
+### Basic Usage
 
 It is recommended to load the different modules of the palmpy package as follows:
 
@@ -130,23 +150,7 @@ To create a static file, you need the palmpy *geodatatools*, *makestatictools* a
 
 <div style="page-break-after: always; break-after: page;"></div>
 
-# Palmpy Description
-
-
-
-## Preprocessing & Static File Generation
-
-
-
-
-
-### *geodatatools*
-
-
-
-### *makestatictools*
-
-
+# Create a PALM Static driver using palmpy
 
 ### QGIS Input File Preparation
 
@@ -234,7 +238,7 @@ insert Table here
 
 PALM can be forced with COSMO-Data. PALM is shipped with a routine called INIFOR, which interpolates boundary conditions from hourly COSMO-DE data for the lateral and top boundary, furthermore, it creates an initial condition volume field for the domain. Also, geostrophic wind components are extracted from the COSMO pressure field, as well as a surface pressure value. 
 
-With its orientation towards data available in Germany, INIFOR is intended to be used with COSMO-DE data, which is available in 2km resolution and with a specific naming of the variables. Swiss COSMO-Data, which was made available so far with the ZHAW, is in a different format and in 1km resolution. Apart from this, the variable naming does not seem to be consistent anyway, which requires some modifications to the COSMO-Files before being able to use them in INIFOR. To convert them into INIFOR-readable format, two scripts for two different conventions have been written (routines cosmo2inifor). Their operation is detailed below. After conversion, INIFOR can be run, this process is also outlined below.
+With its orientation towards data available in Germany, INIFOR is intended to be used with COSMO-DE data, which is available in 2 km resolution and with a specific naming of the variables. Swiss COSMO-Data, which was made available so far with the ZHAW, is in a different format and in 1 km resolution. Apart from this, the variable naming does not seem to be consistent anyway, which requires some modifications to the COSMO-Files before being able to use them in INIFOR. To convert them into INIFOR-readable format, two scripts for two different conventions have been written (routines cosmo2inifor). Their operation is detailed below. After conversion, INIFOR can be run, this process is also outlined below.
 
 
 
