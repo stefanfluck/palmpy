@@ -281,7 +281,7 @@ INIFOR will interpolate (bilinear, as of April 2020) boundary conditions from th
     /
 ```
 
-Under ``&inipar``, grid information of the parent is given. under ``&d3par`` the endtime is given. Coordinates are taken from the static-driver, so it has to be ensured that this information is correct. Furthermore, even though the static-file origin_time attribute is unused for now, it will be used in the future, so it should be correctly set as well. It has the format ``YYYY-MM-DD HH:MM:SS +ZZ``. 
+Under ``&inipar``, grid information of the parent is given. Under ``&d3par`` the endtime is given. This namelist file is automatically generated when running make_static.py, taking all necessary information from the corresponding namelist for the make_static routine. Coordinates are taken from the static-driver, so it has to be ensured that this information is correct. Furthermore, even though the static-file origin_time attribute is unused for now, it will be used in the future, so it should be correctly set as well. It has the format ``YYYY-MM-DD HH:MM:SS +ZZ``. 
 
 Load required modules to run PALM before running INIFOR. INIFOR is executed as follows in the bash shell:
 
