@@ -729,6 +729,32 @@ def mapstreettypes(roadarr):
 
 
 
+def mapclasswithdict(array, mapdict, fillvalue=np.byte(-127):
+    '''
+    Maps all entries of array according to new values given in mapdict. If key is
+    not found, fillvalue is assigned.
+
+    Parameters
+    ----------
+    array : np.array
+        input array to be altered.
+    mapdict : dict
+        dictionary with <oldvalue>:<newvalue> format.
+    fillvalue : any, optional
+        fillvalue to be set if no key is found for that entry.
+
+    Returns
+    -------
+    newarray : np.array
+        output array with modified entries.
+
+    '''
+    import numpy as np
+    
+    newarray = np.vectorize(mapdict.get)(array, fillvalue)
+    
+    return newarray
+
 
 
 
