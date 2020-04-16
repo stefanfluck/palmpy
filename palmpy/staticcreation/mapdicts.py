@@ -36,7 +36,8 @@ tlmbb2palmwat = {   int(5):int(2),    #fliessgewaesser > river
                 }
 
 #%% assign PALM soil type to PALM vegetation types
-palmveg2palmsoil = {    1:1,
+palmveg2palmsoil = {    mst.fillvalues['vegetation_type']:mst.fillvalues['soil_type'],
+                        1:1,
                         2:6,
                         3:1,
                         9:1,
@@ -48,25 +49,26 @@ palmveg2palmsoil = {    1:1,
                     }
 
 #%% assign PALM soil type to PALM pavement types
-palmpav2palmsoil = {    0:3,
+palmpav2palmsoil = {    mst.fillvalues['pavement_type']:mst.fillvalues['soil_type'],
+                        0:3,
                         1:3,
-                        2:3,
-                        3:3,
-                        4:3,
-                        5:3,
-                        6:3,
-                        7:3,
-                        8:3,
-                        9:3,
-                        10:3,
-                        11:3,
-                        12:3,
-                        13:3,
-                        14:3,
-                        15:3,
+                        # 2:3,
+                        # 3:3,
+                        # 4:3,
+                        # 5:3,
+                        # 6:3,
+                        # 7:3,
+                        # 8:3,
+                        # 9:3,
+                        # 10:3,
+                        # 11:3,
+                        # 12:3,
+                        # 13:3,
+                        # 14:3,
+                        # 15:3,
                     }
 
-#%% swissTLM3D street Objektart to PALM street type
+#%% swissTLM3D street !only! Objektart to PALM street type
 tlmstr2palmstyp =   {     
                           #-9999 : mst.fillvalues['street_type'],
                            0    : 18,
@@ -95,7 +97,33 @@ tlmstr2palmstyp =   {
                      }
 
 
-
+#%% swissTLM3D paved surfaces Objektart to PALM street type
+tlmpaved2palmpave =   {     
+                          #-9999 : mst.fillvalues['street_type'],
+                           0    : 18,
+                           1    : 18,
+                           2    : 17,
+                           3    : 7,
+                           4    : 16,
+                           5    : 9,
+                           6    : 9,
+                           8    : 13,
+                           9    : 11, 
+                           10   : 8, 
+                           11   : 8, 
+                           12   : 7,
+                           13   : 7,
+                           #14   : mst.fillvalues['street_type'],
+                           15   : 4,
+                           16   : 3,
+                           17   : 3,
+                           18   : 3,
+                           19   : 3,
+                           20   : 13,
+                           21   : 15,
+                           22   : 3,
+                           #99   : mst.fillvalues['street_type'],
+                     }
 
 
 

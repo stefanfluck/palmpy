@@ -345,7 +345,8 @@ for i in range(totaldomains):
             pavarr = np.where ( pavarr[:,:] != -9999, 1, mst.fillvalues['pavement_type']) #pavement_type set where shp is non-fillvalue. TODO: mit einem map dict auch pavements richtig klassifizieren.
        
         #create surface fraction array
-        soilarr = mst.makesoilarray(vegarr,pavarr) #finally do soilarray depending on vegarr and pavarr, mapping see makestaticotools in palmpy
+        # soilarr = mst.makesoilarray(vegarr,pavarr) #old version.
+        soilarr = mst.makesoilarray2(vegarr,pavarr, mpd.palmveg2palmsoil, mpd.palmpav2palmsoil) #finally do soilarray depending on vegarr and pavarr, mapping see makestaticotools in palmpy
         sfrarr = mst.makesurffractarray(vegarr,pavarr,watarr) #create surfacefraction in end, as now only 0 and 1 fractions are allowed (ca r4400)
         
     if flags[i]['dobuildings2d'] == True:  
@@ -387,13 +388,12 @@ for i in range(totaldomains):
         gebtyp = np.where((gebtyp[:,:]==-9999.), mst.fillvalues['building_type'], gebtyp[:,:]) #change fillvalue to right one, import fcn defatults to -9999.0
         gebtyp = np.where( bldarr[0] == np.byte(0) , mst.fillvalues['building_type'], gebtyp[:,:] ) #set type to fillvalue where 3d bldg is too small to be resolved.
             
-    if flags[i]['dostreettypes'] == True:
+    if flags[i]['dostreettypes'] == True: #for chemistry
         roadarr = gdt.rasterandcuttlm(streetsonly, subdir_rasteredshp+'streettype'+str(ischild[i])+'.asc', 
                                         xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='OBJEKTART', alltouched=pavealltouched[i])
         roadarr = mst.mapdicttoarray(roadarr, mpd.tlmstr2palmstyp, mst.fillvalues['street_type'])
         
-
-    if ((flags[i]['dobuildings3d'] == True or flags[i]['dobuildings2d']==True) and flags[i]['dolad'] == True):
+    if ((flags[i]['dobuildings3d'] == True or flags[i]['dobuildings2d']==True) and flags[i]['dolad'] == True): #cleanup: where bulidings exist, non lad should exist.
         for m in range(len(zlad)):
             ladarr[m,:,:] = np.where( (gebid[:,:] != mst.fillvalues['building_id']), mst.fillvalues['tree_data'], ladarr[m,:,:])
 

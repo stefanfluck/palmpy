@@ -328,21 +328,68 @@ def mapbbclasses(bbarr):
 
 
 
-def makesoilarray(vegarr,pavarr):
+# def makesoilarray(vegarr,pavarr):
+#     '''
+#     Creates Soilarray from vegarr and pavement array. Everywhere where vegetation_type and pavement_type are nonzero values
+#     a soiltype class needs to be specified.
+    
+#     This means, that soil types are generically assigned based on the resulting palm vegetation type!
+#     If specific soil information is available, read in the shp files with geodatatools, 
+#     create a new dictionary in mapdicts.py and perform mapping function. 
+    
+#     Parameters
+#     ----------
+#     vegarr : np.array
+#         vegetation type array in palm classification.
+#     pavarr : np.array
+#         pavement type array in palm classification.
+
+#     Returns
+#     -------
+#     soilarr : np.array
+#         soil array classificaton.
+
+#     '''
+#     soilarr = np.ones(vegarr.shape)*fillvalues['soil_type']
+#     soilarr = np.where( (vegarr[:,:] != fillvalues['vegetation_type'] ), 2, soilarr[:,:])
+    
+#     soilarr = np.where( (vegarr[:,:] == 1), 1, soilarr[:,:])
+#     soilarr = np.where( (vegarr[:,:] == 2), 6, soilarr[:,:]) 
+#     soilarr = np.where( (vegarr[:,:] == 16), 2, soilarr[:,:])
+#     soilarr = np.where( (vegarr[:,:] == 9), 1, soilarr[:,:])
+#     soilarr = np.where( (vegarr[:,:] == 3), 1, soilarr[:,:])
+#     soilarr = np.where( (vegarr[:,:] == 13), 1, soilarr[:,:])
+#     soilarr = np.where( (vegarr[:,:] == 14), 1, soilarr[:,:])
+#     soilarr = np.where( (vegarr[:,:] == 17), 1, soilarr[:,:])
+#     soilarr = np.where( (vegarr[:,:] == 18), 1, soilarr[:,:])
+    
+#     soilarr = np.where( (pavarr[:,:] != fillvalues['pavement_type']), 3, soilarr[:,:])
+#     #TODO: Add more exact pavement classifications fpr soils
+#     return soilarr
+
+
+def makesoilarray2(vegarr,pavarr, palmveg2soildict, palmpav2soildict, fillvalues = [2,4]):
     '''
     Creates Soilarray from vegarr and pavement array. Everywhere where vegetation_type and pavement_type are nonzero values
     a soiltype class needs to be specified.
     
     This means, that soil types are generically assigned based on the resulting palm vegetation type!
     If specific soil information is available, read in the shp files with geodatatools, 
-    create a new dictionary in mapdicts.py and perform mapping function.
-
+    create a new dictionary in mapdicts.py and perform mapping function. 
+    
     Parameters
     ----------
     vegarr : np.array
         vegetation type array in palm classification.
     pavarr : np.array
         pavement type array in palm classification.
+    palmveg2soildict : np.array
+        mapping dict for palm vegetation type > palm soil type
+    palmpav2soildict : np.array
+        mapping dict for palm pavement type > palm soil type
+    fillvalues : list, optional
+        fillvalues, if not available in dicts. defaults to [2,4] (medium for vegetation,
+        fine for pavement surfaces.)
 
     Returns
     -------
@@ -350,21 +397,12 @@ def makesoilarray(vegarr,pavarr):
         soil array classificaton.
 
     '''
-    soilarr = np.ones(vegarr.shape)*fillvalues['soil_type']
-    soilarr = np.where( (vegarr[:,:] != fillvalues['vegetation_type'] ), 2, soilarr[:,:])
     
-    soilarr = np.where( (vegarr[:,:] == 1), 1, soilarr[:,:])
-    soilarr = np.where( (vegarr[:,:] == 2), 6, soilarr[:,:]) 
-    soilarr = np.where( (vegarr[:,:] == 16), 2, soilarr[:,:])
-    soilarr = np.where( (vegarr[:,:] == 9), 1, soilarr[:,:])
-    soilarr = np.where( (vegarr[:,:] == 3), 1, soilarr[:,:])
-    soilarr = np.where( (vegarr[:,:] == 13), 1, soilarr[:,:])
-    soilarr = np.where( (vegarr[:,:] == 14), 1, soilarr[:,:])
-    soilarr = np.where( (vegarr[:,:] == 17), 1, soilarr[:,:])
-    soilarr = np.where( (vegarr[:,:] == 18), 1, soilarr[:,:])
+    vegsoil = mapdicttoarray(vegarr, palmveg2soildict, fillvalues[0])
+    pavsoil = mapdicttoarray(pavarr, palmpav2soildict, fillvalues[1])
     
-    soilarr = np.where( (pavarr[:,:] != fillvalues['pavement_type']), 3, soilarr[:,:])
-    #TODO: Add more exact pavement classifications fpr soils
+    soilarr = np.maximum.reduce([vegsoil, pavsoil])
+    
     return soilarr
 
 
