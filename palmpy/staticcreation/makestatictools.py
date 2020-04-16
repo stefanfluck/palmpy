@@ -14,6 +14,42 @@ TODO:
 import numpy as np
 
 
+fillvalues = {
+   "lat": float(-9999.0),
+   "lon": float(-9999.0),
+   "E_UTM": float(-9999.0),
+   "N_UTM": float(-9999.0),   
+   "zt": float(-9999.0),
+   "buildings_2d": float(-9999.0),
+   "buildings_3d": np.byte(-127),
+   "bridges_2d": float(-9999.0),
+   "building_id": int(-9999),
+   "tree_id": int(-9999),
+   "bridges_id": int(-9999),
+   "building_type": np.byte(-127),
+   "nsurface_fraction": int(-9999),
+   "vegetation_type": np.byte(-127),
+   "vegetation_height": float(-9999.0),
+   "pavement_type": np.byte(-127),
+   "water_type": np.byte(-127),
+   "street_type": np.byte(-127), 
+   "street_crossings": np.byte(-127),   
+   "soil_type": np.byte(-127),
+   "surface_fraction": float(-9999.0),
+   "building_pars": float(-9999.0),
+   "vegetation_pars": float(-9999.0),
+   "water_pars": float(-9999.0),
+   "pavement_pars": float(-9999.0),
+   "buildings_pars": float(-9999.0),
+   "soil_pars": float(-9999.0),
+   "albedo_pars": float(-9999.0),
+   "tree_data": float(-9999.0),
+   "tree_type": np.byte(-127),
+   "lad": float(-9999.0)
+   }
+
+
+
 def checknestcoordsvalid(dxyp,dxyn,nllx,nlly):
     '''
     Checks if grid spacing of parent and child match, also if lower left position of nest is aligned 
@@ -138,40 +174,6 @@ def checknxyzisint(nx,ny,nz):
         
     return result
 
-
-fillvalues = {
-   "lat": float(-9999.0),
-   "lon": float(-9999.0),
-   "E_UTM": float(-9999.0),
-   "N_UTM": float(-9999.0),   
-   "zt": float(-9999.0),
-   "buildings_2d": float(-9999.0),
-   "buildings_3d": np.byte(-127),
-   "bridges_2d": float(-9999.0),
-   "building_id": int(-9999),
-   "tree_id": int(-9999),
-   "bridges_id": int(-9999),
-   "building_type": np.byte(-127),
-   "nsurface_fraction": int(-9999),
-   "vegetation_type": np.byte(-127),
-   "vegetation_height": float(-9999.0),
-   "pavement_type": np.byte(-127),
-   "water_type": np.byte(-127),
-   "street_type": np.byte(-127), 
-   "street_crossings": np.byte(-127),   
-   "soil_type": np.byte(-127),
-   "surface_fraction": float(-9999.0),
-   "building_pars": float(-9999.0),
-   "vegetation_pars": float(-9999.0),
-   "water_pars": float(-9999.0),
-   "pavement_pars": float(-9999.0),
-   "buildings_pars": float(-9999.0),
-   "soil_pars": float(-9999.0),
-   "albedo_pars": float(-9999.0),
-   "tree_data": float(-9999.0),
-   "tree_type": np.byte(-127),
-   "lad": float(-9999.0)
-   }
 
 
 def loadascgeodata(filename):
@@ -680,56 +682,56 @@ def setalbedovalue(albedopars, vegpars, filterarr, filtervalue, newvalue, npar):
 
 
 
-def mapstreettypes(roadarr):
-    '''
-    map street classes from swisstlm (0-22) to approximately the ones from palm
-    categorization. resembles openstreetmap classes. Best guess applied in 
-    mapping dictionary.
-    required for chem emission parametrization
+# def mapstreettypes(roadarr):
+#     '''
+#     map street classes from swisstlm (0-22) to approximately the ones from palm
+#     categorization. resembles openstreetmap classes. Best guess applied in 
+#     mapping dictionary.
+#     required for chem emission parametrization
                 
-    Parameters
-    ----------
-    roadarr : np.array
-        tlm objektarten für roads. fillvalue shall be -9999.
+#     Parameters
+#     ----------
+#     roadarr : np.array
+#         tlm objektarten für roads. fillvalue shall be -9999.
     
-    Returns
-    -------
-    street_type : np.array
-        street_types array with palm classification for road types.   
+#     Returns
+#     -------
+#     street_type : np.array
+#         street_types array with palm classification for road types.   
     
-    '''
+#     '''
     
-    import numpy as np
-    mapdict = {-9999 : fillvalues['street_type'],
-               0    : 18,
-               1    : 18,
-               2    : 17,
-               3    : 7,
-               4    : 16,
-               5    : 9,
-               6    : 9,
-               8    : 13,
-               9    : 11, 
-               10   : 8, 
-               11   : 8, 
-               12   : 7,
-               13   : 7,
-               14   : fillvalues['street_type'],
-               15   : 4,
-               16   : 3,
-               17   : 3,
-               18   : 3,
-               19   : 3,
-               20   : 13,
-               21   : 15,
-               22   : 3,
-               99   : fillvalues['street_type']}
-    street_type = np.vectorize(mapdict.get)(roadarr)
-    return street_type
+#     import numpy as np
+#     mapdict = {-9999 : fillvalues['street_type'],
+#                0    : 18,
+#                1    : 18,
+#                2    : 17,
+#                3    : 7,
+#                4    : 16,
+#                5    : 9,
+#                6    : 9,
+#                8    : 13,
+#                9    : 11, 
+#                10   : 8, 
+#                11   : 8, 
+#                12   : 7,
+#                13   : 7,
+#                14   : fillvalues['street_type'],
+#                15   : 4,
+#                16   : 3,
+#                17   : 3,
+#                18   : 3,
+#                19   : 3,
+#                20   : 13,
+#                21   : 15,
+#                22   : 3,
+#                99   : fillvalues['street_type']}
+#     street_type = np.vectorize(mapdict.get)(roadarr)
+#     return street_type
 
 
 
-def mapclasswithdict(array, mapdict, fillvalue=np.byte(-127):
+def mapdicttoarray(array, mapdict, fillvalue=np.byte(-127)):
     '''
     Maps all entries of array according to new values given in mapdict. If key is
     not found, fillvalue is assigned.

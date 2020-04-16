@@ -67,7 +67,8 @@ palmpav2palmsoil = {    0:3,
                     }
 
 #%% swissTLM3D street Objektart to PALM street type
-tlmstr2palmstyp =   {     -9999 : mst.fillvalues['street_type'],
+tlmstr2palmstyp =   {     
+                          #-9999 : mst.fillvalues['street_type'],
                            0    : 18,
                            1    : 18,
                            2    : 17,
@@ -81,7 +82,7 @@ tlmstr2palmstyp =   {     -9999 : mst.fillvalues['street_type'],
                            11   : 8, 
                            12   : 7,
                            13   : 7,
-                           14   : mst.fillvalues['street_type'],
+                           #14   : mst.fillvalues['street_type'],
                            15   : 4,
                            16   : 3,
                            17   : 3,
@@ -90,7 +91,7 @@ tlmstr2palmstyp =   {     -9999 : mst.fillvalues['street_type'],
                            20   : 13,
                            21   : 15,
                            22   : 3,
-                           99   : mst.fillvalues['street_type'],
+                           #99   : mst.fillvalues['street_type'],
                      }
 
 

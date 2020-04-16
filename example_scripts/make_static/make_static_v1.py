@@ -390,7 +390,7 @@ for i in range(totaldomains):
     if flags[i]['dostreettypes'] == True:
         roadarr = gdt.rasterandcuttlm(streetsonly, subdir_rasteredshp+'streettype'+str(ischild[i])+'.asc', 
                                         xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='OBJEKTART', alltouched=pavealltouched[i])
-        roadarr = mst.mapstreettypes(roadarr)
+        roadarr = mst.mapdicttoarray(roadarr, mpd.tlmstr2palmstyp, mst.fillvalues['street_type'])
         
 
     if ((flags[i]['dobuildings3d'] == True or flags[i]['dobuildings2d']==True) and flags[i]['dolad'] == True):
