@@ -327,7 +327,7 @@ The following questions are written down here for a reason. They are important q
 
 - Are the static driver time stamps, end_times and skip_time_data_output parameters in the namelists correct?
 - Are you simulating the correct day?
-- Have you supplied "d3#/r **restart**" when you want to continue your run after?
+- Have you supplied ``-a "d3#/r restart"`` when you want to continue your run after? If not, its all lost.
 - Have you checked that output variables are really only supplied ones, especially the _av ones? (These arrays are set up after skip_time_data_output, if you skip large parts of your simulations, an error is raised and the simulation is lost)
 - 
 
