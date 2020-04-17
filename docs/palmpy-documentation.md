@@ -319,6 +319,18 @@ VAPOR works on the basis of vdc files. NetCDF files can be converted into vdc fi
 
 
 
+## PALM Simulation Lessons Learned
+
+The following questions are written down here for a reason. They are important questions to ask yourself when simulating with PALM.
+
+
+
+- Are the static driver time stamps, end_times and skip_time_data_output parameters in the namelists correct?
+- Are you simulating the correct day?
+- Have you supplied "d3#/r **restart**" when you want to continue your run after?
+- Have you checked that output variables are really only supplied ones, especially the _av ones? (These arrays are set up after skip_time_data_output, if you skip large parts of your simulations, an error is raised and the simulation is lost)
+- 
+
 ---
 
 <div style="page-break-after: always; break-after: page;"></div>
@@ -328,7 +340,7 @@ VAPOR works on the basis of vdc files. NetCDF files can be converted into vdc fi
 
 ## Castor / Pollux Cluster
 
-load required modules to run PALM (without parallel I/O, no RRTMG!)
+load required modules to run PALM (**basic configuration**, without parallel I/O, no RRTMG!)
 
 ```bash
 module load gnu mpich2/3.3.1-gnu hdf5/1.8.15-gnu7 netcdf/4.6.1-gnu7 netcdf/4.4.4-gfort7
