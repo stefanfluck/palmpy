@@ -329,7 +329,7 @@ The following questions are written down here for a reason. They are important q
 - Are you simulating the correct day?
 - Have you supplied ``-a "d3#/r restart"`` when you want to continue your run after? If not, its all lost.
 - Have you checked that output variables are really only supplied ones, especially the _av ones? (These arrays are set up after skip_time_data_output, if you skip large parts of your simulations, an error is raised and the simulation is lost)
-- 
+- A simulation can be started with ``palmrun ...... -v > logfile &``. With this, the output is piped into a logfile and with ``&`` the command is executed in a subshell. This means, that one can log out of the cluster without the palmrun routine being aborted. This could also be achieved with ``nohup palmrun .... -v``, which apparently also pipes the output to a nohup.log file (not tested).
 
 ---
 

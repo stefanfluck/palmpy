@@ -277,11 +277,66 @@ def childifyfilename(fileout, ischild):
 
 
 
-def mapbbclasses(bbarr):
+# def mapbbclasses(bbarr):
+#     '''
+#     Take the TLM bodenbedeckung as numpy array (see geodatatools.py or loadascgeodata())
+#     and translate the tlm classes into palm classes. This works based on the Bodenbedeckung-
+#     Dataset so far. The pavement-array is empty after applying this function, but it has
+#     to be created and be present anyway. If there are paved surfaces (roads, parking lots),
+#     supply a separate file.
+
+#     TODO: HAVE MAPPING DICT AS INPUT. in fact, do it with a config file that is read and
+#     also applies to the other veg_pars stuff.
+
+#     Parameters
+#     ----------
+#     bbarr : np.arr
+#         numpy array of TLM bodenbedeckung.
+
+#     Returns
+#     -------
+#     vegarr : np.arr
+#         vegetation classification for palm.
+#     pavarr : np.arr
+#         pavement classification for palm. returned empty so far.
+#     watarr : np.arr
+#         water classification for palm.
+#     soilarr : np.arr
+#         soil classification for palm.
+#     '''
+#     import numpy as np
+    
+#     #vegetation array, was done before knowing np.vectorization(dict.get)(inarr)
+#     vegarr = np.ones(bbarr.shape)*fillvalues['vegetation_type']#-127
+#     vegarr[bbarr==0]   = 3  # unclassified > short grass
+#     vegarr[bbarr==1]   = 9  # fels > desert
+#     vegarr[bbarr==6]   = 16 # gebueschwald > deciduous shrubs
+#     vegarr[bbarr==7]   = 9  # lockergestein > desert
+#     vegarr[bbarr==9]   = 13 # Gletscher > ice caps and glaciers
+#     vegarr[bbarr==11]  = 14 # Feuchtgebiet > bogs and marshes
+#     vegarr[bbarr==12]  = 17 # Wald > mixed Forest/woodland
+#     vegarr[bbarr==13]  = 18 # Wald offen > interrupted forest
+
+#     #pavement array
+#     pavarr = np.ones(bbarr.shape)*fillvalues['pavement_type']
+
+#     #water array
+#     watarr = np.ones(bbarr.shape)*fillvalues['water_type']
+#     watarr[bbarr==5]   = 2 #fliessgewaesser > river
+#     watarr[bbarr==10]  = 1 #stehendes gewaesser > lake
+
+#     return vegarr,pavarr,watarr 
+
+
+
+def mapbbclasses2(bbarr, bb2palmvegdict, bb2palmwatdict, 
+                  fillvalue=[fillvalues['vegetation_type'], fillvalues['water_type']]):
     '''
     Take the TLM bodenbedeckung as numpy array (see geodatatools.py or loadascgeodata())
     and translate the tlm classes into palm classes. This works based on the Bodenbedeckung-
-    Dataset so far. The pavement-array is empty for now - use other functions to define pavements.
+    Dataset so far. The pavement-array is empty after applying this function, but it has
+    to be created and be present anyway. If there are paved surfaces (roads, parking lots),
+    supply a separate file.
 
     TODO: HAVE MAPPING DICT AS INPUT. in fact, do it with a config file that is read and
     also applies to the other veg_pars stuff.
@@ -290,6 +345,12 @@ def mapbbclasses(bbarr):
     ----------
     bbarr : np.arr
         numpy array of TLM bodenbedeckung.
+    bb2palmvegdict: dict
+        dictionary mapping input bb classes to palm vegetation classes.
+    bb2palmwatdict: dict
+        dictionary mapping input bb classes to palm water classes.
+    fillvalue : list
+        fillvalues, that are set if value does not correspond to a dict key.
 
     Returns
     -------
@@ -299,30 +360,15 @@ def mapbbclasses(bbarr):
         pavement classification for palm. returned empty so far.
     watarr : np.arr
         water classification for palm.
-    soilarr : np.arr
-        soil classification for palm.
+
     '''
     import numpy as np
     
-    #vegetation array, was done before knowing np.vectorization(dict.get)(inarr)
-    vegarr = np.ones(bbarr.shape)*fillvalues['vegetation_type']#-127
-    vegarr[bbarr==0]   = 3  # unclassified > short grass
-    vegarr[bbarr==1]   = 9  # fels > desert
-    vegarr[bbarr==6]   = 16 # gebueschwald > deciduous shrubs
-    vegarr[bbarr==7]   = 9  # lockergestein > desert
-    vegarr[bbarr==9]   = 13 # Gletscher > ice caps and glaciers
-    vegarr[bbarr==11]  = 14 # Feuchtgebiet > bogs and marshes
-    vegarr[bbarr==12]  = 17 # Wald > mixed Forest/woodland
-    vegarr[bbarr==13]  = 18 # Wald offen > interrupted forest
+    vegarr = mapdicttoarray(bbarr, bb2palmvegdict, fillvalue[0])
+    watarr = mapdicttoarray(bbarr, bb2palmwatdict, fillvalue[1])
+    pavarr = np.ones(bbarr.shape)*fillvalues['pavement_type'] #empty array
 
-    #pavement array
-    pavarr = np.ones(bbarr.shape)*fillvalues['pavement_type']
-
-    #water array
-    watarr = np.ones(bbarr.shape)*fillvalues['water_type']
-    watarr[bbarr==5]   = 2 #fliessgewaesser > river
-    watarr[bbarr==10]  = 1 #stehendes gewaesser > lake
-
+    
     return vegarr,pavarr,watarr 
 
 
@@ -368,7 +414,7 @@ def mapbbclasses(bbarr):
 #     return soilarr
 
 
-def makesoilarray2(vegarr,pavarr, palmveg2soildict, palmpav2soildict, fillvalues = [2,4]):
+def makesoilarray2(vegarr,pavarr, palmveg2soildict, palmpav2soildict, fillvalue = [2,4]):
     '''
     Creates Soilarray from vegarr and pavement array. Everywhere where vegetation_type and pavement_type are nonzero values
     a soiltype class needs to be specified.
@@ -387,7 +433,7 @@ def makesoilarray2(vegarr,pavarr, palmveg2soildict, palmpav2soildict, fillvalues
         mapping dict for palm vegetation type > palm soil type
     palmpav2soildict : np.array
         mapping dict for palm pavement type > palm soil type
-    fillvalues : list, optional
+    fillvalue : list, optional
         fillvalues, if not available in dicts. defaults to [2,4] (medium for vegetation,
         fine for pavement surfaces.)
 
@@ -397,9 +443,9 @@ def makesoilarray2(vegarr,pavarr, palmveg2soildict, palmpav2soildict, fillvalues
         soil array classificaton.
 
     '''
-    
-    vegsoil = mapdicttoarray(vegarr, palmveg2soildict, fillvalues[0])
-    pavsoil = mapdicttoarray(pavarr, palmpav2soildict, fillvalues[1])
+    #uses function from this module: "mapdicttoarray".
+    vegsoil = mapdicttoarray(vegarr, palmveg2soildict, fillvalue[0])
+    pavsoil = mapdicttoarray(pavarr, palmpav2soildict, fillvalue[1])
     
     soilarr = np.maximum.reduce([vegsoil, pavsoil])
     

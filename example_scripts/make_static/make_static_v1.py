@@ -90,7 +90,7 @@ xmax = totaldomains*[None];             ymax = totaldomains*[None]
 nx = totaldomains*[None];               ny = totaldomains*[None]
 ylen = totaldomains*[None];             nz = totaldomains*[None]
 doterrain = totaldomains*[None];        bulkvegclass = totaldomains*[None]
-dotlmbb = totaldomains*[None];          dostreetsbb = totaldomains*[None]
+dotlmbb = totaldomains*[None];          dopavedbb = totaldomains*[None]
 docropfields = totaldomains*[None];     dolad = totaldomains*[None]
 dobuildings_2d = totaldomains*[None];   dobuildings_3d = totaldomains*[None]
 dovegpars = totaldomains*[None];        doalbedopars = totaldomains*[None]
@@ -101,6 +101,7 @@ a_breihe = totaldomains*[None];         b_breihe = totaldomains*[None]
 a_ebgebu = totaldomains*[None];         b_ebgebu = totaldomains*[None]
 llx = totaldomains*[0.0];               lly = totaldomains*[0.0]
 flags = totaldomains*[{}];              pavealltouched = totaldomains*[None]
+bulkpavclass = totaldomains*[None]
 
 #iterate over every section name, if it begins with "domain" then there are domain parameters in it. 0-indexed! 0 is parent.
 for i in range(0,len(cfp.sections())):
@@ -127,7 +128,7 @@ for i in range(0,len(cfp.sections())):
             lly[index] = ymin[index]-ymin[0]
         doterrain[index] = cfp.getboolean(section,'doterrain', fallback=False)  #read flags from config file
         dotlmbb[index] = cfp.getboolean(section,'dotlmbb', fallback=False)
-        dostreetsbb[index] = cfp.getboolean(section,'dostreetsbb', fallback=False)
+        dopavedbb[index] = cfp.getboolean(section,'dopavedbb', fallback=False)
         docropfields[index] = cfp.getboolean(section,'docropfields', fallback=False)
         dolad[index] = cfp.getboolean(section,'dolad', fallback=False)
         dobuildings_2d[index] = cfp.getboolean(section,'dobuildings_2d', fallback=False)
@@ -137,7 +138,8 @@ for i in range(0,len(cfp.sections())):
         dostreettypes[index] = cfp.getboolean(section,'dostreettypes', fallback=False)
         
         #method = XXX -> TODO: implement a method selector for lad constant or lad with beta distribution
-        bulkvegclass[index] = cfp.getint(section,'bulkvegclass', fallback=None)   #read canopy variables from config file
+        bulkvegclass[index] = cfp.getint(section,'bulkvegclass', fallback=3)   #read canopy variables from config file
+        bulkpavclass[index] = cfp.getint(section,'bulkpavclass', fallback=1)   
         pavealltouched[index] = cfp.getboolean(section, 'pave_alltouched', fallback = False)
         lai_forest[index] = cfp.getfloat(section,'lai_forest', fallback=None)
         lai_breihe[index] = cfp.getfloat(section,'lai_breihe', fallback=None)
@@ -155,7 +157,7 @@ for i in range(0,len(cfp.sections())):
         
         flags[index] = {'doterrain':       doterrain[index], #create flags dictionary 
                         'dotlmbb':         dotlmbb[index],
-                        'dostreetsbb':     dostreetsbb[index], #requires dotlmbb = True
+                        'dopavedbb':     dopavedbb[index], #requires dotlmbb = True
                         'docropfields':    docropfields[index], #requires dotlmbb = true
                         'dolad':           dolad[index], #for now: resolved tree file, treerows file and singletree file needed, requires dotlmbb=true
                         'dobuildings2d':   dobuildings_2d[index],
@@ -229,8 +231,13 @@ for i in range(totaldomains):
     ##### treat tlm-bb bulk parametrization
     if flags[i]['dotlmbb'] == True:
         bbdat = gdt.rasterandcuttlm(bb, subdir_rasteredshp+'bb'+str(ischild[i])+'.asc',xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i], burnatt='OBJEKTART')
-        vegarr, pavarr, watarr = mst.mapbbclasses(bbdat)  #map tlm bodenbedeckungs-kategorien to the palm definitions.
-        
+        # vegarr, pavarr, watarr = mst.mapbbclasses(bbdat)  #map tlm bodenbedeckungs-kategorien to the palm definitions.
+        vegarr, pavarr, watarr = mst.mapbbclasses2(bbdat, mpd.tlmbb2palmveg, mpd.tlmbb2palmwat)  #map tlm bodenbedeckungs-kategorien to the palm definitions.
+            #or: function content in three lines.
+            # vegarr = mst.mapdicttoarray(bbdat, mpd.tlmbb2palmveg, mst.fillvalues['vegetation_type'])
+            # watarr = mst.mapdicttoarray(bbdat, mpd.tlmbb2palmwat, mst.fillvalues['water_type'])
+            # pavarr = np.ones((ny[i],nx[i]))*mst.fillvalues['pavement_type'] #empty array
+
         
     ##### BLOCK FOR MODIFICATIONS TO VEGPARS AND ALBEDOPARS
     
@@ -337,13 +344,14 @@ for i in range(totaldomains):
             vegarr = np.where( (vegarr[:,:]==bulkvegclass[i]) & (cropheight[:,:] != -9999), 2, vegarr[:,:]) #where vegarr is set to bulk class and crops are found, set class to 2 (crops)
         
         
-        if flags[i]['dostreetsbb'] == True:
+        if flags[i]['dopavedbb'] == True:
             paved = gdt.rasterandcuttlm(pavementareas, subdir_rasteredshp+'pavement'+str(ischild[i])+'.asc',xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i], burnatt='OBJEKTART', alltouched=pavealltouched[i])
             vegarr = np.where( paved[:,:] != -9999 , mst.fillvalues['vegetation_type'], vegarr[:,:]) #overwrite vegarr where pavement areas are found with fillvalue
             watarr = np.where( paved[:,:] != -9999 , mst.fillvalues['water_type'], watarr[:,:]) #overwrite watarr where pavement areas are found with fillvalue
-            pavarr = paved
-            pavarr = np.where ( pavarr[:,:] != -9999, 1, mst.fillvalues['pavement_type']) #pavement_type set where shp is non-fillvalue. TODO: mit einem map dict auch pavements richtig klassifizieren.
-       
+            # pavarr = paved
+            # pavarr = np.where ( pavarr[:,:] != -9999, 1, mst.fillvalues['pavement_type']) #pavement_type set where shp is non-fillvalue. TODO: mit einem map dict auch pavements richtig klassifizieren.
+            pavarr = mst.mapdicttoarray(paved, mpd.tlmpav2palmpav, fillvalue = bulkpavclass[i]) #classify pavement array acc. to dict.
+
         #create surface fraction array
         # soilarr = mst.makesoilarray(vegarr,pavarr) #old version.
         soilarr = mst.makesoilarray2(vegarr,pavarr, mpd.palmveg2palmsoil, mpd.palmpav2palmsoil) #finally do soilarray depending on vegarr and pavarr, mapping see makestaticotools in palmpy
@@ -392,8 +400,9 @@ for i in range(totaldomains):
         roadarr = gdt.rasterandcuttlm(streetsonly, subdir_rasteredshp+'streettype'+str(ischild[i])+'.asc', 
                                         xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='OBJEKTART', alltouched=pavealltouched[i])
         roadarr = mst.mapdicttoarray(roadarr, mpd.tlmstr2palmstyp, mst.fillvalues['street_type'])
-        
-    if ((flags[i]['dobuildings3d'] == True or flags[i]['dobuildings2d']==True) and flags[i]['dolad'] == True): #cleanup: where bulidings exist, non lad should exist.
+    
+    #cleanup: where bulidings exist, non lad should exist.    
+    if ((flags[i]['dobuildings3d'] == True or flags[i]['dobuildings2d']==True) and flags[i]['dolad'] == True): 
         for m in range(len(zlad)):
             ladarr[m,:,:] = np.where( (gebid[:,:] != mst.fillvalues['building_id']), mst.fillvalues['tree_data'], ladarr[m,:,:])
 
