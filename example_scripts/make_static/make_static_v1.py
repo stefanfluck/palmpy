@@ -11,6 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
+
 #%% Read config file and set flags and values appropriately.
 
 cfp = ConfigParser(allow_no_value=True) #
@@ -397,9 +398,24 @@ for i in range(totaldomains):
         gebtyp = np.where( bldarr[0] == np.byte(0) , mst.fillvalues['building_type'], gebtyp[:,:] ) #set type to fillvalue where 3d bldg is too small to be resolved.
             
     if flags[i]['dostreettypes'] == True: #for chemistry
-        roadarr = gdt.rasterandcuttlm(streetsonly, subdir_rasteredshp+'streettype'+str(ischild[i])+'.asc', 
-                                        xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='OBJEKTART', alltouched=pavealltouched[i])
-        roadarr = mst.mapdicttoarray(roadarr, mpd.tlmstr2palmstyp, mst.fillvalues['street_type'])
+        # roadarr = gdt.rasterandcuttlm(streetsonly, subdir_rasteredshp+'streettype'+str(ischild[i])+'.asc', 
+        #                                 xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='OBJEKTART', alltouched=pavealltouched[i])
+        # roadarr = mst.mapdicttoarray(roadarr, mpd.tlmstr2palmstyp, mst.fillvalues['street_type'])
+        
+        gdt.splitroadsshp(streetsonly, subdir_rasteredshp, mpd.tlmmajroads, mpd.tlmminroads)
+        
+        majroads = gdt.rasterandcuttlm(subdir_rasteredshp+'majorroads.shp', subdir_rasteredshp+'streettypemajor'+str(ischild[i])+'.asc', 
+                                xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='OBJEKTART', alltouched=pavealltouched[i])
+        majroads = mst.mapdicttoarray(majroads, mpd.tlmstr2palmstyp, mst.fillvalues['street_type'])
+        minroads = gdt.rasterandcuttlm(subdir_rasteredshp+'minorroads.shp', subdir_rasteredshp+'streettypeminor'+str(ischild[i])+'.asc', 
+                                xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='OBJEKTART', alltouched=pavealltouched[i])
+        minroads = mst.mapdicttoarray(minroads, mpd.tlmstr2palmstyp, mst.fillvalues['street_type'])
+        
+        roadarr = np.copy(majroads)
+        roadarr = np.where( (majroads[:,:] == mst.fillvalues['street_type']), minroads[:,:], majroads[:,:])
+       
+    
+    
     
     #cleanup: where bulidings exist, non lad should exist.    
     if ((flags[i]['dobuildings3d'] == True or flags[i]['dobuildings2d']==True) and flags[i]['dolad'] == True): 

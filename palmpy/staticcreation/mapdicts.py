@@ -73,35 +73,9 @@ tlmstr2palmstyp =   {
                            #99   : mst.fillvalues['street_type'],
                      }
 
-
-# swissTLM3D paved surfaces Objektart to PALM street type
-tlmpaved2palmpave =   {     
-                          #-9999 : mst.fillvalues['street_type'],
-                           0    : 18,
-                           1    : 18,
-                           2    : 17,
-                           3    : 7,
-                           4    : 16,
-                           5    : 9,
-                           6    : 9,
-                           8    : 13,
-                           9    : 11, 
-                           10   : 8, 
-                           11   : 8, 
-                           12   : 7,
-                           13   : 7,
-                           #14   : mst.fillvalues['street_type'],
-                           15   : 4,
-                           16   : 3,
-                           17   : 3,
-                           18   : 3,
-                           19   : 3,
-                           20   : 13,
-                           21   : 15,
-                           22   : 3,
-                           #99   : mst.fillvalues['street_type'],
-                     }
-
+#classification into major and minor roads: which tlm classes are major (emission relevant)
+tlmmajroads = [0,1,2,4,5,6,8,9,20,21]
+tlmminroads = [3,10,11,12,13,15,16,17,18,19,22]
 
 #%% PALM 2 PALM
 # assign PALM soil type to PALM vegetation types

@@ -196,6 +196,50 @@ def cutortho(filein, fileout, xmin, xmax, ymin, ymax, xres, yres):
     ds = gdal.Translate(fileout, ds, projWin=[xmin, ymax, xmax, ymin], xRes=xres, yRes = yres)
 
 
+
+#%% geopandas functions to precut shp files and set attribute tables right.
+import geopandas as gpd
+
+def splitroadsshp(path, outpath, majroadlist, minroadlist, attrname = 'OBJEKTART'):
+    '''
+    Takes a streets shapefile, splits the file based on an attribute and
+    supplied values for it as major roads and minor roads.
+    
+    path : str
+        path to streets file
+        
+    outfile : str
+        output file.
+        
+    majroadlist : list
+        list of values that are major road types
+    
+    minroadlist : list
+        list of values that are minor road types
+    
+    attrname : string
+        attribute name that contains the types
+        
+    Returns
+    -------
+    Saves two new files.   
+    
+    
+    '''
+    
+    gdf = gpd.read_file(path)
+    
+    gdfmaj = gdf.loc[gdf[attrname].isin(majroadlist)]
+    if len(minroadlist)>0:
+        gdfmin = gdf.loc[gdf[attrname].isin(minroadlist)]
+    
+    gdfmaj.to_file(outpath+'majorroads.shp')
+    if len(minroadlist)>0:
+        gdfmin.to_file(outpath+'minorroads.shp')
+
+
+
+
 #%%
 # par = cutalti('swissALTI3D2018.tif', 'parentdhm.asc', xmin=730000, xmax=742000, ymin=190000, ymax=202000, xres=40, yres=40)
 # chi = cutalti('swissALTI3D2018.tif', 'childdhm.asc', xmin=735000, xmax=738000, ymin=194720, ymax=197720, xres=20, yres=20)
