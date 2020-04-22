@@ -82,6 +82,8 @@ try:
 except:
     pass    
 
+
+
 #initialize all variable lists
 ischild = totaldomains*[None];          xmin = totaldomains*[None]
 ymin = totaldomains*[None];             zmax = totaldomains*[None] 
@@ -170,7 +172,18 @@ for i in range(0,len(cfp.sections())):
         #a = '1,2,3,4' #hint for implementation of vegpars/albedopars
         #b = a.split(',')
         #c = list(map(int,b))
-        
+
+#read in probe locations
+probes_E = cfp.get('probes', 'probes_E', fallback=str(xmin[0]))
+if probes_E != '':
+    probes_E = list(map(float,probes_E.replace(' ','').rstrip(',').split(',')))
+    probes_E = list(map(round,probes_E))
+probes_N = cfp.get('probes', 'probes_N', fallback=str(ymin[0]))
+if probes_N != '':
+    probes_N = list(map(float,probes_N.replace(' ','').rstrip(',').split(',')))
+    probes_N = list(map(round,probes_N))
+    
+    
 #further checks:
 print('\nFinalizing Checks:\n')
 
@@ -178,6 +191,7 @@ mst.checknxyzisint(nx,ny,nz) #checks if nx ny nz values dont have a float part
 nx = list(map(int,nx))
 ny = list(map(int,ny))
 nz = list(map(int,nz))
+
 #visualize domain boundaries, cut the image new for that with higher res than parent resolution.
 #TODO: if query for cutorthoimage.
 gdt.cutortho(ortho, subdir_rasteredshp+filenames+'_baseortho.tif', 
@@ -193,6 +207,18 @@ for a in range(1,totaldomains):
                           xlen[a]/orthores,ylen[a]/orthores, 
                           linewidth=3, edgecolor='r', facecolor='none')
     ax.add_patch(rect)
+    
+for b in range(len(probes_E)):
+    plt.plot( (probes_E[b]-xmin[0]+50)/orthores, 
+             (ylen[0]-(probes_N[b]-ymin[0]))/orthores, 
+             marker='$'+str(b+1)+'$', markeredgecolor = 'red', markerfacecolor='None',
+             markersize=6)
+    plt.plot( (probes_E[b]-xmin[0])/orthores, 
+             (ylen[0]-(probes_N[b]-ymin[0]))/orthores, 
+             marker='.', markersize=6, color='red')
+
+
+
 if extentsonly == True:
     plt.show()
     print('\n\nINFORMATION: Plot is only shown, not saved.')
@@ -203,10 +229,9 @@ else:
 
 
 
+#%%generation with for loop
 
 if extentsonly == False:
-    
-    #%%generation with for loop
     for i in range(totaldomains):
         print('\n\n---------------------------\nSTART CREATING DOMAIN '+str(i))
         infodict = {'version':           1, #assemble the infodict, will be added as global attributes to static file.
@@ -536,9 +561,18 @@ if extentsonly == False:
     # print('\nNormalized by dxzy')
     # for m in range(len(rti)):
     #     print('Domain '+str(m)+':\t\t'+str(rti[m])+'\t'+str( round(rti[m]/sum(rti),4)*100 )+' %')
+        
+    print('\n\nProbes (for masked output):\n', file=parfile)
+    for b in range(totaldomains):
+        print(f'Domain {b}:', file=parfile)
+        for c in range(len(probes_E)):
+            print(f"\tProbe {c+1} x,y\t\t{probes_E[c]-xmin[b]},{probes_N[c]-ymin[b]}", file=parfile)
+        print('\n')
     
     parfile.close() 
+  
     
+    #write to prompt
     print('\n\n-----------------------------------------\nSIMULATION SETUP SUMMARY')
     print('-----------------------------------------')
     domaincells = totaldomains*[0]
@@ -553,13 +587,22 @@ if extentsonly == False:
         print(f"\tOrigin E/N:\t\t{xmin[n]}/{ymin[n]}")
         if n > 0:
             print('\tll-Position for &nesting_parameters\n\tx,y:\t\t\t'+str(llx[n])+', '+str(lly[n]))
-    
+        # for c in range(len(probes_E)):
+        #     print(f"\tProbe {c+1} relative x,y\t{probes_E[c]-xmin[n]},{probes_N[c]-ymin[n]}")
     print('\nTotal Number of Cells:\t\t'+"%4.2e" % (sum(domaincells)))
     for m in range(len(domaincells)):
         print('  Domain '+str(m)+':\t\t\t%4.3e\t= %3.2d %%' % (domaincells[m], round(domaincells[m]/sum(domaincells),4)*100))
     
     print('\nTopo shifted down by:\t\t{:.2f} Meter'.format(origin_z))
     print('\nRuntime length score:\t\t'+str(round((sum(domaincells)*setvmag/min(xres))/1e06,2)))
+    
+    print('\n\nProbes (for masked output):\n')
+    for b in range(totaldomains):
+        print(f'Domain {b}:')
+        for c in range(len(probes_E)):
+            print(f"\tProbe {c+1} x,y\t\t{probes_E[c]-xmin[b]},{probes_N[c]-ymin[b]}")
+        print('\n')
+    
     
     
     #%% create inifor namelist and save to file
