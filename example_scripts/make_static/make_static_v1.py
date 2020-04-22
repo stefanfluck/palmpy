@@ -197,7 +197,7 @@ nz = list(map(int,nz))
 gdt.cutortho(ortho, subdir_rasteredshp+filenames+'_baseortho.tif', 
              xmin[0],xmax[0],ymin[0],ymax[0],orthores,orthores)
 
-fig = plt.figure(figsize=(12,12))
+fig = plt.figure(figsize=(16/2.54,16/2.54))
 ax = fig.gca()
 img = plt.imread(subdir_rasteredshp+filenames+'_baseortho.tif')
 ax.imshow(img)
@@ -209,13 +209,13 @@ for a in range(1,totaldomains):
     ax.add_patch(rect)
     
 for b in range(len(probes_E)):
-    plt.plot( (probes_E[b]-xmin[0]+50)/orthores, 
+    ax.plot( (probes_E[b]-xmin[0]-(xlen[0]/orthores/10))/orthores, 
              (ylen[0]-(probes_N[b]-ymin[0]))/orthores, 
-             marker='$'+str(b+1)+'$', markeredgecolor = 'red', markerfacecolor='None',
-             markersize=6)
-    plt.plot( (probes_E[b]-xmin[0])/orthores, 
-             (ylen[0]-(probes_N[b]-ymin[0]))/orthores, 
-             marker='.', markersize=6, color='red')
+             marker='$'+str(b+1)+'$', color='red',
+             markersize=8)
+    ax.plot( (probes_E[b]-xmin[0])/orthores, 
+              (ylen[0]-(probes_N[b]-ymin[0]))/orthores, 
+              marker='.', markersize=8, color='red')
 
 
 
@@ -225,7 +225,6 @@ if extentsonly == True:
     print('\n\n-----------------------------------------\nDOMAIN INFO')
     print('-----------------------------------------')
     domaincells = totaldomains*[0]
-    rti = totaldomains*[0]
     
     for n in range(totaldomains):
         print('\nDomain '+str(n)+':')
@@ -558,7 +557,6 @@ if extentsonly == False:
     print('-----------------------------------------\nSIMULATION SETUP SUMMARY', file = parfile)
     print('-----------------------------------------', file = parfile)
     domaincells = totaldomains*[0]
-    rti = totaldomains*[0]
     
     for n in range(totaldomains):
         print('\nDomain '+str(n)+':', file=parfile)
@@ -575,10 +573,6 @@ if extentsonly == False:
         print('  Domain '+str(m)+':\t\t\t%4.3e\t= %3.2d %%' % (domaincells[m], round(domaincells[m]/sum(domaincells),4)*100), file=parfile)
     print('\nTopo shifted down by:\t\t{:.2f} Meter'.format(origin_z), file=parfile)
     print('\nRuntime length score:\t\t'+str(round((sum(domaincells)*setvmag/min(xres))/1e6,2)), file = parfile)
-    
-    # print('\nNormalized by dxzy')
-    # for m in range(len(rti)):
-    #     print('Domain '+str(m)+':\t\t'+str(rti[m])+'\t'+str( round(rti[m]/sum(rti),4)*100 )+' %')
         
     print('\n\nProbes (for masked output):\n', file=parfile)
     for b in range(totaldomains):
