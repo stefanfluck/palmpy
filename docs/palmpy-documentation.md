@@ -82,6 +82,25 @@ manual control with python programming language.
 
 ### Python Environment
 
+In order for palmpy to operate, you need the following packages:
+
+
+
+| Package Name | Version used in developing palmpy |
+| -----------: | :-------------------------------: |
+|        numpy |              1.18.1               |
+|        scipy |               1.4.1               |
+|   matplotlib |               3.1.3               |
+|       pillow |               7.0.0               |
+|      netcdf4 |               1.4.2               |
+|         gdal |               3.0.2               |
+|        pynco |               1.0.0               |
+|     rasterio |               1.1.0               |
+|     (pandas) |               1.0.3               |
+|  (geopandas) |               0.6.1               |
+
+
+
 It is strongly recommended to set up python with the conda package management ecosystem. There are many ways to do it. Users relatively unfamiliar with python can install the full [Anaconda](https://www.anaconda.com/) software, which comes with the most relevant python packages for doing science, but also with some baggage in form of software. More experienced users, who know what packages they need and are able to install them easily, can install python with a [Miniconda](https://docs.conda.io/en/latest/miniconda.html) installer, which only installs the bare minimum of packages and python on the machine (much smaller download size). Most importantly, the conda package manager is installed as well. 
 
 Once a running conda environment (usually named ``base``, you can check it with entering ``conda env list`` into the Anaconda Prompt (in Windows) or your regular shell (in Linux)) is present. we set up a new environment that contains all necessary packages to run palmpy. Environment are an essential tool when it comes to software development and allows to "freeze" an environment to have defined package versions and dependencies for a particular project. After the following process, an environment "palm" (or however you name it) shall be present in the conda environment list.
@@ -100,9 +119,15 @@ Depending on your system, choose the appropriate .yml file from the ``env`` fold
   conda env create -f palmenv-versinfo.yml -n <envname>
 ```
 
-If it does not work, use the .yml file without version numbers attached to the packages.
+The string after ``-f`` represents the path to the .yml file, the string after ``-n`` the name of the environment that you create. If it does not work because some packages are not found, use the .yml file without version numbers attached to the packages. If there are errors relating to "invalid name" or similar, check your path to the .yml file.
 
 
+
+#### A Word on Environments and Packages
+
+This concept of having various environments with the same packages over and over again may be confusing to new python users at first. However, it makes perfect sense to have controlled package versions for a project. As python modules are updated, some functions may stop working, and new functions may be added that make life much easier. Having a python environment for everyone working on a project ensures that everyone is able to execute this particular code and it can be shared among coworkers. Therefore, and because palmpy is the result of a student project, continuous maintenance will not be available. Should therefore e.g. numpy be updated and a specific function be made obsolete, on which palmpy relied on heavily, the code will simply stop working. Therefore, installing a python environment from a yml file ensures that the environment is set up correctly with correct version numbers. However, this process can be prone to errors, especially when installing an environment on different operating systems. Therefore, a .yml file without version names is included, that should work on any given operating system. 
+
+For this project, Spyder was used to write palmpy. Spyder is a package like any other and can be installed with conda. When installing multiple environments and you intend to use spyder for every one of them, it seems that you have to include the spyder package in these environments as well. In the end, when you start up spyder to work on a particular project, make sure to open the correct one - you can recognize that on the Shortcut name "Spyder (palm)" or "Spyder" (no env name for the base environment) or "Spyder (randomproject)".
 
 
 
@@ -212,7 +237,7 @@ insert Table here
 
 #### Namelist
 
-
+namelist parameters
 
 
 
@@ -329,7 +354,9 @@ The following questions are written down here for a reason. They are important q
 - Are you simulating the correct day?
 - Have you supplied ``-a "d3#/r restart"`` when you want to continue your run after? If not, its all lost.
 - Have you checked that output variables are really only supplied ones, especially the _av ones? (These arrays are set up after skip_time_data_output, if you skip large parts of your simulations, an error is raised and the simulation is lost)
-- A simulation can be started with ``palmrun ...... -v > logfile &``. With this, the output is piped into a logfile and with ``&`` the command is executed in a subshell. This means, that one can log out of the cluster without the palmrun routine being aborted. This could also be achieved with ``nohup palmrun .... -v``, which apparently also pipes the output to a nohup.log file (not tested).
+- A simulation can be started with ``palmrun ...... -v > logfile &``. With this, the output is piped into a logfile and with ``&`` the command is executed in a subshell. This means, that one can log out of the cluster without the palmrun routine being aborted. This could also be achieved with ``nohup palmrun .... -v &`` , which apparently also pipes the output to a ``nohup.out`` file (not tested).
+- When monitoring the simulation progress over a VPN connection with ``tail -f <logfile>``, it might occur that the simulation aborts with the message ``-> palmrun finished`` if the VPN session is aborted due to the computer entering energy saver mode or something else. It has proven more robust by monitoring the percentage of the simulation progress with spot checks, and await the completion of the job by monitoring the Ganglia load monitor.
+- 
 
 ---
 
@@ -359,11 +386,17 @@ export LD_LIBRARY_PATH=/cluster/home/<rrtmg_install_location>/lib/rrtmg/shared/l
 ## NCO
 
 ```bash
+# overwrite attribute grid_mapping in variable SOILTYP (if global, write global) by a c(haracter) entry
 ncatted -O -a grid_mapping,SOILTYP,o,c,'rotated_pole' soil.nc
 
+#cut a file according to those dimensions given
 ncea -d y_1,-0.5,0.5 -d x_1,-1.0,0.0 filein fileout
 
+# add a value to a variable. -O is overwrite, -s is for an arithmetic expression.
 ncap2 -O -s ‘time=time+39600’ <in> <out>
+
+# concatenate output files to one large file (only works without errors if equal variables are present)
+ncrcat -v var1,var2,var3 inputfiles outputfiles
 ```
 
 
@@ -389,6 +422,22 @@ and run ``cdo remapbil,target.grid input output``.
 Industry Standard seems to be ``remapcon`` (conservative), ``remapbil`` is bilinear remapping.
 
 
+
+## GIS / GDAL
+
+**Fill empty values in a raster with values from another raster**
+
+Example: swissAlti3d data close to the swiss borders contains only empty values outside of swiss territory. Idea: fill those areas with data from coarser NASA SRTM data. Problem: inhomogeneous resolutions and CRS (swissAlti3D is LV95 and 2x2m, NASA SRTM is WGS84 and 30x20m around Switzerland).
+
+How to:
+
+- reproject NASA SRTM Dataset to LV95 (QGIS: Raster -> Projections -> Transform)
+- cut NASA SRTM Dataset to a bit larger than the swissAlti3D subset (QGIS: Raster -> Extract -> Cut Raster to Extents)
+- resample NASA SRTM Dataset to swissALTI3D-Resolution (QGIS: right click on layer -> Save as -> set Resolution in the correct boxes)
+- With installed QGIS: Open *osgeo4w shell*. Without: Install GDAL Command Line Tools under Windows, or do it in Linux
+- ``gdal_merge -o <outfilename> <infile> <infile2>`` does the job. Here, the input files are being put on top of each other, later mentioned files are put on top of earlier ones. Resolution information comes from the first one. Output datatype is guessed from the file ending of the outfilename (.tif is your best bet). 
+
+For every QGIS operation there is a gdal equivalent, multiple steps can be done with e.g. gdal_translate. The command line is mighty: why point at things in a GUI while you could simply say what you want to do.
 
 
 

@@ -222,6 +222,24 @@ for b in range(len(probes_E)):
 if extentsonly == True:
     plt.show()
     print('\n\nINFORMATION: Plot is only shown, not saved.')
+    print('\n\n-----------------------------------------\nDOMAIN INFO')
+    print('-----------------------------------------')
+    domaincells = totaldomains*[0]
+    rti = totaldomains*[0]
+    
+    for n in range(totaldomains):
+        print('\nDomain '+str(n)+':')
+        print('\tnx/ny/nz\t\t'+str(int(nx[n]-1))+'/'+str(int(ny[n]-1))+'/'+str(int(nz[n])))
+        print('\tdx/dy/dz\t\t'+str(xres[n])+'/'+str(yres[n])+'/'+str(zres[n]))
+        domaincells[n] = nx[n]*ny[n]*nz[n]
+        print(f"\tOrigin E/N:\t\t{xmin[n]}/{ymin[n]}")
+    print('\nTotal Number of Cells:\t\t'+"%4.2e" % (sum(domaincells)))
+    for m in range(len(domaincells)):
+        print('  Domain '+str(m)+':\t\t\t%4.3e\t= %3.2d %%' % (domaincells[m], round(domaincells[m]/sum(domaincells),4)*100))
+    
+    print('\nRuntime length score:\t\t'+str(round((sum(domaincells)*setvmag/min(xres))/1e06,2)))
+
+
 else:
     plt.savefig(outpath+'domainoverview.png')
     print('Saved domainoverview.png')
@@ -382,7 +400,7 @@ if extentsonly == False:
                 watarr = np.where( paved[:,:] != -9999 , mst.fillvalues['water_type'], watarr[:,:]) #overwrite watarr where pavement areas are found with fillvalue
                 # pavarr = paved
                 # pavarr = np.where ( pavarr[:,:] != -9999, 1, mst.fillvalues['pavement_type']) #pavement_type set where shp is non-fillvalue. TODO: mit einem map dict auch pavements richtig klassifizieren.
-                pavarr = mst.mapdicttoarray(paved, mpd.tlmpav2palmpav, fillvalue = bulkpavclass[i]) #classify pavement array acc. to dict.
+                pavarr = mst.mapdicttoarray(paved, mpd.tlmpav2palmpav, fillvalue = np.byte(bulkpavclass[i])) #classify pavement array acc. to dict.
     
             #create surface fraction array
             # soilarr = mst.makesoilarray(vegarr,pavarr) #old version.
@@ -600,7 +618,7 @@ if extentsonly == False:
     for b in range(totaldomains):
         print(f'Domain {b}:')
         for c in range(len(probes_E)):
-            print(f"\tProbe {c+1} x,y\t\t{probes_E[c]-xmin[b]},{probes_N[c]-ymin[b]}")
+            print(f"\tProbe {c+1} x,y\t\t{probes_E[c]-xmin[b]}, {probes_N[c]-ymin[b]}")
         print('\n')
     
     
