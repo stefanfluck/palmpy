@@ -11,7 +11,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
-
 #%% Read config file and set flags and values appropriately.
 
 cfp = ConfigParser(allow_no_value=True) #
@@ -20,8 +19,8 @@ try:
     cfp.read(sys.argv[1]) #check if commandline argument is given for config file.
 except:
     print('No command line argument given. Using hardcoded config_file path in script.')
-    cfp.read("C:\\Users\\Stefan Fluck\\Documents\\Python Scripts\\ZAV-PALM-Scripts\\example_scripts\\make_static\\make_static.ini")
-    # cfp.read("C:\\Users\\Stefan Fluck\\Desktop\\yv_ssw_2.ini")
+    # cfp.read("C:\\Users\\Stefan Fluck\\Documents\\Python Scripts\\ZAV-PALM-Scripts\\example_scripts\\make_static\\make_static.ini")
+    cfp.read("C:\\Users\\Stefan Fluck\\Desktop\\yv_jor_1.ini")
 
 modulepath = cfp.get('paths', 'modulepath') #read modulepath from config file
 
@@ -40,6 +39,7 @@ filenames = cfp.get('settings','casename', fallback='default')+'_static'
 origin_time = cfp.get('settings', 'origin_time', fallback='2020-08-01 12:00:00 +02')
 totaldomains = cfp.getint('settings', 'totaldomains', fallback=1)
 cutorthoimg = cfp.getboolean('settings', 'cutorthoimg', fallback=False)
+extentsonly = cfp.getboolean('settings', 'extentsonly', fallback=False)
 orthores = cfp.getfloat('settings', 'orthores', fallback=5.0)
 rotationangle = cfp.getfloat('settings', 'rotationangle', fallback=0.0)
 setvmag = cfp.getfloat('settings', 'set_vmag', fallback=1.0)
@@ -193,383 +193,389 @@ for a in range(1,totaldomains):
                           xlen[a]/orthores,ylen[a]/orthores, 
                           linewidth=3, edgecolor='r', facecolor='none')
     ax.add_patch(rect)
-plt.savefig(outpath+'domainoverview.png')
+if extentsonly == True:
+    plt.show()
+    print('\n\nINFORMATION: Plot is only shown, not saved.')
+else:
+    plt.savefig(outpath+'domainoverview.png')
+    print('Saved domainoverview.png')
 
 
 
 
 
-
-#%%generation with for loop
-for i in range(totaldomains):
-    print('\n\n---------------------------\nSTART CREATING DOMAIN '+str(i))
-    infodict = {'version':           1, #assemble the infodict, will be added as global attributes to static file.
-                'palm_version':      6.0,
-                'origin_z':          0.0, #is changed further below
-                'origin_y':          ymin[i],
-                'origin_x':          xmin[i],
-                'origin_lat':        gdt.lv95towgs84(xmin[i]+2000000,ymin[i]+1000000)[1],
-                'origin_lon':        gdt.lv95towgs84(xmin[i]+2000000,ymin[i]+1000000)[0],
-                'origin_time':       origin_time,
-                'rotation_angle':    rotationangle}
+if extentsonly == False:
     
-    #childify filename (add _NXX if necessary)
-    filename = mst.childifyfilename(filenames, ischild[i]) #adds _N0X to the filename if needed
-    
-    #### cut orthoimage if specified.
-    if cutorthoimg == True:
-        gdt.cutortho(ortho, subdir_rasteredshp+filename+'_ortho.tif', xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i])
-    
-    ##### treat terrain
-    if flags[i]['doterrain'] == True:
-        ztdat = gdt.cutalti(dhm, subdir_rasteredshp+'dhm'+str(ischild[i])+'.asc',xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i])
-        if ischild[i]==0:
-            ztdat, origin_z = mst.shifttopodown(ztdat,ischild[i]) #shift the domain downwards to min value if it's the parent domain
-        else:
-            ztdat, origin_z = mst.shifttopodown(ztdat,ischild[i],shift=origin_z) #shift the domain downwards with origin_z value of parent if its a child.
-        infodict['origin_z'] = origin_z    #modify the origin_z attribute according to the shift
-    
-    ##### treat tlm-bb bulk parametrization
-    if flags[i]['dotlmbb'] == True:
-        bbdat = gdt.rasterandcuttlm(bb, subdir_rasteredshp+'bb'+str(ischild[i])+'.asc',xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i], burnatt='OBJEKTART')
-        # vegarr, pavarr, watarr = mst.mapbbclasses(bbdat)  #map tlm bodenbedeckungs-kategorien to the palm definitions.
-        vegarr, pavarr, watarr = mst.mapbbclasses2(bbdat, mpd.tlmbb2palmveg, mpd.tlmbb2palmwat)  #map tlm bodenbedeckungs-kategorien to the palm definitions.
-            #or: function content in three lines.
-            # vegarr = mst.mapdicttoarray(bbdat, mpd.tlmbb2palmveg, mst.fillvalues['vegetation_type'])
-            # watarr = mst.mapdicttoarray(bbdat, mpd.tlmbb2palmwat, mst.fillvalues['water_type'])
-            # pavarr = np.ones((ny[i],nx[i]))*mst.fillvalues['pavement_type'] #empty array
-
+    #%%generation with for loop
+    for i in range(totaldomains):
+        print('\n\n---------------------------\nSTART CREATING DOMAIN '+str(i))
+        infodict = {'version':           1, #assemble the infodict, will be added as global attributes to static file.
+                    'palm_version':      6.0,
+                    'origin_z':          0.0, #is changed further below
+                    'origin_y':          ymin[i],
+                    'origin_x':          xmin[i],
+                    'origin_lat':        gdt.lv95towgs84(xmin[i]+2000000,ymin[i]+1000000)[1],
+                    'origin_lon':        gdt.lv95towgs84(xmin[i]+2000000,ymin[i]+1000000)[0],
+                    'origin_time':       origin_time,
+                    'rotation_angle':    rotationangle}
         
-    ##### BLOCK FOR MODIFICATIONS TO VEGPARS AND ALBEDOPARS
+        #childify filename (add _NXX if necessary)
+        filename = mst.childifyfilename(filenames, ischild[i]) #adds _N0X to the filename if needed
+        
+        #### cut orthoimage if specified.
+        if cutorthoimg == True:
+            gdt.cutortho(ortho, subdir_rasteredshp+filename+'_ortho.tif', xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i])
+        
+        ##### treat terrain
+        if flags[i]['doterrain'] == True:
+            ztdat = gdt.cutalti(dhm, subdir_rasteredshp+'dhm'+str(ischild[i])+'.asc',xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i])
+            if ischild[i]==0:
+                ztdat, origin_z = mst.shifttopodown(ztdat,ischild[i]) #shift the domain downwards to min value if it's the parent domain
+            else:
+                ztdat, origin_z = mst.shifttopodown(ztdat,ischild[i],shift=origin_z) #shift the domain downwards with origin_z value of parent if its a child.
+            infodict['origin_z'] = origin_z    #modify the origin_z attribute according to the shift
+        
+        ##### treat tlm-bb bulk parametrization
+        if flags[i]['dotlmbb'] == True:
+            bbdat = gdt.rasterandcuttlm(bb, subdir_rasteredshp+'bb'+str(ischild[i])+'.asc',xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i], burnatt='OBJEKTART')
+            # vegarr, pavarr, watarr = mst.mapbbclasses(bbdat)  #map tlm bodenbedeckungs-kategorien to the palm definitions.
+            vegarr, pavarr, watarr = mst.mapbbclasses2(bbdat, mpd.tlmbb2palmveg, mpd.tlmbb2palmwat)  #map tlm bodenbedeckungs-kategorien to the palm definitions.
+                #or: function content in three lines.
+                # vegarr = mst.mapdicttoarray(bbdat, mpd.tlmbb2palmveg, mst.fillvalues['vegetation_type'])
+                # watarr = mst.mapdicttoarray(bbdat, mpd.tlmbb2palmwat, mst.fillvalues['water_type'])
+                # pavarr = np.ones((ny[i],nx[i]))*mst.fillvalues['pavement_type'] #empty array
     
-        # vegpars = mst.createparsarrays(nx[i], ny[i])[0]
-        # albedopars = mst.createparsarrays(nx[i], ny[i])[5]
+            
+        ##### BLOCK FOR MODIFICATIONS TO VEGPARS AND ALBEDOPARS
+        
+            # vegpars = mst.createparsarrays(nx[i], ny[i])[0]
+            # albedopars = mst.createparsarrays(nx[i], ny[i])[5]
+        
+            # vegpars,albedopars = mst.setalbedovalue(albedopars, vegpars, bbdat, 9, 1, -1)
+            # vegpars = mst.modifyparsarray(vegpars,9,2093,bbdat,9)
+            # vegpars = mst.modifyparsarray(vegpars,11,0,bbdat,9)
+        
+        ##### treat LAD
+            if flags[i]['dolad'] == True:
+                
+                #import canopyfiles
+                if resolvedforestshp != None:
+                    resforesttop = gdt.rasterandcuttlm(resolvedforestshp, subdir_rasteredshp+'resolvedforesttop'+str(ischild[i])+'.asc', 
+                                                    xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_TOP')
+                    resforestbot = gdt.rasterandcuttlm(resolvedforestshp, subdir_rasteredshp+'resolvedforestbot'+str(ischild[i])+'.asc', 
+                                                    xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_BOT')
+                    resforestid = gdt.rasterandcuttlm(resolvedforestshp, subdir_rasteredshp+'resolvedforestid'+str(ischild[i])+'.asc', 
+                                                    xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='ID')
+                else:
+                    resforesttop = np.ones((ny[i], nx[i]))*mst.fillvalues['vegetation_height']
+                    resforestbot = np.ones((ny[i], nx[i]))*mst.fillvalues['vegetation_height']
+                    resforestid = np.ones((ny[i], nx[i]))*mst.fillvalues['vegetation_height']
+                    
+                if treerowsshp != None:
+                    resbreihetop = gdt.rasterandcuttlm(treerowsshp, subdir_rasteredshp+'resolvedbreihentop'+str(ischild[i])+'.asc', 
+                                                    xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_TOP')
+                    resbreihebot = gdt.rasterandcuttlm(treerowsshp, subdir_rasteredshp+'resolvedbreihenbot'+str(ischild[i])+'.asc', 
+                                                    xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_BOT')
+                    resbreiheid = gdt.rasterandcuttlm(treerowsshp, subdir_rasteredshp+'resolvedbreihenid'+str(ischild[i])+'.asc', 
+                                                    xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='ID')
+                else:
+                    resbreihetop = np.ones((ny[i], nx[i]))*mst.fillvalues['vegetation_height']
+                    resbreihebot = np.ones((ny[i], nx[i]))*mst.fillvalues['vegetation_height']
+                    resbreiheid = np.ones((ny[i], nx[i]))*mst.fillvalues['vegetation_height']
+                    
+                if singletreesshp != None:
+                    resebgebtop = gdt.rasterandcuttlm(singletreesshp, subdir_rasteredshp+'resolvedebgebtop'+str(ischild[i])+'.asc', 
+                                                    xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_TOP')
+                    resebgebbot = gdt.rasterandcuttlm(singletreesshp, subdir_rasteredshp+'resolvedebgebbot'+str(ischild[i])+'.asc', 
+                                                    xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_BOT')
+                    resebgebid = gdt.rasterandcuttlm(singletreesshp, subdir_rasteredshp+'resolvedebgebid'+str(ischild[i])+'.asc', 
+                                                    xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='ID')
+                else:
+                    resebgebtop = np.ones((ny[i], nx[i]))*mst.fillvalues['vegetation_height']
+                    resebgebbot = np.ones((ny[i], nx[i]))*mst.fillvalues['vegetation_height']
+                    resebgebid = np.ones((ny[i], nx[i]))*mst.fillvalues['vegetation_height']
+                    
+                
+                canopyheight = np.maximum.reduce([resforesttop, resbreihetop, resebgebtop]) #analyze all arrays in each pixel and return max value per pixel
+                canopybottom = np.maximum.reduce([resforestbot, resbreihebot, resebgebbot])
+                canopyid = np.maximum.reduce([resforestid, resbreiheid, resebgebid])
+                
+                #create arrays for alpha and beta and reduce to one layer in the end
+                resforesta = np.where(resforesttop[:,:] != 0, a_forest[i], resforesttop[:,:])     # alpha für forest
+                resforestb = np.where(resforesttop[:,:] != 0, b_forest[i], resforesttop[:,:])     # beta für forest
+                resbreihea = np.where(resbreihetop[:,:] != 0, a_breihe[i], resbreihetop[:,:])     # alpha für baumreihe
+                resbreiheb = np.where(resbreihetop[:,:] != 0, b_breihe[i], resbreihetop[:,:])     # beta für baumreihe
+                resebgeba = np.where(resebgebtop[:,:] != 0, a_ebgebu[i], resebgebtop[:,:])        # alpha für ebgeb
+                resebgebb = np.where(resebgebtop[:,:] != 0, b_ebgebu[i], resebgebtop[:,:])        # beta für ebgeb
+                canalpha = np.maximum.reduce([resforesta,resbreihea,resebgeba])
+                canbeta = np.maximum.reduce([resforestb,resbreiheb,resebgebb])
+                
+                #create an LAI array, only at pixels where canopy has a height. get maximum lai where forest/reihe/ebgebu overlap
+                laiforest = np.where(resforesttop[:,:] != 0, lai_forest[i], resforesttop[:,:])
+                laibreihe = np.where(resbreihetop[:,:] != 0, lai_breihe[i], resbreihetop[:,:])
+                laiebgeb = np.where(resebgebtop[:,:] != 0, lai_ebgebu[i], resebgebtop[:,:])        
+                lai = np.maximum.reduce([laiforest, laibreihe, laiebgeb])
+                
+                maxtreeheight = np.max(canopyheight) #evaluate maximum tree height for zlad coordinate generation
+                
+                zlad= mst.createzlad(maxtreeheight, zres[i]) #create zlad array
+                ladarr = np.ones((len(zlad), ny[i], nx[i]))*mst.fillvalues['tree_data'] #create empty lad array
+                
+                chdztop = np.where(canopyheight[:,:]==-9999., canopyheight[:,:], np.round(canopyheight[:,:]/zres[i],0).astype(int)) # cell indexes that need to be filled with lad.
+                chidxtop = np.where( (chdztop[:,:]==0), -9999, chdztop[:,:]) #index of zlad height that needs to be filled (same as above, leiche)
+                chdzbot = np.where(canopybottom[:,:]==-9999., canopybottom[:,:], np.round(canopybottom[:,:]/zres[i],0).astype(int)) #same for bottom.
+                chidxbot = np.where( (chdzbot[:,:]==0), 0, chdzbot[:,:]) #index of zlad height that needs to be filled
+                
+                #create actual lad array
+                from scipy.stats import beta
+                for k in range(ny[i]): #iterate over y and x dimensions
+                    for j in range(nx[i]):
+                        if not chidxtop[k,j] == -9999:
+                            botindex = int(chidxbot[k,j])
+                            topindex = int(chidxtop[k,j])+1
+                            pdf = beta.pdf(x=np.arange(0,1,(1/(topindex-botindex))),a=canalpha[k,j],b=canbeta[k,j]) #get a beta distribution (pdf) for given a and b values
+                            ladarr[botindex:topindex,k,j] = pdf/pdf.max()*lai[k,j]/canopyheight[k,j] #scale a by the max pdf value, multiply by lai/treeheight (definition of lad)
+                            
+                vegarr = np.where((canopyid[:,:] != -9999) & (watarr[:,:] == -127), 3, vegarr[:,:]) #where there is a tree id assigned/where a tree is and no water, set land surface to grass
+                vegarr = np.where( (ladarr[0] == mst.fillvalues['lad']) &
+                                   (watarr[:,:] == mst.fillvalues['water_type']) &
+                                   (canopyid[:,:] != mst.fillvalues['tree_id']), 18, vegarr[:,:]) #where no water and where tree too small to be resolved and where tree_id is present -> set vegtype to deciduous shrubs (18)
+                canopyid = np.where(canopyid[:,:] == 0, mst.fillvalues['tree_id'], canopyid[:,:]) #where ther is no tree to be found, set canopyid to its fill value
+                canopyid = np.where( ladarr[0] == mst.fillvalues['lad'], mst.fillvalues['tree_id'], canopyid[:,:]) #where no lad is defined, maybe bc its subgridscale, set tree-id to fillvalue too
+                
+            vegarr = np.where( (vegarr[:,:]==-127) & (watarr[:,:]==-127) & (pavarr[:,:]==-127), bulkvegclass[i], vegarr[:,:]) #fill unassigned vegetation types to defined bulk vegetation class.
+            
+            if flags[i]['docropfields'] == True:
+                cropheight = gdt.rasterandcuttlm(crops, subdir_rasteredshp+'felder'+str(ischild[i])+'.asc', 
+                                               xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_TOP')
+                vegarr = np.where( (vegarr[:,:]==bulkvegclass[i]) & (cropheight[:,:] != -9999), 2, vegarr[:,:]) #where vegarr is set to bulk class and crops are found, set class to 2 (crops)
+            
+            
+            if flags[i]['dopavedbb'] == True:
+                paved = gdt.rasterandcuttlm(pavementareas, subdir_rasteredshp+'pavement'+str(ischild[i])+'.asc',xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i], burnatt='OBJEKTART', alltouched=pavealltouched[i])
+                vegarr = np.where( paved[:,:] != -9999 , mst.fillvalues['vegetation_type'], vegarr[:,:]) #overwrite vegarr where pavement areas are found with fillvalue
+                watarr = np.where( paved[:,:] != -9999 , mst.fillvalues['water_type'], watarr[:,:]) #overwrite watarr where pavement areas are found with fillvalue
+                # pavarr = paved
+                # pavarr = np.where ( pavarr[:,:] != -9999, 1, mst.fillvalues['pavement_type']) #pavement_type set where shp is non-fillvalue. TODO: mit einem map dict auch pavements richtig klassifizieren.
+                pavarr = mst.mapdicttoarray(paved, mpd.tlmpav2palmpav, fillvalue = bulkpavclass[i]) #classify pavement array acc. to dict.
     
-        # vegpars,albedopars = mst.setalbedovalue(albedopars, vegpars, bbdat, 9, 1, -1)
-        # vegpars = mst.modifyparsarray(vegpars,9,2093,bbdat,9)
-        # vegpars = mst.modifyparsarray(vegpars,11,0,bbdat,9)
+            #create surface fraction array
+            # soilarr = mst.makesoilarray(vegarr,pavarr) #old version.
+            soilarr = mst.makesoilarray2(vegarr,pavarr, mpd.palmveg2palmsoil, mpd.palmpav2palmsoil) #finally do soilarray depending on vegarr and pavarr, mapping see makestaticotools in palmpy
+            sfrarr = mst.makesurffractarray(vegarr,pavarr,watarr) #create surfacefraction in end, as now only 0 and 1 fractions are allowed (ca r4400)
+            
+        if flags[i]['dobuildings2d'] == True:  
+            gebhoehe = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudehoehe'+str(ischild[i])+'.asc', 
+                                            xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_TOP')
+            gebid = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudeid'+str(ischild[i])+'.asc', 
+                                            xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='ID')
+            gebtyp = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudetyp'+str(ischild[i])+'.asc', 
+                                            xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='BLDGTYP')
+            gebtyp = np.where((gebtyp[:,:]==-9999.), mst.fillvalues['building_type'], gebtyp[:,:]) #change fillvalue to byte, import function defaults to -9999.0
+        
+        if flags[i]['dobuildings3d'] == True:
+            gebtop = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudetop'+str(ischild[i])+'.asc', 
+                                            xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_TOP')
+            gebbot = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudebot'+str(ischild[i])+'.asc', 
+                                            xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_BOT')
+            maxbldgheight = np.max(gebtop)+zres[i]
+            z = mst.createzcoord(maxbldgheight,zres[i])              #create z coordinate
+            bldarr = np.ones((len(z), ny[i], nx[i]))*np.byte(0) #create empty buliding3d array
+            
+            bhdztop = np.where(gebtop[:,:]==-9999., gebtop[:,:], np.round(gebtop[:,:]/zres[i],0).astype(int))
+            bhidxtop = np.where( (bhdztop[:,:]==0), -9999, bhdztop[:,:]) #index of zlad height that needs to be filled
+            bhdzbot = np.where(gebbot[:,:]==-9999., gebbot[:,:], np.round(gebbot[:,:]/zres[i],0).astype(int))
+            bhidxbot = np.where( (bhdzbot[:,:]==0), 0, bhdzbot[:,:]) #index of zlad height that needs to be filled
+            
+            for k in range(ny[i]):
+                   for j in range(nx[i]):
+                       # if not np.isnan(chidxtop[k,j]):
+                       if not bhidxtop[k,j] == -9999:
+                           botindex = int(bhidxbot[k,j])
+                           topindex = int(bhidxtop[k,j])+1
+                           bldarr[botindex:topindex,k,j] = np.byte(1)
+            
+            gebid = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudeid'+str(ischild[i])+'.asc', 
+                                            xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='ID')
+            gebid = np.where( bldarr[0] == np.byte(0) , mst.fillvalues['building_id'], gebid[:,:] ) #set id to fillvalue where 3d bldg is not resolved/subgrid scale (especially vertical dimension)
+            gebtyp = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudetyp'+str(ischild[i])+'.asc', 
+                                            xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='BLDGTYP')
+            gebtyp = np.where((gebtyp[:,:]==-9999.), mst.fillvalues['building_type'], gebtyp[:,:]) #change fillvalue to right one, import fcn defatults to -9999.0
+            gebtyp = np.where( bldarr[0] == np.byte(0) , mst.fillvalues['building_type'], gebtyp[:,:] ) #set type to fillvalue where 3d bldg is too small to be resolved.
+                
+        if flags[i]['dostreettypes'] == True: #for chemistry
+            # roadarr = gdt.rasterandcuttlm(streetsonly, subdir_rasteredshp+'streettype'+str(ischild[i])+'.asc', 
+            #                                 xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='OBJEKTART', alltouched=pavealltouched[i])
+            # roadarr = mst.mapdicttoarray(roadarr, mpd.tlmstr2palmstyp, mst.fillvalues['street_type'])
+            
+            gdt.splitroadsshp(streetsonly, subdir_rasteredshp, mpd.tlmmajroads, mpd.tlmminroads)
+            
+            majroads = gdt.rasterandcuttlm(subdir_rasteredshp+'majorroads.shp', subdir_rasteredshp+'streettypemajor'+str(ischild[i])+'.asc', 
+                                    xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='OBJEKTART', alltouched=pavealltouched[i])
+            majroads = mst.mapdicttoarray(majroads, mpd.tlmstr2palmstyp, mst.fillvalues['street_type'])
+            minroads = gdt.rasterandcuttlm(subdir_rasteredshp+'minorroads.shp', subdir_rasteredshp+'streettypeminor'+str(ischild[i])+'.asc', 
+                                    xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='OBJEKTART', alltouched=pavealltouched[i])
+            minroads = mst.mapdicttoarray(minroads, mpd.tlmstr2palmstyp, mst.fillvalues['street_type'])
+            
+            roadarr = np.copy(majroads)
+            roadarr = np.where( (majroads[:,:] == mst.fillvalues['street_type']), minroads[:,:], majroads[:,:])
+           
+        
+        
+        
+        #cleanup: where bulidings exist, non lad should exist.    
+        if ((flags[i]['dobuildings3d'] == True or flags[i]['dobuildings2d']==True) and flags[i]['dolad'] == True): 
+            for m in range(len(zlad)):
+                ladarr[m,:,:] = np.where( (gebid[:,:] != mst.fillvalues['building_id']), mst.fillvalues['tree_data'], ladarr[m,:,:])
     
-    ##### treat LAD
+    
+        ######### create static netcdf file
+        static = xr.Dataset()
+        x,y = mst.createstaticcoords(nx[i],ny[i],xres[i])[0:2] #create x and y cordinates. 
+        
+        #create coordinates, create data Array and then assign to static dataset and append the encodingdict.
+        if flags[i]['doterrain'] == True:
+            zt = mst.createdataarrays(ztdat,['y','x'],[y,x]) #create xr.DataArray object
+            mst.setneededattributes(zt, 'zt') #set attributes to dataarray object
+            static['zt'] = zt    #add dataarray object to dataset object
+        if flags[i]['dotlmbb'] == True:
+            nsurface_fraction = mst.createstaticcoords(ny[i],nx[i],xres[i])[2] #create coordinates of the item
+            vegetation_type = mst.createdataarrays(vegarr,['y','x'],[y,x])    #create dataarray object
+            pavement_type = mst.createdataarrays(pavarr,['y','x'],[y,x])
+            water_type = mst.createdataarrays(watarr,['y','x'],[y,x])
+            soil_type = mst.createdataarrays(soilarr,['y','x'],[y,x])
+            surface_fraction = mst.createdataarrays(sfrarr,['nsurface_fraction','y','x'],[nsurface_fraction,y,x])
+            mst.setneededattributes(vegetation_type,'vegetation_type')  #set attributes
+            mst.setneededattributes(pavement_type,'pavement_type')
+            mst.setneededattributes(water_type,'water_type')
+            mst.setneededattributes(soil_type,'soil_type')
+            mst.setneededattributes(surface_fraction,'surface_fraction')
+            static['vegetation_type'] = vegetation_type #merge into dataset object
+            static['water_type'] = water_type
+            static['soil_type'] = soil_type
+            static['pavement_type'] = pavement_type
+            static['surface_fraction'] = surface_fraction
+        if flags[i]['dovegpars'] == True:
+            nvegetation_pars =  mst.createstaticcoords(ny[i],nx[i],xres[i])[3]
+            vegetation_pars =  mst.createdataarrays(vegpars, ['nvegetation_pars','y','x'],[nvegetation_pars,y,x])
+            mst.setneededattributes(vegetation_pars,'vegetation_pars')
+            static['vegetation_pars']=vegetation_pars
+        if flags[i]['doalbedopars'] == True:
+            nalbedo_pars = mst.createstaticcoords(ny[i],nx[i],xres[i])[4]
+            albedo_pars =  mst.createdataarrays(albedopars, ['nalbedo_pars','y','x'],[nalbedo_pars,y,x])
+            mst.setneededattributes(albedo_pars,'albedo_pars')
+            static['albedo_pars'] = albedo_pars
         if flags[i]['dolad'] == True:
-            
-            #import canopyfiles
-            if resolvedforestshp != None:
-                resforesttop = gdt.rasterandcuttlm(resolvedforestshp, subdir_rasteredshp+'resolvedforesttop'+str(ischild[i])+'.asc', 
-                                                xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_TOP')
-                resforestbot = gdt.rasterandcuttlm(resolvedforestshp, subdir_rasteredshp+'resolvedforestbot'+str(ischild[i])+'.asc', 
-                                                xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_BOT')
-                resforestid = gdt.rasterandcuttlm(resolvedforestshp, subdir_rasteredshp+'resolvedforestid'+str(ischild[i])+'.asc', 
-                                                xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='ID')
-            else:
-                resforesttop = np.ones((ny[i], nx[i]))*mst.fillvalues['vegetation_height']
-                resforestbot = np.ones((ny[i], nx[i]))*mst.fillvalues['vegetation_height']
-                resforestid = np.ones((ny[i], nx[i]))*mst.fillvalues['vegetation_height']
-                
-            if treerowsshp != None:
-                resbreihetop = gdt.rasterandcuttlm(treerowsshp, subdir_rasteredshp+'resolvedbreihentop'+str(ischild[i])+'.asc', 
-                                                xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_TOP')
-                resbreihebot = gdt.rasterandcuttlm(treerowsshp, subdir_rasteredshp+'resolvedbreihenbot'+str(ischild[i])+'.asc', 
-                                                xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_BOT')
-                resbreiheid = gdt.rasterandcuttlm(treerowsshp, subdir_rasteredshp+'resolvedbreihenid'+str(ischild[i])+'.asc', 
-                                                xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='ID')
-            else:
-                resbreihetop = np.ones((ny[i], nx[i]))*mst.fillvalues['vegetation_height']
-                resbreihebot = np.ones((ny[i], nx[i]))*mst.fillvalues['vegetation_height']
-                resbreiheid = np.ones((ny[i], nx[i]))*mst.fillvalues['vegetation_height']
-                
-            if singletreesshp != None:
-                resebgebtop = gdt.rasterandcuttlm(singletreesshp, subdir_rasteredshp+'resolvedebgebtop'+str(ischild[i])+'.asc', 
-                                                xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_TOP')
-                resebgebbot = gdt.rasterandcuttlm(singletreesshp, subdir_rasteredshp+'resolvedebgebbot'+str(ischild[i])+'.asc', 
-                                                xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_BOT')
-                resebgebid = gdt.rasterandcuttlm(singletreesshp, subdir_rasteredshp+'resolvedebgebid'+str(ischild[i])+'.asc', 
-                                                xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='ID')
-            else:
-                resebgebtop = np.ones((ny[i], nx[i]))*mst.fillvalues['vegetation_height']
-                resebgebbot = np.ones((ny[i], nx[i]))*mst.fillvalues['vegetation_height']
-                resebgebid = np.ones((ny[i], nx[i]))*mst.fillvalues['vegetation_height']
-                
-            
-            canopyheight = np.maximum.reduce([resforesttop, resbreihetop, resebgebtop]) #analyze all arrays in each pixel and return max value per pixel
-            canopybottom = np.maximum.reduce([resforestbot, resbreihebot, resebgebbot])
-            canopyid = np.maximum.reduce([resforestid, resbreiheid, resebgebid])
-            
-            #create arrays for alpha and beta and reduce to one layer in the end
-            resforesta = np.where(resforesttop[:,:] != 0, a_forest[i], resforesttop[:,:])     # alpha für forest
-            resforestb = np.where(resforesttop[:,:] != 0, b_forest[i], resforesttop[:,:])     # beta für forest
-            resbreihea = np.where(resbreihetop[:,:] != 0, a_breihe[i], resbreihetop[:,:])     # alpha für baumreihe
-            resbreiheb = np.where(resbreihetop[:,:] != 0, b_breihe[i], resbreihetop[:,:])     # beta für baumreihe
-            resebgeba = np.where(resebgebtop[:,:] != 0, a_ebgebu[i], resebgebtop[:,:])        # alpha für ebgeb
-            resebgebb = np.where(resebgebtop[:,:] != 0, b_ebgebu[i], resebgebtop[:,:])        # beta für ebgeb
-            canalpha = np.maximum.reduce([resforesta,resbreihea,resebgeba])
-            canbeta = np.maximum.reduce([resforestb,resbreiheb,resebgebb])
-            
-            #create an LAI array, only at pixels where canopy has a height. get maximum lai where forest/reihe/ebgebu overlap
-            laiforest = np.where(resforesttop[:,:] != 0, lai_forest[i], resforesttop[:,:])
-            laibreihe = np.where(resbreihetop[:,:] != 0, lai_breihe[i], resbreihetop[:,:])
-            laiebgeb = np.where(resebgebtop[:,:] != 0, lai_ebgebu[i], resebgebtop[:,:])        
-            lai = np.maximum.reduce([laiforest, laibreihe, laiebgeb])
-            
-            maxtreeheight = np.max(canopyheight) #evaluate maximum tree height for zlad coordinate generation
-            
-            zlad= mst.createzlad(maxtreeheight, zres[i]) #create zlad array
-            ladarr = np.ones((len(zlad), ny[i], nx[i]))*mst.fillvalues['tree_data'] #create empty lad array
-            
-            chdztop = np.where(canopyheight[:,:]==-9999., canopyheight[:,:], np.round(canopyheight[:,:]/zres[i],0).astype(int)) # cell indexes that need to be filled with lad.
-            chidxtop = np.where( (chdztop[:,:]==0), -9999, chdztop[:,:]) #index of zlad height that needs to be filled (same as above, leiche)
-            chdzbot = np.where(canopybottom[:,:]==-9999., canopybottom[:,:], np.round(canopybottom[:,:]/zres[i],0).astype(int)) #same for bottom.
-            chidxbot = np.where( (chdzbot[:,:]==0), 0, chdzbot[:,:]) #index of zlad height that needs to be filled
-            
-            #create actual lad array
-            from scipy.stats import beta
-            for k in range(ny[i]): #iterate over y and x dimensions
-                for j in range(nx[i]):
-                    if not chidxtop[k,j] == -9999:
-                        botindex = int(chidxbot[k,j])
-                        topindex = int(chidxtop[k,j])+1
-                        pdf = beta.pdf(x=np.arange(0,1,(1/(topindex-botindex))),a=canalpha[k,j],b=canbeta[k,j]) #get a beta distribution (pdf) for given a and b values
-                        ladarr[botindex:topindex,k,j] = pdf/pdf.max()*lai[k,j]/canopyheight[k,j] #scale a by the max pdf value, multiply by lai/treeheight (definition of lad)
-                        
-            vegarr = np.where((canopyid[:,:] != -9999) & (watarr[:,:] == -127), 3, vegarr[:,:]) #where there is a tree id assigned/where a tree is and no water, set land surface to grass
-            vegarr = np.where( (ladarr[0] == mst.fillvalues['lad']) &
-                               (watarr[:,:] == mst.fillvalues['water_type']) &
-                               (canopyid[:,:] != mst.fillvalues['tree_id']), 18, vegarr[:,:]) #where no water and where tree too small to be resolved and where tree_id is present -> set vegtype to deciduous shrubs (18)
-            canopyid = np.where(canopyid[:,:] == 0, mst.fillvalues['tree_id'], canopyid[:,:]) #where ther is no tree to be found, set canopyid to its fill value
-            canopyid = np.where( ladarr[0] == mst.fillvalues['lad'], mst.fillvalues['tree_id'], canopyid[:,:]) #where no lad is defined, maybe bc its subgridscale, set tree-id to fillvalue too
-            
-        vegarr = np.where( (vegarr[:,:]==-127) & (watarr[:,:]==-127) & (pavarr[:,:]==-127), bulkvegclass[i], vegarr[:,:]) #fill unassigned vegetation types to defined bulk vegetation class.
+            lad = mst.createdataarrays(ladarr,['zlad', 'y', 'x'], [zlad,y,x])
+            mst.setneededattributes(lad, 'lad')
+            static['lad'] = lad
+            tree_id = mst.createdataarrays(canopyid, ['y','x'], [y,x])
+            mst.setneededattributes(tree_id,'tree_id')
+            static['tree_id'] = tree_id
+        if flags[i]['dobuildings2d'] == True:
+            buildings_2d = mst.createdataarrays(gebhoehe, ['y','x'], [y,x])
+            mst.setneededattributes(buildings_2d, 'buildings_2d')
+            static['buildings_2d'] = buildings_2d
+            building_id = mst.createdataarrays(gebid, ['y','x'], [y,x])
+            mst.setneededattributes(building_id, 'building_id')
+            static['building_id'] = building_id
+            building_type = mst.createdataarrays(gebtyp, ['y','x'], [y,x])
+            mst.setneededattributes(building_type, 'building_type')
+            static['building_type'] = building_type
+        if flags[i]['dobuildings3d'] == True:
+            buildings_3d = mst.createdataarrays(bldarr, ['z','y','x'], [z,y,x])
+            mst.setneededattributes(buildings_3d, 'buildings_3d')
+            static['buildings_3d'] = buildings_3d
+            building_id = mst.createdataarrays(gebid, ['y','x'], [y,x])
+            mst.setneededattributes(building_id, 'building_id')
+            static['building_id'] = building_id
+            building_type = mst.createdataarrays(gebtyp, ['y','x'], [y,x])
+            mst.setneededattributes(building_type, 'building_type')
+            static['building_type'] = building_type
+        if flags[i]['dostreettypes'] == True:
+            street_type = mst.createdataarrays(roadarr, ['y','x'], [y,x])
+            mst.setneededattributes(street_type,'street_type')
+            static['street_type'] = street_type
         
-        if flags[i]['docropfields'] == True:
-            cropheight = gdt.rasterandcuttlm(crops, subdir_rasteredshp+'felder'+str(ischild[i])+'.asc', 
-                                           xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_TOP')
-            vegarr = np.where( (vegarr[:,:]==bulkvegclass[i]) & (cropheight[:,:] != -9999), 2, vegarr[:,:]) #where vegarr is set to bulk class and crops are found, set class to 2 (crops)
+        mst.setneededattributes(static.x,'x') #set attributes of basic coordinates x and y
+        mst.setneededattributes(static.y,'y')
         
+        if flags[i]['dobuildings3d'] == True:
+            mst.setneededattributes(static.z,'z') #set attributes of coordinate z if buildings are set (only data to require z so far)
         
-        if flags[i]['dopavedbb'] == True:
-            paved = gdt.rasterandcuttlm(pavementareas, subdir_rasteredshp+'pavement'+str(ischild[i])+'.asc',xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i], burnatt='OBJEKTART', alltouched=pavealltouched[i])
-            vegarr = np.where( paved[:,:] != -9999 , mst.fillvalues['vegetation_type'], vegarr[:,:]) #overwrite vegarr where pavement areas are found with fillvalue
-            watarr = np.where( paved[:,:] != -9999 , mst.fillvalues['water_type'], watarr[:,:]) #overwrite watarr where pavement areas are found with fillvalue
-            # pavarr = paved
-            # pavarr = np.where ( pavarr[:,:] != -9999, 1, mst.fillvalues['pavement_type']) #pavement_type set where shp is non-fillvalue. TODO: mit einem map dict auch pavements richtig klassifizieren.
-            pavarr = mst.mapdicttoarray(paved, mpd.tlmpav2palmpav, fillvalue = bulkpavclass[i]) #classify pavement array acc. to dict.
-
-        #create surface fraction array
-        # soilarr = mst.makesoilarray(vegarr,pavarr) #old version.
-        soilarr = mst.makesoilarray2(vegarr,pavarr, mpd.palmveg2palmsoil, mpd.palmpav2palmsoil) #finally do soilarray depending on vegarr and pavarr, mapping see makestaticotools in palmpy
-        sfrarr = mst.makesurffractarray(vegarr,pavarr,watarr) #create surfacefraction in end, as now only 0 and 1 fractions are allowed (ca r4400)
+        encodingdict = mst.setupencodingdict(flags[i]) #create encoding dictionary for saving the netcdf file (maybe not needed if really all fillvalues and dtypes are set correct!)
+        mst.setglobalattributes(static,infodict) #set global attributes
         
-    if flags[i]['dobuildings2d'] == True:  
-        gebhoehe = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudehoehe'+str(ischild[i])+'.asc', 
-                                        xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_TOP')
-        gebid = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudeid'+str(ischild[i])+'.asc', 
-                                        xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='ID')
-        gebtyp = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudetyp'+str(ischild[i])+'.asc', 
-                                        xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='BLDGTYP')
-        gebtyp = np.where((gebtyp[:,:]==-9999.), mst.fillvalues['building_type'], gebtyp[:,:]) #change fillvalue to byte, import function defaults to -9999.0
-    
-    if flags[i]['dobuildings3d'] == True:
-        gebtop = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudetop'+str(ischild[i])+'.asc', 
-                                        xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_TOP')
-        gebbot = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudebot'+str(ischild[i])+'.asc', 
-                                        xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_BOT')
-        maxbldgheight = np.max(gebtop)+zres[i]
-        z = mst.createzcoord(maxbldgheight,zres[i])              #create z coordinate
-        bldarr = np.ones((len(z), ny[i], nx[i]))*np.byte(0) #create empty buliding3d array
-        
-        bhdztop = np.where(gebtop[:,:]==-9999., gebtop[:,:], np.round(gebtop[:,:]/zres[i],0).astype(int))
-        bhidxtop = np.where( (bhdztop[:,:]==0), -9999, bhdztop[:,:]) #index of zlad height that needs to be filled
-        bhdzbot = np.where(gebbot[:,:]==-9999., gebbot[:,:], np.round(gebbot[:,:]/zres[i],0).astype(int))
-        bhidxbot = np.where( (bhdzbot[:,:]==0), 0, bhdzbot[:,:]) #index of zlad height that needs to be filled
-        
-        for k in range(ny[i]):
-               for j in range(nx[i]):
-                   # if not np.isnan(chidxtop[k,j]):
-                   if not bhidxtop[k,j] == -9999:
-                       botindex = int(bhidxbot[k,j])
-                       topindex = int(bhidxtop[k,j])+1
-                       bldarr[botindex:topindex,k,j] = np.byte(1)
-        
-        gebid = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudeid'+str(ischild[i])+'.asc', 
-                                        xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='ID')
-        gebid = np.where( bldarr[0] == np.byte(0) , mst.fillvalues['building_id'], gebid[:,:] ) #set id to fillvalue where 3d bldg is not resolved/subgrid scale (especially vertical dimension)
-        gebtyp = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudetyp'+str(ischild[i])+'.asc', 
-                                        xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='BLDGTYP')
-        gebtyp = np.where((gebtyp[:,:]==-9999.), mst.fillvalues['building_type'], gebtyp[:,:]) #change fillvalue to right one, import fcn defatults to -9999.0
-        gebtyp = np.where( bldarr[0] == np.byte(0) , mst.fillvalues['building_type'], gebtyp[:,:] ) #set type to fillvalue where 3d bldg is too small to be resolved.
-            
-    if flags[i]['dostreettypes'] == True: #for chemistry
-        # roadarr = gdt.rasterandcuttlm(streetsonly, subdir_rasteredshp+'streettype'+str(ischild[i])+'.asc', 
-        #                                 xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='OBJEKTART', alltouched=pavealltouched[i])
-        # roadarr = mst.mapdicttoarray(roadarr, mpd.tlmstr2palmstyp, mst.fillvalues['street_type'])
-        
-        gdt.splitroadsshp(streetsonly, subdir_rasteredshp, mpd.tlmmajroads, mpd.tlmminroads)
-        
-        majroads = gdt.rasterandcuttlm(subdir_rasteredshp+'majorroads.shp', subdir_rasteredshp+'streettypemajor'+str(ischild[i])+'.asc', 
-                                xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='OBJEKTART', alltouched=pavealltouched[i])
-        majroads = mst.mapdicttoarray(majroads, mpd.tlmstr2palmstyp, mst.fillvalues['street_type'])
-        minroads = gdt.rasterandcuttlm(subdir_rasteredshp+'minorroads.shp', subdir_rasteredshp+'streettypeminor'+str(ischild[i])+'.asc', 
-                                xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='OBJEKTART', alltouched=pavealltouched[i])
-        minroads = mst.mapdicttoarray(minroads, mpd.tlmstr2palmstyp, mst.fillvalues['street_type'])
-        
-        roadarr = np.copy(majroads)
-        roadarr = np.where( (majroads[:,:] == mst.fillvalues['street_type']), minroads[:,:], majroads[:,:])
-       
+        mst.outputstaticfile(static,outpath+filename, encodingdict) #output the static file as netcdf file.
     
     
+    #%% finishing actions and write parameters to a file
+    parfile = open(outpath+'parameters.txt', 'w') 
     
-    #cleanup: where bulidings exist, non lad should exist.    
-    if ((flags[i]['dobuildings3d'] == True or flags[i]['dobuildings2d']==True) and flags[i]['dolad'] == True): 
-        for m in range(len(zlad)):
-            ladarr[m,:,:] = np.where( (gebid[:,:] != mst.fillvalues['building_id']), mst.fillvalues['tree_data'], ladarr[m,:,:])
-
-
-    ######### create static netcdf file
-    static = xr.Dataset()
-    x,y = mst.createstaticcoords(nx[i],ny[i],xres[i])[0:2] #create x and y cordinates. 
+    print('-----------------------------------------\nSIMULATION SETUP SUMMARY', file = parfile)
+    print('-----------------------------------------', file = parfile)
+    domaincells = totaldomains*[0]
+    rti = totaldomains*[0]
     
-    #create coordinates, create data Array and then assign to static dataset and append the encodingdict.
-    if flags[i]['doterrain'] == True:
-        zt = mst.createdataarrays(ztdat,['y','x'],[y,x]) #create xr.DataArray object
-        mst.setneededattributes(zt, 'zt') #set attributes to dataarray object
-        static['zt'] = zt    #add dataarray object to dataset object
-    if flags[i]['dotlmbb'] == True:
-        nsurface_fraction = mst.createstaticcoords(ny[i],nx[i],xres[i])[2] #create coordinates of the item
-        vegetation_type = mst.createdataarrays(vegarr,['y','x'],[y,x])    #create dataarray object
-        pavement_type = mst.createdataarrays(pavarr,['y','x'],[y,x])
-        water_type = mst.createdataarrays(watarr,['y','x'],[y,x])
-        soil_type = mst.createdataarrays(soilarr,['y','x'],[y,x])
-        surface_fraction = mst.createdataarrays(sfrarr,['nsurface_fraction','y','x'],[nsurface_fraction,y,x])
-        mst.setneededattributes(vegetation_type,'vegetation_type')  #set attributes
-        mst.setneededattributes(pavement_type,'pavement_type')
-        mst.setneededattributes(water_type,'water_type')
-        mst.setneededattributes(soil_type,'soil_type')
-        mst.setneededattributes(surface_fraction,'surface_fraction')
-        static['vegetation_type'] = vegetation_type #merge into dataset object
-        static['water_type'] = water_type
-        static['soil_type'] = soil_type
-        static['pavement_type'] = pavement_type
-        static['surface_fraction'] = surface_fraction
-    if flags[i]['dovegpars'] == True:
-        nvegetation_pars =  mst.createstaticcoords(ny[i],nx[i],xres[i])[3]
-        vegetation_pars =  mst.createdataarrays(vegpars, ['nvegetation_pars','y','x'],[nvegetation_pars,y,x])
-        mst.setneededattributes(vegetation_pars,'vegetation_pars')
-        static['vegetation_pars']=vegetation_pars
-    if flags[i]['doalbedopars'] == True:
-        nalbedo_pars = mst.createstaticcoords(ny[i],nx[i],xres[i])[4]
-        albedo_pars =  mst.createdataarrays(albedopars, ['nalbedo_pars','y','x'],[nalbedo_pars,y,x])
-        mst.setneededattributes(albedo_pars,'albedo_pars')
-        static['albedo_pars'] = albedo_pars
-    if flags[i]['dolad'] == True:
-        lad = mst.createdataarrays(ladarr,['zlad', 'y', 'x'], [zlad,y,x])
-        mst.setneededattributes(lad, 'lad')
-        static['lad'] = lad
-        tree_id = mst.createdataarrays(canopyid, ['y','x'], [y,x])
-        mst.setneededattributes(tree_id,'tree_id')
-        static['tree_id'] = tree_id
-    if flags[i]['dobuildings2d'] == True:
-        buildings_2d = mst.createdataarrays(gebhoehe, ['y','x'], [y,x])
-        mst.setneededattributes(buildings_2d, 'buildings_2d')
-        static['buildings_2d'] = buildings_2d
-        building_id = mst.createdataarrays(gebid, ['y','x'], [y,x])
-        mst.setneededattributes(building_id, 'building_id')
-        static['building_id'] = building_id
-        building_type = mst.createdataarrays(gebtyp, ['y','x'], [y,x])
-        mst.setneededattributes(building_type, 'building_type')
-        static['building_type'] = building_type
-    if flags[i]['dobuildings3d'] == True:
-        buildings_3d = mst.createdataarrays(bldarr, ['z','y','x'], [z,y,x])
-        mst.setneededattributes(buildings_3d, 'buildings_3d')
-        static['buildings_3d'] = buildings_3d
-        building_id = mst.createdataarrays(gebid, ['y','x'], [y,x])
-        mst.setneededattributes(building_id, 'building_id')
-        static['building_id'] = building_id
-        building_type = mst.createdataarrays(gebtyp, ['y','x'], [y,x])
-        mst.setneededattributes(building_type, 'building_type')
-        static['building_type'] = building_type
-    if flags[i]['dostreettypes'] == True:
-        street_type = mst.createdataarrays(roadarr, ['y','x'], [y,x])
-        mst.setneededattributes(street_type,'street_type')
-        static['street_type'] = street_type
+    for n in range(totaldomains):
+        print('\nDomain '+str(n)+':', file=parfile)
+        print('\tnx/ny/nz\t\t'+str(int(nx[n]-1))+'/'+str(int(ny[n]-1))+'/'+str(int(nz[n])), file=parfile)
+        print('\tdx/dy/dz\t\t'+str(xres[n])+'/'+str(yres[n])+'/'+str(zres[n]), file=parfile)
+        domaincells[n] = nx[n]*ny[n]*nz[n]
+        # rti[n] = domaincells[n]*setvmag/xres[n]
+        print(f"\tOrigin E/N:\t\t{xmin[n]}/{ymin[n]}", file=parfile)
+        if n > 0:
+            print('\tll-Position for &nesting_parameters\n\tx,y:\t\t\t'+str(llx[n])+', '+str(lly[n]), file=parfile)
     
-    mst.setneededattributes(static.x,'x') #set attributes of basic coordinates x and y
-    mst.setneededattributes(static.y,'y')
+    print('\nTotal Number of Cells:\t\t'+"%4.2e" % (sum(domaincells)), file=parfile)
+    for m in range(len(domaincells)):
+        print('  Domain '+str(m)+':\t\t\t%4.3e\t= %3.2d %%' % (domaincells[m], round(domaincells[m]/sum(domaincells),4)*100), file=parfile)
+    print('\nTopo shifted down by:\t\t{:.2f} Meter'.format(origin_z), file=parfile)
+    print('\nRuntime length score:\t\t'+str(round((sum(domaincells)*setvmag/min(xres))/1e6,2)), file = parfile)
     
-    if flags[i]['dobuildings3d'] == True:
-        mst.setneededattributes(static.z,'z') #set attributes of coordinate z if buildings are set (only data to require z so far)
+    # print('\nNormalized by dxzy')
+    # for m in range(len(rti)):
+    #     print('Domain '+str(m)+':\t\t'+str(rti[m])+'\t'+str( round(rti[m]/sum(rti),4)*100 )+' %')
     
-    encodingdict = mst.setupencodingdict(flags[i]) #create encoding dictionary for saving the netcdf file (maybe not needed if really all fillvalues and dtypes are set correct!)
-    mst.setglobalattributes(static,infodict) #set global attributes
+    parfile.close() 
     
-    mst.outputstaticfile(static,outpath+filename, encodingdict) #output the static file as netcdf file.
-
-
-#%% finishing actions and write parameters to a file
-parfile = open(outpath+'parameters.txt', 'w') 
-
-print('-----------------------------------------\nSIMULATION SETUP SUMMARY', file = parfile)
-print('-----------------------------------------', file = parfile)
-domaincells = totaldomains*[0]
-rti = totaldomains*[0]
-
-for n in range(totaldomains):
-    print('\nDomain '+str(n)+':', file=parfile)
-    print('\tnx/ny/nz\t\t'+str(int(nx[n]-1))+'/'+str(int(ny[n]-1))+'/'+str(int(nz[n])), file=parfile)
-    print('\tdx/dy/dz\t\t'+str(xres[n])+'/'+str(yres[n])+'/'+str(zres[n]), file=parfile)
-    domaincells[n] = nx[n]*ny[n]*nz[n]
-    # rti[n] = domaincells[n]*setvmag/xres[n]
-    print(f"\tOrigin E/N:\t\t{xmin[n]}/{ymin[n]}", file=parfile)
-    if n > 0:
-        print('\tll-Position for &nesting_parameters\n\tx,y:\t\t\t'+str(llx[n])+', '+str(lly[n]), file=parfile)
-
-print('\nTotal Number of Cells:\t\t'+"%4.2e" % (sum(domaincells)), file=parfile)
-for m in range(len(domaincells)):
-    print('  Domain '+str(m)+':\t\t\t%4.3e\t= %3.2d %%' % (domaincells[m], round(domaincells[m]/sum(domaincells),4)*100), file=parfile)
-print('\nTopo shifted down by:\t\t{:.2f} Meter'.format(origin_z), file=parfile)
-print('\nRuntime length score:\t\t'+str(round((sum(domaincells)*setvmag/min(xres))/1e6,2)), file = parfile)
-
-# print('\nNormalized by dxzy')
-# for m in range(len(rti)):
-#     print('Domain '+str(m)+':\t\t'+str(rti[m])+'\t'+str( round(rti[m]/sum(rti),4)*100 )+' %')
-
-parfile.close() 
-
-print('\n\n-----------------------------------------\nSIMULATION SETUP SUMMARY')
-print('-----------------------------------------')
-domaincells = totaldomains*[0]
-rti = totaldomains*[0]
-
-for n in range(totaldomains):
-    print('\nDomain '+str(n)+':')
-    print('\tnx/ny/nz\t\t'+str(int(nx[n]-1))+'/'+str(int(ny[n]-1))+'/'+str(int(nz[n])))
-    print('\tdx/dy/dz\t\t'+str(xres[n])+'/'+str(yres[n])+'/'+str(zres[n]))
-    domaincells[n] = nx[n]*ny[n]*nz[n]
-    # rti[n] = domaincells[n]*setvmag/xres[n]
-    print(f"\tOrigin E/N:\t\t{xmin[n]}/{ymin[n]}")
-    if n > 0:
-        print('\tll-Position for &nesting_parameters\n\tx,y:\t\t\t'+str(llx[n])+', '+str(lly[n]))
-
-print('\nTotal Number of Cells:\t\t'+"%4.2e" % (sum(domaincells)))
-for m in range(len(domaincells)):
-    print('  Domain '+str(m)+':\t\t\t%4.3e\t= %3.2d %%' % (domaincells[m], round(domaincells[m]/sum(domaincells),4)*100))
-
-print('\nTopo shifted down by:\t\t{:.2f} Meter'.format(origin_z))
-print('\nRuntime length score:\t\t'+str(round((sum(domaincells)*setvmag/min(xres))/1e06,2)))
-
-
-#%% create inifor namelist and save to file
-
-namelist = open(outpath+'inifornamelist', 'w')
-print('&inipar nx = {:d}, ny = {:d}, nz = {:d},\n' \
-      '        dx = {:.1f}, dy = {:.1f}, dz = {:.1f},\n    /'.format(int(nx[0])-1, 
-                                                             int(ny[0]-1), 
-                                                             int(nz[0]),
-                                                             xres[0], yres[0], 
-                                                             zres[0]),
-      file=namelist)
-print('&d3par    end_time = {:.1f}\n    /'.format(simtime), file = namelist)
-
-namelist.close() 
-
-print('\nCreated inifor namelist.')
+    print('\n\n-----------------------------------------\nSIMULATION SETUP SUMMARY')
+    print('-----------------------------------------')
+    domaincells = totaldomains*[0]
+    rti = totaldomains*[0]
+    
+    for n in range(totaldomains):
+        print('\nDomain '+str(n)+':')
+        print('\tnx/ny/nz\t\t'+str(int(nx[n]-1))+'/'+str(int(ny[n]-1))+'/'+str(int(nz[n])))
+        print('\tdx/dy/dz\t\t'+str(xres[n])+'/'+str(yres[n])+'/'+str(zres[n]))
+        domaincells[n] = nx[n]*ny[n]*nz[n]
+        # rti[n] = domaincells[n]*setvmag/xres[n]
+        print(f"\tOrigin E/N:\t\t{xmin[n]}/{ymin[n]}")
+        if n > 0:
+            print('\tll-Position for &nesting_parameters\n\tx,y:\t\t\t'+str(llx[n])+', '+str(lly[n]))
+    
+    print('\nTotal Number of Cells:\t\t'+"%4.2e" % (sum(domaincells)))
+    for m in range(len(domaincells)):
+        print('  Domain '+str(m)+':\t\t\t%4.3e\t= %3.2d %%' % (domaincells[m], round(domaincells[m]/sum(domaincells),4)*100))
+    
+    print('\nTopo shifted down by:\t\t{:.2f} Meter'.format(origin_z))
+    print('\nRuntime length score:\t\t'+str(round((sum(domaincells)*setvmag/min(xres))/1e06,2)))
+    
+    
+    #%% create inifor namelist and save to file
+    
+    namelist = open(outpath+'inifornamelist', 'w')
+    print('&inipar nx = {:d}, ny = {:d}, nz = {:d},\n' \
+          '        dx = {:.1f}, dy = {:.1f}, dz = {:.1f},\n    /'.format(int(nx[0])-1, 
+                                                                 int(ny[0]-1), 
+                                                                 int(nz[0]),
+                                                                 xres[0], yres[0], 
+                                                                 zres[0]),
+          file=namelist)
+    print('&d3par    end_time = {:.1f}\n    /'.format(simtime), file = namelist)
+    
+    namelist.close() 
+    
+    print('\nCreated inifor namelist.')
 
 
