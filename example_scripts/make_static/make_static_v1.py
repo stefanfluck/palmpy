@@ -20,7 +20,7 @@ try:
 except:
     print('No command line argument given. Using hardcoded config_file path in script.')
     # cfp.read("C:\\Users\\Stefan Fluck\\Documents\\Python Scripts\\ZAV-PALM-Scripts\\example_scripts\\make_static\\make_static.ini")
-    cfp.read("C:\\Users\\Stefan Fluck\\Desktop\\yv_jor_1.ini")
+    cfp.read("C:\\Users\\Stefan Fluck\\Desktop\\yv-jor-1_CASE\\yv-jor-1c.ini")
 
 modulepath = cfp.get('paths', 'modulepath') #read modulepath from config file
 
@@ -212,7 +212,7 @@ for b in range(len(probes_E)):
     ax.plot( (probes_E[b]-xmin[0]-(xlen[0]/orthores/10))/orthores, 
              (ylen[0]-(probes_N[b]-ymin[0]))/orthores, 
              marker='$'+str(b+1)+'$', color='red',
-             markersize=8)
+             markersize=6)
     ax.plot( (probes_E[b]-xmin[0])/orthores, 
               (ylen[0]-(probes_N[b]-ymin[0]))/orthores, 
               marker='.', markersize=8, color='red')
@@ -234,7 +234,8 @@ if extentsonly == True:
         print(f"\tOrigin E/N:\t\t{xmin[n]}/{ymin[n]}")
     print('\nTotal Number of Cells:\t\t'+"%4.2e" % (sum(domaincells)))
     for m in range(len(domaincells)):
-        print('  Domain '+str(m)+':\t\t\t%4.3e\t= %3.2d %%' % (domaincells[m], round(domaincells[m]/sum(domaincells),4)*100))
+        # print('  Domain '+str(m)+':\t\t\t%4.3e\t= %3.2d %%' % (domaincells[m], round(domaincells[m]/sum(domaincells),4)*100))
+        print(f'   Domain {m}:\t\t\t{domaincells[m]:4.3e}\t{domaincells[m]/sum(domaincells)*100:.2f}%')
     
     print('\nRuntime length score:\t\t'+str(round((sum(domaincells)*setvmag/min(xres))/1e06,2)))
 
@@ -558,6 +559,8 @@ if extentsonly == False:
     print('-----------------------------------------', file = parfile)
     domaincells = totaldomains*[0]
     
+    print(f"Origin Time:\t\t\t{origin_time}", file=parfile)
+    
     for n in range(totaldomains):
         print('\nDomain '+str(n)+':', file=parfile)
         print('\tnx/ny/nz\t\t'+str(int(nx[n]-1))+'/'+str(int(ny[n]-1))+'/'+str(int(nz[n])), file=parfile)
@@ -570,7 +573,9 @@ if extentsonly == False:
     
     print('\nTotal Number of Cells:\t\t'+"%4.2e" % (sum(domaincells)), file=parfile)
     for m in range(len(domaincells)):
-        print('  Domain '+str(m)+':\t\t\t%4.3e\t= %3.2d %%' % (domaincells[m], round(domaincells[m]/sum(domaincells),4)*100), file=parfile)
+        # print('  Domain '+str(m)+':\t\t\t%4.3e\t= %3.2d %%' % (domaincells[m], round(domaincells[m]/sum(domaincells),4)*100), file=parfile)
+        print(f'   Domain {m}:\t\t\t{domaincells[m]:4.3e}\t{domaincells[m]/sum(domaincells)*100:.2f}%', file=parfile)
+        
     print('\nTopo shifted down by:\t\t{:.2f} Meter'.format(origin_z), file=parfile)
     print('\nRuntime length score:\t\t'+str(round((sum(domaincells)*setvmag/min(xres))/1e6,2)), file = parfile)
         
@@ -588,7 +593,8 @@ if extentsonly == False:
     print('\n\n-----------------------------------------\nSIMULATION SETUP SUMMARY')
     print('-----------------------------------------')
     domaincells = totaldomains*[0]
-    rti = totaldomains*[0]
+    
+    print(f"Origin Time:\t\t\t{origin_time}")
     
     for n in range(totaldomains):
         print('\nDomain '+str(n)+':')
@@ -603,7 +609,8 @@ if extentsonly == False:
         #     print(f"\tProbe {c+1} relative x,y\t{probes_E[c]-xmin[n]},{probes_N[c]-ymin[n]}")
     print('\nTotal Number of Cells:\t\t'+"%4.2e" % (sum(domaincells)))
     for m in range(len(domaincells)):
-        print('  Domain '+str(m)+':\t\t\t%4.3e\t= %3.2d %%' % (domaincells[m], round(domaincells[m]/sum(domaincells),4)*100))
+        # print('  Domain '+str(m)+':\t\t\t%4.3e\t= %3.2d %%' % (domaincells[m], round(domaincells[m]/sum(domaincells),4)*100))
+        print(f'   Domain {m}:\t\t\t{domaincells[m]:4.3e}\t{domaincells[m]/sum(domaincells)*100:.2f}%')
     
     print('\nTopo shifted down by:\t\t{:.2f} Meter'.format(origin_z))
     print('\nRuntime length score:\t\t'+str(round((sum(domaincells)*setvmag/min(xres))/1e06,2)))

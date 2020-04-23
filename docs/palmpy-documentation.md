@@ -243,9 +243,33 @@ namelist parameters
 
 
 
+#### Hints
+
+##### Grid Dimensions
+
+Choosing valid domain extents can be tricky. There are a few rules that need to be followed, which are explained next. 
+
+**Limitations  on nx and ny**
+
+When choosing the extents of the domains, keep in mind that the resulting number of gridpoints in x and y direction (``nx`` and ``ny``) must match the processor grid that results due to your choice of number of cores. What does that mean? When assigning 24 processor entities (cores, PE) to a domain, the domain will be split into 24 subdomains, one for each processor. With 24 cores, the resulting processor grid will be a 6 by 4 grid (whose dimensions are called ``npex`` and ``npey``). Therefore, your ``nx`` and ``ny`` respectively must be integer divisible by  ``npex`` and ``npey``.  Furthermore, which is a bit more tricky is the fact that ``(nxy+1)/npexy`` must hold with the result containing a factor 2<sup>n </sup> with n >= 2. Choose basic domain extents, check the distribution of cells with the chosen resolution. Optimize the core count per domain based on their factorization (``npex and npey``).  
+$$
+2^n
+$$
+![image-20200423170812814](palmpy-documentation.assets/image-20200423170812814.png)
 
 
 
+There is a python script ``palm_gf`` that should simplify the grid finding process. What will mostly work best is a processor grid that has 2<sup>n</sup> values in x and y direction (32 cores = 4x8, 64 cores = 8x8, 16 cores = 4x4, 8 cores = 2x4, ...). So use nx and ny that are powers of two and also core numbers that are powers of two. 
+
+To get maximum usage out of speedflyer, use for example the following number of cores (not exhaustive):
+
+| # Domains | Domain 1 | Domain 2 | Domain 3 | Domain 4 | Domain 5 |
+| :-------: | :------: | :------: | :------: | :------: | :------: |
+|     1     |    64    |          |          |          |          |
+|     2     |    64    |    32    |          |          |          |
+|     3     |    32    |    32    |    32    |          |          |
+|     4     |    32    |    32    |    16    |    16    |          |
+|     5     |    32    |    32    |    16    |    8     |    8     |
 
 
 
