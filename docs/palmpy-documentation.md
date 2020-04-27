@@ -252,10 +252,12 @@ Choosing valid domain extents can be tricky. There are a few rules that need to 
 **Limitations  on nx and ny**
 
 When choosing the extents of the domains, keep in mind that the resulting number of gridpoints in x and y direction (``nx`` and ``ny``) must match the processor grid that results due to your choice of number of cores. What does that mean? When assigning 24 processor entities (cores, PE) to a domain, the domain will be split into 24 subdomains, one for each processor. With 24 cores, the resulting processor grid will be a 6 by 4 grid (whose dimensions are called ``npex`` and ``npey``). Therefore, your ``nx`` and ``ny`` respectively must be integer divisible by  ``npex`` and ``npey``.  Furthermore, which is a bit more tricky is the fact that ``(nxy+1)/npexy`` must hold with the result containing a factor 2<sup>n </sup> with n >= 2. Choose basic domain extents, check the distribution of cells with the chosen resolution. Optimize the core count per domain based on their factorization (``npex and npey``).  
-$$
-2^n
-$$
+
+
+
 ![image-20200423170812814](palmpy-documentation.assets/image-20200423170812814.png)
+
+<center><font size="-1">With wrong nx and ny values, the multigrid solver cannot work correctly and may become unstable.</font></center>
 
 
 
@@ -335,7 +337,7 @@ Under ``&inipar``, grid information of the parent is given. Under ``&d3par`` the
 Load required modules to run PALM before running INIFOR. INIFOR is executed as follows in the bash shell:
 
 ```bash
-inifor -p <path> -d <date> -i <init-mode> -n <namelist> --input-prefix <input-prefix> -t <static-driver> -o <output> -a <averaging-angle>
+inifor -p <path> -d <YYYYMMDDHH (in UTC)> -i <init-mode> -n <namelist> --input-prefix <input-prefix> -t <static-driver> -o <output> -a <averaging-angle>
 ```
 
 
@@ -374,13 +376,14 @@ The following questions are written down here for a reason. They are important q
 
 
 
-- Are the static driver time stamps, end_times and skip_time_data_output parameters in the namelists correct?
-- Are you simulating the correct day?
+- Are the static driver **time stamps, end_times and skip_time_data_output** parameters in the namelists correct?
+- Are you simulating the **correct day**?
 - Have you supplied ``-a "d3#/r restart"`` when you want to continue your run after? If not, its all lost.
-- Have you checked that output variables are really only supplied ones, especially the _av ones? (These arrays are set up after skip_time_data_output, if you skip large parts of your simulations, an error is raised and the simulation is lost)
+- Have you checked that **output variables** are really only **supplied once**, especially the _av ones? (These arrays are set up after skip_time_data_output, if you skip large parts of your simulations, an error is raised and the simulation is lost)
 - A simulation can be started with ``palmrun ...... -v > logfile &``. With this, the output is piped into a logfile and with ``&`` the command is executed in a subshell. This means, that one can log out of the cluster without the palmrun routine being aborted. This could also be achieved with ``nohup palmrun .... -v &`` , which apparently also pipes the output to a ``nohup.out`` file (not tested).
 - When monitoring the simulation progress over a VPN connection with ``tail -f <logfile>``, it might occur that the simulation aborts with the message ``-> palmrun finished`` if the VPN session is aborted due to the computer entering energy saver mode or something else. It has proven more robust by monitoring the percentage of the simulation progress with spot checks, and await the completion of the job by monitoring the Ganglia load monitor.
-- 
+
+
 
 ---
 
@@ -405,6 +408,20 @@ export LD_LIBRARY_PATH=/cluster/home/<rrtmg_install_location>/lib/rrtmg/shared/l
 
 
 
+To choose **how many cores** the run should use can be steered with the hostfile supplied in the ``.palm.config.<identifier>`` file under ``%execute_command``. There, a path to a hostfile is given, where for every node it's IP address is given and how many cores are available. This hostfile must look like the following:
+
+```bash
+# The following node is a dual processor machine:
+192.168.111.250:50
+
+# The following node is a dual-processor machine:
+192.168.111.251:50
+```
+
+The config does not have to be recompiled. The flag ``-T`` does not have an effect on the Speedflyer cluster.
+
+
+
 
 
 ## NCO
@@ -421,6 +438,8 @@ ncap2 -O -s ‘time=time+39600’ <in> <out>
 
 # concatenate output files to one large file (only works without errors if equal variables are present)
 ncrcat -v var1,var2,var3 inputfiles outputfiles
+# as an example with multiple input files and all variables:
+ncrcat yv-jor-2_av_3d_N02.00{0..5}.nc yv-jor-2_av_3d_N02.nc
 ```
 
 

@@ -10,6 +10,7 @@ from configparser import ConfigParser
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+from datetime import datetime
 
 #%% Read config file and set flags and values appropriately.
 
@@ -20,7 +21,7 @@ try:
 except:
     print('No command line argument given. Using hardcoded config_file path in script.')
     # cfp.read("C:\\Users\\Stefan Fluck\\Documents\\Python Scripts\\ZAV-PALM-Scripts\\example_scripts\\make_static\\make_static.ini")
-    cfp.read("C:\\Users\\Stefan Fluck\\Desktop\\yv-jor-1_CASE\\yv-jor-1c.ini")
+    cfp.read("C:\\Users\\Stefan Fluck\\Desktop\\yv-jor-2\\yv-jor-2.ini")
 
 modulepath = cfp.get('paths', 'modulepath') #read modulepath from config file
 
@@ -543,6 +544,10 @@ if extentsonly == False:
         mst.setneededattributes(static.x,'x') #set attributes of basic coordinates x and y
         mst.setneededattributes(static.y,'y')
         
+        static.attrs['creation_time'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        static.attrs['Conventions'] = 'CF-1.7'
+        
+        
         if flags[i]['dobuildings3d'] == True:
             mst.setneededattributes(static.z,'z') #set attributes of coordinate z if buildings are set (only data to require z so far)
         
@@ -584,7 +589,7 @@ if extentsonly == False:
         print(f'Domain {b}:', file=parfile)
         for c in range(len(probes_E)):
             print(f"\tProbe {c+1} x,y\t\t{probes_E[c]-xmin[b]},{probes_N[c]-ymin[b]}", file=parfile)
-        print('\n')
+        print(f'\n\nCreated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}', file=parfile)
     
     parfile.close() 
   
@@ -620,7 +625,7 @@ if extentsonly == False:
         print(f'Domain {b}:')
         for c in range(len(probes_E)):
             print(f"\tProbe {c+1} x,y\t\t{probes_E[c]-xmin[b]}, {probes_N[c]-ymin[b]}")
-        print('\n')
+        print(f'\n\nCreated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
     
     
     
@@ -635,7 +640,7 @@ if extentsonly == False:
                                                                  zres[0]),
           file=namelist)
     print('&d3par    end_time = {:.1f}\n    /'.format(simtime), file = namelist)
-    
+    print(f"\n\n! Created on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", file=namelist)
     namelist.close() 
     
     print('\nCreated inifor namelist.')
