@@ -20,8 +20,8 @@ try:
     cfp.read(sys.argv[1]) #check if commandline argument is given for config file.
 except:
     print('No command line argument given. Using hardcoded config_file path in script.')
-    cfp.read("C:\\Users\\Stefan Fluck\\Documents\\Python Scripts\\ZAV-PALM-Scripts\\example_scripts\\make_static\\make_static.ini")
-    # cfp.read("C:\\Users\\Stefan Fluck\\Desktop\\yv-jor-2\\yv-jor-2.ini")
+    # cfp.read("C:\\Users\\Stefan Fluck\\Documents\\Python Scripts\\ZAV-PALM-Scripts\\example_scripts\\make_static\\make_static.ini")
+    cfp.read("C:\\Users\\Stefan Fluck\\Desktop\\yv-jor-3\\yv-jor-3.ini")
 
 modulepath = cfp.get('paths', 'modulepath') #read modulepath from config file
 
@@ -651,7 +651,7 @@ if extentsonly == False:
         print(f'Domain {b}:', file=parfile)
         for c in range(len(probes_E)):
             print(f"\tProbe {c+1} x,y\t\t{probes_E[c]-xmin[b]},{probes_N[c]-ymin[b]}", file=parfile)
-        print(f'\n\nCreated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}', file=parfile)
+    print(f'\n\nCreated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}', file=parfile)
     
     parfile.close() 
   
@@ -687,7 +687,7 @@ if extentsonly == False:
         print(f'Domain {b}:')
         for c in range(len(probes_E)):
             print(f"\tProbe {c+1} x,y\t\t{probes_E[c]-xmin[b]}, {probes_N[c]-ymin[b]}")
-        print(f'\n\nCreated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
+    print(f'\n\nCreated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
     
     
     
