@@ -223,7 +223,7 @@ insert Table here
 | 1001      | Grass Field                          |
 | 1002      | Low Crops (Such as beet, Potatoes, ) |
 | 1003      | Wheat                                |
-| 1004      | Mais                                 |
+| 1004      | Corn                                 |
 
 
 
@@ -250,6 +250,20 @@ insert Table here
 namelist parameters
 
 
+
+
+
+``[change_npars]``
+
+In order to change vegetation, pavement, water, soil or albedo parameters individually, set the flags "dovegpars" or "doalbpars" to True for each domain. If a flag is set to True, values must be provided or an error is raised (``string index out of range``).
+
+| Parameter            |                                                              |
+| -------------------- | ------------------------------------------------------------ |
+| ``vegparchanges``    | Provide in form ``npar:newvalue:filterarr:filtervalue``, where filterarr  = 0 means from source array, filterarr = 1 corresponds to array after mapping (palm classes). For crop types (>= 1000) only 0 is supported. Multiple requested changes are to be separated by commas. <br /><br />Example: ``vegparchanges = 4:0.5:0:1004, 4:0.2:0:1003`` |
+| ``watparchanges``    | Provide in form ``npar:newvalue:filterarr:filtervalue``, where filterarr  = 0 means from source array, filterarr = 1 corresponds to array after mapping (palm classes). Multiple requested changes are to be separated by commas. |
+| ``pavparchanges``    | Provide in form ``npar:newvalue:filterarr:filtervalue``, where filterarr  = 0 means from source array, filterarr = 1 corresponds to array after mapping (palm classes). Multiple requested changes are to be separated by commas. |
+| ``soilparchanges``   | Provide in form ``npar:newvalue:filterarr:filtervalue``, where filterarr  = 0 means from source array, filterarr = 1 corresponds to array after mapping (palm classes). Multiple requested changes are to be separated by commas. |
+| ``albedoparchanges`` | Provide in form ``npar:newvalue:filterarr:filtervalue``, where filterarr  = 0 means from source array, filterarr = 1 corresponds to array after mapping (palm classes). Multiple requested changes are to be separated by commas. |
 
 
 

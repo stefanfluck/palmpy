@@ -184,6 +184,39 @@ if probes_N != '':
     probes_N = list(map(float,probes_N.replace(' ','').rstrip(',').split(',')))
     probes_N = list(map(round,probes_N))
     
+
+# read in vegpars changes
+vegparchanges = cfp.get('change_npars', 'vegparchanges').replace(' ','').rstrip(',').split(',')
+if vegparchanges != ['']:
+    for it in range(len(vegparchanges)):
+        vegparchanges[it] = vegparchanges[it].split(':')
+        vegparchanges[it] = list(map(float,vegparchanges[it]))
+    
+watparchanges = cfp.get('change_npars', 'watparchanges').replace(' ','').rstrip(',').split(',')
+if watparchanges != ['']:
+    for it in range(len(watparchanges)):
+        watparchanges[it] = watparchanges[it].split(':')
+        watparchanges[it] = list(map(float,watparchanges[it]))
+
+pavparchanges = cfp.get('change_npars', 'pavparchanges').replace(' ','').rstrip(',').split(',')
+if pavparchanges != ['']:
+    for it in range(len(pavparchanges)):
+        pavparchanges[it] = pavparchanges[it].split(':')
+        pavparchanges[it] = list(map(float,pavparchanges[it]))
+    
+soilparchanges = cfp.get('change_npars', 'soilparchanges').replace(' ','').rstrip(',').split(',')
+if soilparchanges != ['']:  
+    for it in range(len(soilparchanges)):
+        soilparchanges[it] = soilparchanges[it].split(':')
+        soilparchanges[it] = list(map(float,soilparchanges[it]))
+
+albedoparchanges = cfp.get('change_npars', 'albedoparchanges').replace(' ','').rstrip(',').split(',')
+if albedoparchanges != ['']:
+    for it in range(len(albedoparchanges)):
+        albedoparchanges[it] = albedoparchanges[it].split(':')
+        albedoparchanges[it] = list(map(float,albedoparchanges[it]))
+
+    
     
 #further checks:
 print('\nFinalizing Checks:\n')
@@ -291,13 +324,30 @@ if extentsonly == False:
     
             
         ##### BLOCK FOR MODIFICATIONS TO VEGPARS AND ALBEDOPARS
-        
-            # vegpars = mst.createparsarrays(nx[i], ny[i])[0]
-            # albedopars = mst.createparsarrays(nx[i], ny[i])[5]
-        
-            # vegpars,albedopars = mst.setalbedovalue(albedopars, vegpars, bbdat, 9, 1, -1)
-            # vegpars = mst.modifyparsarray(vegpars,9,2093,bbdat,9)
-            # vegpars = mst.modifyparsarray(vegpars,11,0,bbdat,9)
+            if flags[i]['dovegpars'] == True:
+                vegpars = mst.createparsarrays(nx[i], ny[i])[0] # create vegpars arrays and albedopars arrays
+                # vegpars = mst.modifyparsarray(vegpars,9,2093,bbdat,9)
+                # vegpars = mst.modifyparsarray(vegpars,11,0,bbdat,9)
+                for it in range(len(vegparchanges)):
+                    if vegparchanges[it][3] < 1000:
+                        if vegparchanges[it][2] == 0:
+                            vegpars = mst.modifyparsarray(vegpars,int(vegparchanges[it][0]),vegparchanges[it][1],bbdat,vegparchanges[it][3])
+                        if vegparchanges[it][2] == 1:
+                            vegpars = mst.modifyparsarray(vegpars,int(vegparchanges[it][0]),vegparchanges[it][1],vegarr,vegparchanges[it][3])
+                 #TODO: add here also same structure for wat pav soilpars!
+
+            if flags[i]['doalbedopars'] == True:
+                albedopars = mst.createparsarrays(nx[i], ny[i])[5]
+                # vegpars,albedopars = mst.setalbedovalue(albedopars, vegpars, bbdat, 9, 1, -1)
+                for it in range(len(albedoparchanges)):
+                    if albedoparchanges[it][3] < 1000:
+                        if albedoparchanges[it][2] == 0:
+                            vegpars,albedopars = mst.setalbedovalue(albedopars, vegpars, bbdat, albedoparchanges[it][3], 
+                                                                    albedoparchanges[it][1], int(albedoparchanges[it][0]))
+                        if albedoparchanges[it][2] == 1:
+                            vegpars,albedopars = mst.setalbedovalue(albedopars, vegpars, vegarr, albedoparchanges[it][3], 
+                                                                    albedoparchanges[it][1], int(albedoparchanges[it][0]))
+            
         
         ##### treat LAD
             if flags[i]['dolad'] == True:
@@ -390,11 +440,23 @@ if extentsonly == False:
             vegarr = np.where( (vegarr[:,:]==-127) & (watarr[:,:]==-127) & (pavarr[:,:]==-127), bulkvegclass[i], vegarr[:,:]) #fill unassigned vegetation types to defined bulk vegetation class.
             
             if flags[i]['docropfields'] == True:
-                cropheight = gdt.rasterandcuttlm(crops, subdir_rasteredshp+'felder'+str(ischild[i])+'.asc', 
-                                               xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_TOP')
-                vegarr = np.where( (vegarr[:,:]==bulkvegclass[i]) & (cropheight[:,:] != -9999), 2, vegarr[:,:]) #where vegarr is set to bulk class and crops are found, set class to 2 (crops)
+                croptype = gdt.rasterandcuttlm(crops, subdir_rasteredshp+'croptype'+str(ischild[i])+'.asc', 
+                                               xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='OBJEKTART')
+                vegarr = np.where( (vegarr[:,:]==bulkvegclass[i]) & (croptype[:,:] != -9999), 2, vegarr[:,:]) #where vegarr is set to bulk class and crops are found, set class to 2 (crops)
             
-            
+                
+                if flags[i]['dovegpars'] == True:
+                    for it in range(len(vegparchanges)):
+                        if vegparchanges[it][3] >= 1000:
+                            vegpars = mst.modifyparsarray(vegpars,int(vegparchanges[it][0]),vegparchanges[it][1],croptype,vegparchanges[it][3])
+                
+                if flags[i]['doalbedopars'] == True:      
+                    for it in range(len(albedoparchanges)):
+                        if albedoparchanges[it][3] >= 1000:
+                            vegpars,albedopars = mst.setalbedovalue(albedopars, vegpars, croptype, albedoparchanges[it][3], 
+                                                                    albedoparchanges[it][1], int(albedoparchanges[it][0]))
+
+
             if flags[i]['dopavedbb'] == True:
                 paved = gdt.rasterandcuttlm(pavementareas, subdir_rasteredshp+'pavement'+str(ischild[i])+'.asc',xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i], burnatt='OBJEKTART', alltouched=pavealltouched[i])
                 vegarr = np.where( paved[:,:] != -9999 , mst.fillvalues['vegetation_type'], vegarr[:,:]) #overwrite vegarr where pavement areas are found with fillvalue
