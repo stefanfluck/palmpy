@@ -20,8 +20,8 @@ try:
     cfp.read(sys.argv[1]) #check if commandline argument is given for config file.
 except:
     print('No command line argument given. Using hardcoded config_file path in script.')
-    # cfp.read("C:\\Users\\Stefan Fluck\\Documents\\Python Scripts\\ZAV-PALM-Scripts\\example_scripts\\make_static\\make_static.ini")
-    cfp.read("C:\\Users\\Stefan Fluck\\Desktop\\yv-jor-2\\yv-jor-2.ini")
+    cfp.read("C:\\Users\\Stefan Fluck\\Documents\\Python Scripts\\ZAV-PALM-Scripts\\example_scripts\\make_static\\make_static.ini")
+    # cfp.read("C:\\Users\\Stefan Fluck\\Desktop\\yv-jor-2\\yv-jor-2.ini")
 
 modulepath = cfp.get('paths', 'modulepath') #read modulepath from config file
 

@@ -217,6 +217,16 @@ insert Table here
 
 ##### Crops
 
+| OBJEKTART | Crop Type                            |
+| --------- | ------------------------------------ |
+| 1000      | Bare Field                           |
+| 1001      | Grass Field                          |
+| 1002      | Low Crops (Such as beet, Potatoes, ) |
+| 1003      | Wheat                                |
+| 1004      | Mais                                 |
+
+
+
 
 
 ##### Buildings
@@ -435,6 +445,12 @@ ncea -d y_1,-0.5,0.5 -d x_1,-1.0,0.0 filein fileout
 
 # add a value to a variable. -O is overwrite, -s is for an arithmetic expression.
 ncap2 -O -s ‘time=time+39600’ <in> <out>
+
+# copy variables from one into another file
+ncks -A -v <var> <static-file> <3d_output_file>
+
+# add an attribute to a variable
+ncatted -O -a <attname>,<var>,<mode mostly o>,<dtype (c for char)>,"<attribute>" <file>
 
 # concatenate output files to one large file (only works without errors if equal variables are present)
 ncrcat -v var1,var2,var3 inputfiles outputfiles
