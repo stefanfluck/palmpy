@@ -460,6 +460,7 @@ if extentsonly == False:
             if flags[i]['dopavedbb'] == True:
                 paved = gdt.rasterandcuttlm(pavementareas, subdir_rasteredshp+'pavement'+str(ischild[i])+'.asc',xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i], burnatt='OBJEKTART', alltouched=pavealltouched[i])
                 vegarr = np.where( paved[:,:] != -9999 , mst.fillvalues['vegetation_type'], vegarr[:,:]) #overwrite vegarr where pavement areas are found with fillvalue
+                vegpars[:,:,:] = np.where( paved[:,:] != -9999, mst.fillvalues['vegetation_pars'], vegpars[:,:,:])
                 watarr = np.where( paved[:,:] != -9999 , mst.fillvalues['water_type'], watarr[:,:]) #overwrite watarr where pavement areas are found with fillvalue
                 # pavarr = paved
                 # pavarr = np.where ( pavarr[:,:] != -9999, 1, mst.fillvalues['pavement_type']) #pavement_type set where shp is non-fillvalue. TODO: mit einem map dict auch pavements richtig klassifizieren.
@@ -626,7 +627,8 @@ if extentsonly == False:
     print('-----------------------------------------', file = parfile)
     domaincells = totaldomains*[0]
     
-    print(f"Origin Time:\t\t\t{origin_time}", file=parfile)
+    print(f"\nOrigin Time:\t\t\t{origin_time}", file=parfile)
+    print('Topo shifted down by:\t\t{:.2f} Meter'.format(origin_z), file=parfile)
     
     for n in range(totaldomains):
         print('\nDomain '+str(n)+':', file=parfile)
@@ -638,19 +640,47 @@ if extentsonly == False:
         if n > 0:
             print('\tll-Position for &nesting_parameters\n\tx,y:\t\t\t'+str(llx[n])+', '+str(lly[n]), file=parfile)
     
-    print('\nTotal Number of Cells:\t\t'+"%4.2e" % (sum(domaincells)), file=parfile)
+    print('\n----------------------\nTotal Number of Cells:\t\t'+"%4.2e" % (sum(domaincells)), file=parfile)
     for m in range(len(domaincells)):
         # print('  Domain '+str(m)+':\t\t\t%4.3e\t= %3.2d %%' % (domaincells[m], round(domaincells[m]/sum(domaincells),4)*100), file=parfile)
         print(f'   Domain {m}:\t\t\t{domaincells[m]:4.3e}\t{domaincells[m]/sum(domaincells)*100:.2f}%', file=parfile)
         
-    print('\nTopo shifted down by:\t\t{:.2f} Meter'.format(origin_z), file=parfile)
     print('\nRuntime length score:\t\t'+str(round((sum(domaincells)*setvmag/min(xres))/1e6,2)), file = parfile)
         
-    print('\n\nProbes (for masked output):\n', file=parfile)
+    print('\n\n---------------------\nProbes (for masked output):\n', file=parfile)
     for b in range(totaldomains):
         print(f'Domain {b}:', file=parfile)
         for c in range(len(probes_E)):
-            print(f"\tProbe {c+1} x,y\t\t{probes_E[c]-xmin[b]},{probes_N[c]-ymin[b]}", file=parfile)
+            print(f"\tProbe {c+1} x/y\t\t{probes_E[c]-xmin[b]}/{probes_N[c]-ymin[b]}", file=parfile)
+
+    source = {0:'Source Data classes', 1:'PALM classes'}
+    print('\n\n----------------------\nChanges to vegetation/albedo/water/pavement/soil_pars', file=parfile)
+
+    if vegparchanges != ['']:
+        print(f'\nManual overrides for vegetation type:', file=parfile)
+        for e in vegparchanges:
+            print(f"\tFor class {int(e[3])}, set npar {int(e[0])} to {e[1]} based on {source[e[2]]}.", file=parfile)
+            
+    if albedoparchanges != ['']:
+        print(f'\nManual overrides for albedo type:', file=parfile)
+        for e in albedoparchanges:
+            print(f"\tFor class {int(e[3])}, set npar {int(e[0])} to {e[1]} based on {source[e[2]]}.", file=parfile)
+        
+    if watparchanges != ['']:
+        print(f'\nManual overrides for vegetation type:', file=parfile)
+        for e in watparchanges:
+            print(f"\tFor class {int(e[3])}, set npar {int(e[0])} to {e[1]} based on {source[e[2]]}.", file=parfile)
+    
+    if pavparchanges != ['']:
+        print(f'\nManual overrides for vegetation type:', file=parfile)
+        for e in pavparchanges:
+            print(f"\tFor class {int(e[3])}, set npar {int(e[0])} to {e[1]} based on {source[e[2]]}.", file=parfile)
+        
+    if soilparchanges != ['']:
+        print(f'\nManual overrides for vegetation type:', file=parfile)
+        for e in soilparchanges:
+            print(f"\tFor class {int(e[3])}, set npar {int(e[0])} to {e[1]} based on {source[e[2]]}.", file=parfile)
+
     print(f'\n\nCreated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}', file=parfile)
     
     parfile.close() 
@@ -661,7 +691,8 @@ if extentsonly == False:
     print('-----------------------------------------')
     domaincells = totaldomains*[0]
     
-    print(f"Origin Time:\t\t\t{origin_time}")
+    print(f"\nOrigin Time:\t\t\t{origin_time}")
+    print('Topo shifted down by:\t\t{:.2f} Meter'.format(origin_z))
     
     for n in range(totaldomains):
         print('\nDomain '+str(n)+':')
@@ -674,19 +705,46 @@ if extentsonly == False:
             print('\tll-Position for &nesting_parameters\n\tx,y:\t\t\t'+str(llx[n])+', '+str(lly[n]))
         # for c in range(len(probes_E)):
         #     print(f"\tProbe {c+1} relative x,y\t{probes_E[c]-xmin[n]},{probes_N[c]-ymin[n]}")
-    print('\nTotal Number of Cells:\t\t'+"%4.2e" % (sum(domaincells)))
+    print('\n----------------------\nTotal Number of Cells:\t\t'+"%4.2e" % (sum(domaincells)))
     for m in range(len(domaincells)):
         # print('  Domain '+str(m)+':\t\t\t%4.3e\t= %3.2d %%' % (domaincells[m], round(domaincells[m]/sum(domaincells),4)*100))
         print(f'   Domain {m}:\t\t\t{domaincells[m]:4.3e}\t{domaincells[m]/sum(domaincells)*100:.2f}%')
     
-    print('\nTopo shifted down by:\t\t{:.2f} Meter'.format(origin_z))
     print('\nRuntime length score:\t\t'+str(round((sum(domaincells)*setvmag/min(xres))/1e06,2)))
     
-    print('\n\nProbes (for masked output):\n')
+    print('\n\n---------------------\nProbes (for masked output):\n')
     for b in range(totaldomains):
         print(f'Domain {b}:')
         for c in range(len(probes_E)):
-            print(f"\tProbe {c+1} x,y\t\t{probes_E[c]-xmin[b]}, {probes_N[c]-ymin[b]}")
+            print(f"\tProbe {c+1} x/y\t\t{probes_E[c]-xmin[b]}/{probes_N[c]-ymin[b]}")
+    
+    source = {0:'Source Data classes', 1:'PALM classes'}
+    print('\n\n----------------------\nChanges to vegetation/albedo/water/pavement/soil_pars')
+    if vegparchanges != ['']:
+        print(f'\nManual overrides for vegetation type:')
+        for e in vegparchanges:
+            print(f"\tFor class {int(e[3])}, set npar {int(e[0])} to {e[1]} based on {source[e[2]]}.")
+            
+    if albedoparchanges != ['']:
+        print(f'\nManual overrides for albedo type:')
+        for e in albedoparchanges:
+            print(f"\tFor class {int(e[3])}, set npar {int(e[0])} to {e[1]} based on {source[e[2]]}.")
+        
+    if watparchanges != ['']:
+        print(f'\nManual overrides for vegetation type:')
+        for e in watparchanges:
+            print(f"\tFor class {int(e[3])}, set npar {int(e[0])} to {e[1]} based on {source[e[2]]}.")
+    
+    if pavparchanges != ['']:
+        print(f'\nManual overrides for vegetation type:')
+        for e in pavparchanges:
+            print(f"\tFor class {int(e[3])}, set npar {int(e[0])} to {e[1]} based on {source[e[2]]}.")
+        
+    if soilparchanges != ['']:
+        print(f'\nManual overrides for vegetation type:')
+        for e in soilparchanges:
+            print(f"\tFor class {int(e[3])}, set npar {int(e[0])} to {e[1]} based on {source[e[2]]}.")
+    
     print(f'\n\nCreated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
     
     
