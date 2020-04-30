@@ -16,5 +16,6 @@ dependencies:
   - pillow
   - pynco
   - rasterio
+  - geopandas
 prefix: C:\Users\stefa\Miniconda3\envs\palm
 
