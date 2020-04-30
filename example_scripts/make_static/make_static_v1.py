@@ -21,7 +21,14 @@ try:
 except:
     print('No command line argument given. Using hardcoded config_file path in script.')
     # cfp.read("C:\\Users\\Stefan Fluck\\Documents\\Python Scripts\\ZAV-PALM-Scripts\\example_scripts\\make_static\\make_static.ini")
-    cfp.read("C:\\Users\\Stefan Fluck\\Desktop\\yv-jor-3\\yv-jor-3.ini")
+    # cfp.read("C:\\Users\\Stefan Fluck\\Desktop\\yv-jor-3\\yv-jor-3.ini")
+    from tkinter import Tk
+    from tkinter.filedialog import askopenfilename
+    Tk().withdraw()
+    inipath = askopenfilename()
+    cfp.read(inipath)
+
+
 
 modulepath = cfp.get('paths', 'modulepath') #read modulepath from config file
 
