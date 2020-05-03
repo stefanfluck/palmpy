@@ -105,6 +105,7 @@ dotlmbb = totaldomains*[None];          dopavedbb = totaldomains*[None]
 docropfields = totaldomains*[None];     dolad = totaldomains*[None]
 dobuildings_2d = totaldomains*[None];   dobuildings_3d = totaldomains*[None]
 dovegpars = totaldomains*[None];        doalbedopars = totaldomains*[None]
+dobldgpars = totaldomains*[None]; 
 dostreettypes = totaldomains*[None];    lai_forest = totaldomains*[None]
 lai_breihe = totaldomains*[None];       lai_ebgebu = totaldomains*[None]
 a_forest = totaldomains*[None];         b_forest = totaldomains*[None]
@@ -146,6 +147,7 @@ for i in range(0,len(cfp.sections())):
         dobuildings_3d[index] = cfp.getboolean(section,'dobuildings_3d', fallback=False)
         dovegpars[index] = cfp.getboolean(section,'dovegpars', fallback=False)
         doalbedopars[index] = cfp.getboolean(section,'doalbedopars', fallback=False)
+        dobldgpars[index] = cfp.getboolean(section,'dobldgpars', fallback=False)
         dostreettypes[index] = cfp.getboolean(section,'dostreettypes', fallback=False)
         
         #method = XXX -> TODO: implement a method selector for lad constant or lad with beta distribution
@@ -168,13 +170,14 @@ for i in range(0,len(cfp.sections())):
         
         flags[index] = {'doterrain':       doterrain[index], #create flags dictionary 
                         'dotlmbb':         dotlmbb[index],
-                        'dopavedbb':     dopavedbb[index], #requires dotlmbb = True
+                        'dopavedbb':       dopavedbb[index], #requires dotlmbb = True
                         'docropfields':    docropfields[index], #requires dotlmbb = true
                         'dolad':           dolad[index], #for now: resolved tree file, treerows file and singletree file needed, requires dotlmbb=true
                         'dobuildings2d':   dobuildings_2d[index],
                         'dobuildings3d':   dobuildings_3d[index],
                         'dovegpars':       dovegpars[index],
                         'doalbedopars':    doalbedopars[index],
+                        'dobldgpars':      dobldgpars[index],
                         'dostreettypes':   dostreettypes[index]}
         
         #a = '1,2,3,4' #hint for implementation of vegpars/albedopars
@@ -222,6 +225,12 @@ if albedoparchanges != ['']:
     for it in range(len(albedoparchanges)):
         albedoparchanges[it] = albedoparchanges[it].split(':')
         albedoparchanges[it] = list(map(float,albedoparchanges[it]))
+
+bldgparchanges = cfp.get('change_npars', 'bldgparchanges').replace(' ','').rstrip(',').split(',')
+if bldgparchanges != ['']:
+    for it in range(len(bldgparchanges)):
+        bldgparchanges[it] = bldgparchanges[it].split(':')
+        bldgparchanges[it] = list(map(float,bldgparchanges[it]))
 
     
     
@@ -517,7 +526,29 @@ if extentsonly == False:
                                             xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='BLDGTYP')
             gebtyp = np.where((gebtyp[:,:]==-9999.), mst.fillvalues['building_type'], gebtyp[:,:]) #change fillvalue to right one, import fcn defatults to -9999.0
             gebtyp = np.where( bldarr[0] == np.byte(0) , mst.fillvalues['building_type'], gebtyp[:,:] ) #set type to fillvalue where 3d bldg is too small to be resolved.
-                
+            
+        #change buliding pars if buildings are created and dobuildingpars flag is set.
+        if (flags[i]['dobuildings2d'] == True or flags[i]['dobuildings3d'] == True) and flags[i]['dobldgpars'] == True:
+            bldgpars = mst.createparsarrays(nx[i], ny[i])[4] #create the building pars array
+            #INFO: grouped stuff needs to be larger than 0 at the moment! 0 is also a fillvalue!
+            group1 = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudeareanum'+str(ischild[i])+'.asc', 
+                                            xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='GROUPING1')
+            group1 = np.where( (group1[:,:]==0), mst.fillvalues['building_pars'], group1[:,:] )
+            group2 = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudeareanum'+str(ischild[i])+'.asc', 
+                                            xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='GROUPING2')
+            group2 = np.where( (group2[:,:]==0), mst.fillvalues['building_pars'], group2[:,:] )
+            group3 = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudeareanum'+str(ischild[i])+'.asc', 
+                                            xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='GROUPING3')
+            group3 = np.where( (group3[:,:]==0), mst.fillvalues['building_pars'], group3[:,:] )
+            input2group = {0: gebtyp, 1:group1, 2:group2, 3:group3}
+            
+            for it in range(len(bldgparchanges)):
+                # if bldgparchanges[it][2] == 0:
+                    # ändere based on building_type von oben die building pars                
+                bldgpars = mst.modifyparsarray(bldgpars,int(bldgparchanges[it][0]),bldgparchanges[it][1],input2group[bldgparchanges[it][2]],bldgparchanges[it][3])
+
+            
+        
         if flags[i]['dostreettypes'] == True: #for chemistry
             # roadarr = gdt.rasterandcuttlm(streetsonly, subdir_rasteredshp+'streettype'+str(ischild[i])+'.asc', 
             #                                 xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='OBJEKTART', alltouched=pavealltouched[i])
@@ -580,6 +611,11 @@ if extentsonly == False:
             albedo_pars =  mst.createdataarrays(albedopars, ['nalbedo_pars','y','x'],[nalbedo_pars,y,x])
             mst.setneededattributes(albedo_pars,'albedo_pars')
             static['albedo_pars'] = albedo_pars
+        if flags[i]['dobldgpars'] == True:
+            nbuilding_pars = mst.createstaticcoords(ny[i],nx[i],xres[i])[8]
+            building_pars =  mst.createdataarrays(bldgpars, ['nbuilding_pars','y','x'],[nbuilding_pars,y,x])
+            mst.setneededattributes(building_pars,'building_pars')
+            static['building_pars'] = building_pars
         if flags[i]['dolad'] == True:
             lad = mst.createdataarrays(ladarr,['zlad', 'y', 'x'], [zlad,y,x])
             mst.setneededattributes(lad, 'lad')

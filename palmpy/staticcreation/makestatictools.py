@@ -993,6 +993,10 @@ def setneededattributes(dataarray, staticvariable):
     if staticvariable == 'albedo_pars':
         dataarray.attrs['_FillValue'] = fillvalues[staticvariable]
         dataarray.attrs['long_name'] = 'albedo parameters'
+     
+    if staticvariable == 'building_pars':
+        dataarray.attrs['_FillValue'] = fillvalues[staticvariable]
+        dataarray.attrs['long_name'] = 'building parameters'
         
     if staticvariable == 'pavement_pars':
         dataarray.attrs['_FillValue'] = fillvalues[staticvariable]
