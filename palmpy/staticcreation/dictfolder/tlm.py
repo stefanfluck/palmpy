@@ -33,7 +33,7 @@ bb2palmveg = {
 
 
 # swissTLM3D BB water classes to PALM water types
-bb2palmwat = {   5:2,    #fliessgewaesser > river
+bb2palmwat =    {   5:2,    #fliessgewaesser > river
                     10:1,   #stehendes gewaesser > lake
                 }
 

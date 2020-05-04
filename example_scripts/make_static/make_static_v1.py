@@ -692,14 +692,19 @@ if extentsonly == False:
     print('\nRuntime length score:\t\t'+str(round((sum(domaincells)*setvmag/min(xres))/1e6,2)), file = parfile)
         
     print('\n\n---------------------\nProbes (for masked output):\n', file=parfile)
-    for b in range(totaldomains):
-        print(f'Domain {b}:', file=parfile)
-        for c in range(len(probes_E)):
-            print(f"\tProbe {c+1} x/y\t\t{probes_E[c]-xmin[b]}/{probes_N[c]-ymin[b]}", file=parfile)
+    if probes_E == '':
+        print('\tNone.', file=parfile)
+    if probes_E != '':
+        for b in range(totaldomains):
+            print(f'Domain {b}:', file=parfile)
+            for c in range(len(probes_E)):
+                print(f"\tProbe {c+1} x/y\t\t{probes_E[c]-xmin[b]}/{probes_N[c]-ymin[b]}", file=parfile)
 
     source = {0:'Source Data classes', 1:'PALM classes'}
     print('\n\n----------------------\nChanges to vegetation/albedo/water/pavement/soil_pars', file=parfile)
-
+    if (vegparchanges == [''] and albedoparchanges == [''] and watparchanges == [''] and 
+        pavparchanges == [''] and soilparchanges == [''] and bldgparchanges == [''] ):
+        print('\tNone.', file=parfile)
     if vegparchanges != ['']:
         print(f'\nManual overrides for vegetation type:', file=parfile)
         for e in vegparchanges:
@@ -757,13 +762,20 @@ if extentsonly == False:
     print('\nRuntime length score:\t\t'+str(round((sum(domaincells)*setvmag/min(xres))/1e06,2)))
     
     print('\n\n---------------------\nProbes (for masked output):\n')
-    for b in range(totaldomains):
-        print(f'Domain {b}:')
-        for c in range(len(probes_E)):
-            print(f"\tProbe {c+1} x/y\t\t{probes_E[c]-xmin[b]}/{probes_N[c]-ymin[b]}")
+    if probes_E == '':
+        print('\tNone.')
+    if probes_E != '':
+        for b in range(totaldomains):
+            print(f'Domain {b}:')
+            for c in range(len(probes_E)):
+                print(f"\tProbe {c+1} x/y\t\t{probes_E[c]-xmin[b]}/{probes_N[c]-ymin[b]}")
     
     source = {0:'Source Data classes', 1:'PALM classes'}
-    print('\n\n----------------------\nChanges to vegetation/albedo/water/pavement/soil_pars')
+        
+    print('\n\n----------------------\nChanges to vegetation/albedo/water/pavement/soil_pars\n')
+    if (vegparchanges == [''] and albedoparchanges == [''] and watparchanges == [''] and 
+        pavparchanges == [''] and soilparchanges == [''] and bldgparchanges == [''] ):
+        print('\tNone.')
     if vegparchanges != ['']:
         print(f'\nManual overrides for vegetation type:')
         for e in vegparchanges:
