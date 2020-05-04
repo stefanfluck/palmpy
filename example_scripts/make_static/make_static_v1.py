@@ -19,7 +19,7 @@ cfp = ConfigParser(allow_no_value=True) #
 try:
     cfp.read(sys.argv[1]) #check if commandline argument is given for config file.
 except:
-    print('No command line argument given. Using hardcoded config_file path in script.')
+    print('No command line argument given. Choose your file.')
     # cfp.read("C:\\Users\\Stefan Fluck\\Documents\\Python Scripts\\ZAV-PALM-Scripts\\example_scripts\\make_static\\make_static.ini")
     # cfp.read("C:\\Users\\Stefan Fluck\\Desktop\\yv-jor-3\\yv-jor-3.ini")
     from tkinter import Tk
@@ -31,15 +31,23 @@ except:
 
 
 modulepath = cfp.get('paths', 'modulepath', fallback = '') #read modulepath from config file
-
-# modulepath = str(Path.home() / 'Documents' / 'Python Scripts' / 'ZAV-PALM-Scripts') #uncomment this line to have module path hardcoded.
+mapdialect = cfp.get('settings', 'mapdialect', fallback = 'mapdicts')
 
 if modulepath not in sys.path:
     sys.path.append(modulepath) #add modulepath to system path if not already there.
     
 import palmpy.staticcreation.geodatatools as gdt         #import modules for static generation
 import palmpy.staticcreation.makestatictools as mst
-import palmpy.staticcreation.mapdicts as mpd
+
+if mapdialect == 'tlm':
+    import palmpy.staticcreation.dictfolder.tlm as mpd
+    print('INFO: Imported the tlm mapdict.')
+elif mapdialect == 'custom':
+    import palmpy.staticcreation.dictfolder.custom as mpd
+    print('INFO: Imported the custom mapdict.')
+elif mapdialect == 'mapdicts':
+    import palmpy.staticcreation.mapdicts as mpd
+    print('INFO: Imported the generic mapdicts mapdict.')
 
 
 #parse settings and paths
@@ -332,7 +340,7 @@ if extentsonly == False:
         if flags[i]['dotlmbb'] == True:
             bbdat = gdt.rasterandcuttlm(bb, subdir_rasteredshp+'bb'+str(ischild[i])+'.asc',xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i], burnatt='OBJEKTART')
             # vegarr, pavarr, watarr = mst.mapbbclasses(bbdat)  #map tlm bodenbedeckungs-kategorien to the palm definitions.
-            vegarr, pavarr, watarr = mst.mapbbclasses2(bbdat, mpd.tlmbb2palmveg, mpd.tlmbb2palmwat)  #map tlm bodenbedeckungs-kategorien to the palm definitions.
+            vegarr, pavarr, watarr = mst.mapbbclasses2(bbdat, mpd.bb2palmveg, mpd.bb2palmwat)  #map tlm bodenbedeckungs-kategorien to the palm definitions.
                 #or: function content in three lines.
                 # vegarr = mst.mapdicttoarray(bbdat, mpd.tlmbb2palmveg, mst.fillvalues['vegetation_type'])
                 # watarr = mst.mapdicttoarray(bbdat, mpd.tlmbb2palmwat, mst.fillvalues['water_type'])
@@ -481,7 +489,7 @@ if extentsonly == False:
                 watarr = np.where( paved[:,:] != -9999 , mst.fillvalues['water_type'], watarr[:,:]) #overwrite watarr where pavement areas are found with fillvalue
                 # pavarr = paved
                 # pavarr = np.where ( pavarr[:,:] != -9999, 1, mst.fillvalues['pavement_type']) #pavement_type set where shp is non-fillvalue. TODO: mit einem map dict auch pavements richtig klassifizieren.
-                pavarr = mst.mapdicttoarray(paved, mpd.tlmpav2palmpav, fillvalue = np.byte(bulkpavclass[i])) #classify pavement array acc. to dict.
+                pavarr = mst.mapdicttoarray(paved, mpd.pav2palmpav, fillvalue = np.byte(bulkpavclass[i])) #classify pavement array acc. to dict.
     
             #create surface fraction array
             # soilarr = mst.makesoilarray(vegarr,pavarr) #old version.
@@ -554,14 +562,14 @@ if extentsonly == False:
             #                                 xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='OBJEKTART', alltouched=pavealltouched[i])
             # roadarr = mst.mapdicttoarray(roadarr, mpd.tlmstr2palmstyp, mst.fillvalues['street_type'])
             
-            gdt.splitroadsshp(streetsonly, subdir_rasteredshp, mpd.tlmmajroads, mpd.tlmminroads)
+            gdt.splitroadsshp(streetsonly, subdir_rasteredshp, mpd.majroads, mpd.minroads)
             
             majroads = gdt.rasterandcuttlm(subdir_rasteredshp+'majorroads.shp', subdir_rasteredshp+'streettypemajor'+str(ischild[i])+'.asc', 
                                     xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='OBJEKTART', alltouched=pavealltouched[i])
-            majroads = mst.mapdicttoarray(majroads, mpd.tlmstr2palmstyp, mst.fillvalues['street_type'])
+            majroads = mst.mapdicttoarray(majroads, mpd.str2palmstyp, mst.fillvalues['street_type'])
             minroads = gdt.rasterandcuttlm(subdir_rasteredshp+'minorroads.shp', subdir_rasteredshp+'streettypeminor'+str(ischild[i])+'.asc', 
                                     xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='OBJEKTART', alltouched=pavealltouched[i])
-            minroads = mst.mapdicttoarray(minroads, mpd.tlmstr2palmstyp, mst.fillvalues['street_type'])
+            minroads = mst.mapdicttoarray(minroads, mpd.str2palmstyp, mst.fillvalues['street_type'])
             
             roadarr = np.copy(majroads)
             roadarr = np.where( (majroads[:,:] == mst.fillvalues['street_type']), minroads[:,:], majroads[:,:])
