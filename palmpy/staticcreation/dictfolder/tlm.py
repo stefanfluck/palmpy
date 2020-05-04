@@ -13,7 +13,7 @@ import palmpy.staticcreation.makestatictools as mst
 
 #%% swissTLM3D BB 2 PALM
 # swissTLM3D BB vegetation classes to PALM vegetation types
-tlmbb2palmveg = {   
+bb2palmveg = {   
                     1:9,    # fels > desert
                     6:16,   # gebueschwald > deciduous shrubs
                     7:9,    # lockergestein > desert
@@ -33,20 +33,20 @@ tlmbb2palmveg = {
 
 
 # swissTLM3D BB water classes to PALM water types
-tlmbb2palmwat = {   5:2,    #fliessgewaesser > river
+bb2palmwat = {   5:2,    #fliessgewaesser > river
                     10:1,   #stehendes gewaesser > lake
                 }
 
 
 # swissTLM3D assembled pavement file (from streets, vkareal, eisenbahn)
-tlmpav2palmpav = {  -9999.:mst.fillvalues['pavement_type'],
+pav2palmpav = {  -9999.:mst.fillvalues['pavement_type'],
                     99: 9, #eisenbahntrassees meist 99 -> gravel
                      4: 3, #perrons meist 4 -> concrete
                   }
 
 
 # swissTLM3D street !only! Objektart to PALM street type
-tlmstr2palmstyp =   {     
+str2palmstyp =   {     
                           #-9999 : mst.fillvalues['street_type'],
                            0    : 18,
                            1    : 18,
@@ -75,8 +75,8 @@ tlmstr2palmstyp =   {
 
 #classification into major and minor roads: which tlm classes are major (emission relevant)
 #(if minor and major roads overlap, the major road type is on top).
-tlmmajroads = [0,1,2,4,5,6,8,9,20,21]
-tlmminroads = [3,10,11,12,13,15,16,17,18,19,22]
+majroads = [0,1,2,4,5,6,8,9,20,21]
+minroads = [3,10,11,12,13,15,16,17,18,19,22]
 
 #%% PALM 2 PALM
 # assign PALM soil type to PALM vegetation types
@@ -114,12 +114,3 @@ palmpav2palmsoil = {    mst.fillvalues['pavement_type']:mst.fillvalues['soil_typ
                     }
 
 
-#%% USGS 
-# usgs2palm = {0:7,
-#              1:12}
-
-
-
-# CORINE
-# corine2palm = {0:1,
-#                1:2}
