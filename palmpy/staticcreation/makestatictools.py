@@ -444,7 +444,7 @@ def makesoilarray2(vegarr,pavarr, palmveg2soildict, palmpav2soildict, fillvalue 
 
     '''
     #uses function from this module: "mapdicttoarray".
-    vegsoil = mapdicttoarray(vegarr, palmveg2soildict, fillvalue[0])
+    vegsoil = mapdicttoarray(vegarr, palmveg2soildict, fillvalue[0]) #here, fillvalue is something else than -9999, because -9999 is a key in the dict! if not in dict, here difficulties!
     pavsoil = mapdicttoarray(pavarr, palmpav2soildict, fillvalue[1])
     
     soilarr = np.maximum.reduce([vegsoil, pavsoil])
