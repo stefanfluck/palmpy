@@ -22,7 +22,7 @@ tlmbb2palmveg = {
                     12:17,  # Wald > mixed Forest/woodland
                     13:18,  # Wald offen > interrupted forest
                     
-                    #own categories
+                    #own categories - put those in own directory with cropfields and call it ownveg iso. cropfields
                     1000 : 3,
                     1001 : 3,
                     1002 : 3,

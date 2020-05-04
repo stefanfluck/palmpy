@@ -30,7 +30,7 @@ except:
 
 
 
-modulepath = cfp.get('paths', 'modulepath') #read modulepath from config file
+modulepath = cfp.get('paths', 'modulepath', fallback = '') #read modulepath from config file
 
 # modulepath = str(Path.home() / 'Documents' / 'Python Scripts' / 'ZAV-PALM-Scripts') #uncomment this line to have module path hardcoded.
 
@@ -447,11 +447,11 @@ if extentsonly == False:
                             ladarr[botindex:topindex,k,j] = pdf/pdf.max()*lai[k,j]/canopyheight[k,j] #scale a by the max pdf value, multiply by lai/treeheight (definition of lad)
                             
                 vegarr = np.where((canopyid[:,:] != -9999) & (watarr[:,:] == -127), 3, vegarr[:,:]) #where there is a tree id assigned/where a tree is and no water, set land surface to grass
-                vegarr = np.where( (ladarr[0] == mst.fillvalues['lad']) &
+                vegarr = np.where( (np.maximum.reduce(ladarr) == mst.fillvalues['lad']) & 
                                    (watarr[:,:] == mst.fillvalues['water_type']) &
                                    (canopyid[:,:] != mst.fillvalues['tree_id']), 18, vegarr[:,:]) #where no water and where tree too small to be resolved and where tree_id is present -> set vegtype to deciduous shrubs (18)
                 canopyid = np.where(canopyid[:,:] == 0, mst.fillvalues['tree_id'], canopyid[:,:]) #where ther is no tree to be found, set canopyid to its fill value
-                canopyid = np.where( ladarr[0] == mst.fillvalues['lad'], mst.fillvalues['tree_id'], canopyid[:,:]) #where no lad is defined, maybe bc its subgridscale, set tree-id to fillvalue too
+                canopyid = np.where( np.maximum.reduce(ladarr) == mst.fillvalues['lad'], mst.fillvalues['tree_id'], canopyid[:,:]) #where no lad is defined, maybe bc its subgridscale, set tree-id to fillvalue too
                 
             vegarr = np.where( (vegarr[:,:]==-127) & (watarr[:,:]==-127) & (pavarr[:,:]==-127), bulkvegclass[i], vegarr[:,:]) #fill unassigned vegetation types to defined bulk vegetation class.
             
@@ -665,7 +665,7 @@ if extentsonly == False:
     
     
     #%% finishing actions and write parameters to a file
-    parfile = open(outpath+'parameters.txt', 'w') 
+    parfile = open(outpath+filenames[:-7]+'_parameters.txt', 'w') 
     
     print('-----------------------------------------\nSIMULATION SETUP SUMMARY', file = parfile)
     print('-----------------------------------------', file = parfile)
@@ -795,7 +795,7 @@ if extentsonly == False:
     
     #%% create inifor namelist and save to file
     
-    namelist = open(outpath+'inifornamelist', 'w')
+    namelist = open(outpath+filenames[:-7]+'_inifornamelist', 'w')
     print('&inipar nx = {:d}, ny = {:d}, nz = {:d},\n' \
           '        dx = {:.1f}, dy = {:.1f}, dz = {:.1f},\n    /'.format(int(nx[0])-1, 
                                                                  int(ny[0]-1), 
