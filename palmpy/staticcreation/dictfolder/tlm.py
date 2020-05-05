@@ -40,8 +40,9 @@ bb2palmwat =    {   5:2,    #fliessgewaesser > river
 
 # swissTLM3D assembled pavement file (from streets, vkareal, eisenbahn)
 pav2palmpav = {  -9999.:mst.fillvalues['pavement_type'],
-                    99: 9, #eisenbahntrassees meist 99 -> gravel
-                     4: 3, #perrons meist 4 -> concrete
+                    100: 1, #eisenbahntrassees meist 99 -> gravel
+                    101: 1,
+                    103: 2,#perrons meist 4 -> concrete
                   }
 
 

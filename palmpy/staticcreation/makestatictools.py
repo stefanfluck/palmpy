@@ -414,7 +414,7 @@ def mapbbclasses2(bbarr, bb2palmvegdict, bb2palmwatdict,
 #     return soilarr
 
 
-def makesoilarray2(vegarr,pavarr, palmveg2soildict, palmpav2soildict, fillvalue = [2,4]):
+def makesoilarray2(vegarr,pavarr, palmveg2soildict, palmpav2soildict, fillvalue = [2,3]):
     '''
     Creates Soilarray from vegarr and pavement array. Everywhere where vegetation_type and pavement_type are nonzero values
     a soiltype class needs to be specified.

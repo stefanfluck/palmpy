@@ -98,8 +98,6 @@ try:
 except:
     pass    
 
-
-
 #initialize all variable lists
 ischild = totaldomains*[None];          xmin = totaldomains*[None]
 ymin = totaldomains*[None];             zmax = totaldomains*[None] 
@@ -250,57 +248,57 @@ nx = list(map(int,nx))
 ny = list(map(int,ny))
 nz = list(map(int,nz))
 
-#visualize domain boundaries, cut the image new for that with higher res than parent resolution.
-#TODO: if query for cutorthoimage.
-gdt.cutortho(ortho, subdir_rasteredshp+filenames+'_baseortho.tif', 
-             xmin[0],xmax[0],ymin[0],ymax[0],orthores,orthores)
-
-fig = plt.figure(figsize=(16/2.54,16/2.54))
-ax = fig.gca()
-img = plt.imread(subdir_rasteredshp+filenames+'_baseortho.tif')
-ax.imshow(img)
-
-for a in range(1,totaldomains):
-    rect = patches.Rectangle((llx[a]/orthores,(ylen[0]-lly[a]-ylen[a])/orthores), 
-                          xlen[a]/orthores,ylen[a]/orthores, 
-                          linewidth=3, edgecolor='r', facecolor='none')
-    ax.add_patch(rect)
+if cutorthoimg == True:
+    #visualize domain boundaries, cut the image new for that with higher res than parent resolution.
+    gdt.cutortho(ortho, subdir_rasteredshp+filenames+'_baseortho.tif', 
+                 xmin[0],xmax[0],ymin[0],ymax[0],orthores,orthores)
     
-for b in range(len(probes_E)):
-    ax.plot( (probes_E[b]-xmin[0]-(xlen[0]/orthores/10))/orthores, 
-             (ylen[0]-(probes_N[b]-ymin[0]))/orthores, 
-             marker='$'+str(b+1)+'$', color='red',
-             markersize=6)
-    ax.plot( (probes_E[b]-xmin[0])/orthores, 
-              (ylen[0]-(probes_N[b]-ymin[0]))/orthores, 
-              marker='.', markersize=8, color='red')
-
-
-
-if extentsonly == True:
-    plt.show()
-    print('\n\nINFORMATION: Plot is only shown, not saved.')
-    print('\n\n-----------------------------------------\nDOMAIN INFO')
-    print('-----------------------------------------')
-    domaincells = totaldomains*[0]
+    fig = plt.figure(figsize=(16/2.54,16/2.54))
+    ax = fig.gca()
+    img = plt.imread(subdir_rasteredshp+filenames+'_baseortho.tif')
+    ax.imshow(img)
     
-    for n in range(totaldomains):
-        print('\nDomain '+str(n)+':')
-        print('\tnx/ny/nz\t\t'+str(int(nx[n]-1))+'/'+str(int(ny[n]-1))+'/'+str(int(nz[n])))
-        print('\tdx/dy/dz\t\t'+str(xres[n])+'/'+str(yres[n])+'/'+str(zres[n]))
-        domaincells[n] = nx[n]*ny[n]*nz[n]
-        print(f"\tOrigin E/N:\t\t{xmin[n]}/{ymin[n]}")
-    print('\nTotal Number of Cells:\t\t'+"%4.2e" % (sum(domaincells)))
-    for m in range(len(domaincells)):
-        # print('  Domain '+str(m)+':\t\t\t%4.3e\t= %3.2d %%' % (domaincells[m], round(domaincells[m]/sum(domaincells),4)*100))
-        print(f'   Domain {m}:\t\t\t{domaincells[m]:4.3e}\t{domaincells[m]/sum(domaincells)*100:.2f}%')
+    for a in range(1,totaldomains):
+        rect = patches.Rectangle((llx[a]/orthores,(ylen[0]-lly[a]-ylen[a])/orthores), 
+                              xlen[a]/orthores,ylen[a]/orthores, 
+                              linewidth=3, edgecolor='r', facecolor='none')
+        ax.add_patch(rect)
+        
+    for b in range(len(probes_E)):
+        ax.plot( (probes_E[b]-xmin[0]-(xlen[0]/orthores/10))/orthores, 
+                 (ylen[0]-(probes_N[b]-ymin[0]))/orthores, 
+                 marker='$'+str(b+1)+'$', color='red',
+                 markersize=6)
+        ax.plot( (probes_E[b]-xmin[0])/orthores, 
+                  (ylen[0]-(probes_N[b]-ymin[0]))/orthores, 
+                  marker='.', markersize=8, color='red')
     
-    print('\nRuntime length score:\t\t'+str(round((sum(domaincells)*setvmag/min(xres))/1e06,2)))
-
-
-else:
-    plt.savefig(outpath+'domainoverview.png')
-    print('Saved domainoverview.png')
+    
+    
+    if extentsonly == True:
+        plt.show()
+        print('\n\nINFORMATION: Plot is only shown, not saved.')
+        print('\n\n-----------------------------------------\nDOMAIN INFO')
+        print('-----------------------------------------')
+        domaincells = totaldomains*[0]
+        
+        for n in range(totaldomains):
+            print('\nDomain '+str(n)+':')
+            print('\tnx/ny/nz\t\t'+str(int(nx[n]-1))+'/'+str(int(ny[n]-1))+'/'+str(int(nz[n])))
+            print('\tdx/dy/dz\t\t'+str(xres[n])+'/'+str(yres[n])+'/'+str(zres[n]))
+            domaincells[n] = nx[n]*ny[n]*nz[n]
+            print(f"\tOrigin E/N:\t\t{xmin[n]}/{ymin[n]}")
+        print('\nTotal Number of Cells:\t\t'+"%4.2e" % (sum(domaincells)))
+        for m in range(len(domaincells)):
+            # print('  Domain '+str(m)+':\t\t\t%4.3e\t= %3.2d %%' % (domaincells[m], round(domaincells[m]/sum(domaincells),4)*100))
+            print(f'   Domain {m}:\t\t\t{domaincells[m]:4.3e}\t{domaincells[m]/sum(domaincells)*100:.2f}%')
+        
+        print('\nRuntime length score:\t\t'+str(round((sum(domaincells)*setvmag/min(xres))/1e06,2)))
+    
+    
+    else:
+        plt.savefig(outpath+'domainoverview.png')
+        print('Saved domainoverview.png')
 
 
 
@@ -482,7 +480,8 @@ if extentsonly == False:
 
 
             if flags[i]['dopavedbb'] == True:
-                paved = gdt.rasterandcuttlm(pavementareas, subdir_rasteredshp+'pavement'+str(ischild[i])+'.asc',xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i], burnatt='OBJEKTART', alltouched=pavealltouched[i])
+                paved = gdt.rasterandcuttlm(pavementareas, subdir_rasteredshp+'pavement'+str(ischild[i])+'.asc',
+                                            xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i], burnatt='BELAGSART', alltouched=pavealltouched[i])
                 vegarr = np.where( paved[:,:] != -9999 , mst.fillvalues['vegetation_type'], vegarr[:,:]) #overwrite vegarr where pavement areas are found with fillvalue
                 if flags[i]['dovegpars'] == True:
                     vegpars[:,:,:] = np.where( paved[:,:] != -9999, mst.fillvalues['vegetation_pars'], vegpars[:,:,:])
