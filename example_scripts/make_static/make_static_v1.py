@@ -19,7 +19,7 @@ cfp = ConfigParser(allow_no_value=True) #
 try:
     cfp.read(sys.argv[1]) #check if commandline argument is given for config file.
 except:
-    print('No command line argument given. Choose your file.')
+    print('No command line argument given. Choose your config file.')
     # cfp.read("C:\\Users\\Stefan Fluck\\Documents\\Python Scripts\\ZAV-PALM-Scripts\\example_scripts\\make_static\\make_static.ini")
     # cfp.read("C:\\Users\\Stefan Fluck\\Desktop\\yv-jor-3\\yv-jor-3.ini")
     from tkinter import Tk
@@ -41,13 +41,13 @@ import palmpy.staticcreation.makestatictools as mst
 
 if mapdialect == 'tlm':
     import palmpy.staticcreation.dictfolder.tlm as mpd
-    print('INFO: Imported the tlm mapdict.')
+    print('\nINFO: Imported the tlm mapdict.')
 elif mapdialect == 'custom':
     import palmpy.staticcreation.dictfolder.custom as mpd
-    print('INFO: Imported the custom mapdict.')
+    print('\nINFO: Imported the custom mapdict.')
 elif mapdialect == 'mapdicts':
     import palmpy.staticcreation.mapdicts as mpd
-    print('INFO: Imported the generic mapdicts mapdict.')
+    print('\nINFO: Imported the generic mapdicts mapdict.')
 
 
 #parse settings and paths
@@ -88,12 +88,13 @@ outpath = cfp.get('paths', 'outpath')
 
 #try to generate output folders, don't if they exist (throws error when creating a folder)
 try:
-    os.mkdir(outpath)
+    os.makedirs(outpath)
     print('create outpath')
 except:
+    print('couldnt create path')
     pass
 try:
-    os.mkdir(subdir_rasteredshp)
+    os.makedirs(subdir_rasteredshp)
     print('create subdir for rastered data:')
 except:
     pass    
