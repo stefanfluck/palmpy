@@ -606,6 +606,105 @@ Industry Standard seems to be ``remapcon`` (conservative), ``remapbil`` is bilin
 
 
 
+**Subset some variables into a new file**
+
+To take a couple of variables and put it into a new file (e.g. if remapping fails due to errors related to single coordinates), you can run 
+
+```bash
+cdo select,name=ASWDIR_S,ATHD_S laf2019060702.nc out.nc
+```
+
+Example: get SW and LW in data from lafXX.nc files to put as boundary condition into the dynamic file.. Possible procedure goes as follows:
+
+- For interesting timesteps: subset ASWDIR_S and ATHD_S to a separate file.
+
+- ``ncrcat 060{0702..0800}.nc jor1.nc`` them together to one file with a time series.
+
+- remap the new file to a grid that equals the parent static driver extents with ``cdo remapbil,grid.grid jor1.nc jor1rmp.nc``.
+
+- Use ``xarray`` to create an average over the spatial dimensions (``ds.ASWDIR_S.mean(dim=[lon','lat'])``)
+
+  ```
+  >>> import xarray as xr
+  >>> ds = xr.open_dataset('jor1rmp.nc')
+  >>> ds
+  <xarray.Dataset>
+  Dimensions:    (lat: 60, lon: 80, time: 25)
+  Coordinates:
+    * time       (time) datetime64[ns] 2019-06-07T02:00:00 ... 2019-06-08T02:00:00
+    * lon        (lon) float64 6.563 6.564 6.565 6.566 ... 6.639 6.64 6.641 6.642
+    * lat        (lat) float64 46.73 46.73 46.73 46.73 ... 46.78 46.78 46.78 46.79
+  Data variables:
+      ASWDIFD_S  (time, lat, lon) float32 ...
+      ATHD_S     (time, lat, lon) float32 ...
+      ASWDIR_S   (time, lat, lon) float32 ...
+  Attributes:
+      CDI:             Climate Data Interface version 1.9.5 (http://mpimet.mpg....
+      Conventions:     CF-1.6
+      history:         Thu May 14 13:30:56 2020: cdo remapbil,grid.grid jor1b.n...
+      source:          model: cosmo, production_status: unknown, version: 106, ...
+      institution:     MeteoSwiss
+      ConventionsURL:  http://cfconventions.org/cf-conventions/v1.6.0/cf-conven...
+      NCO:             netCDF Operators version 4.8.1 (Homepage = http://nco.sf...
+      CDO:             Climate Data Operators version 1.9.5 (http://mpimet.mpg....
+  >>> dsa = ds.mean(dim=['lon', 'lat'])
+  >>> dsa
+  <xarray.Dataset>
+  Dimensions:    (time: 25)
+  Coordinates:
+    * time       (time) datetime64[ns] 2019-06-07T02:00:00 ... 2019-06-08T02:00:00
+  Data variables:
+      ASWDIFD_S  (time) float32 0.0 0.0 1.1035653 19.519888 ... 0.0 0.0 0.0 0.0
+      ATHD_S     (time) float32 346.2963 339.63437 322.497 ... 352.97894 327.9394
+      ASWDIR_S   (time) float32 0.0 0.0 0.0034005991 5.844116 ... 0.0 0.0 0.0 0.0
+  >>> dsa.to_netcdf('joravg.nc')
+  
+  ```
+
+  
+
+- Add this time series to the dynamic driver with
+
+  ```
+  import xarray as xr
+  import numpy as np
+  import os
+  import matplotlib.pyplot as plt
+  os.chdir('C:\\Users\\Stefan Fluck\\Desktop\\')
+  
+  dyn = xr.open_dataset('radtest_dynamic', decode_times = False)
+  raddata = xr.open_dataset('joravg.nc')
+  
+  time_rad = dyn.time.values
+  lwdata = raddata.ATHD_S.values
+  swdirdata = raddata.ATHD_S.values
+  swdifdata = raddata.ATHD_S.values
+  
+  rad_lw_in = xr.DataArray(lwdata, dims = 'time_rad', coords={'time_rad':time_rad} )
+  rad_sw_in = xr.DataArray(swdirdata, dims = 'time_rad', coords={'time_rad':time_rad} )
+  rad_sw_in_dif = xr.DataArray(swdifdata, dims = 'time_rad', coords={'time_rad':time_rad} )
+  
+  rad_lw_in.attrs['long_name'] = 'longwave downdwelling radiation'
+  rad_lw_in.attrs['lod'] = 1
+  rad_lw_in.attrs['units'] = 'Wm-2'
+  rad_sw_in.attrs['long_name'] = 'shortwave downdwelling radiation'
+  rad_sw_in.attrs['lod'] = 1
+  rad_sw_in.attrs['units'] = 'Wm-2'
+  rad_sw_in_dif.attrs['long_name'] = 'shortwave diffuse downdwelling radiation'
+  rad_sw_in_dif.attrs['lod'] = 1
+  rad_sw_in_dif.attrs['units'] = 'Wm-2'
+  
+  dyn['rad_lw_in'] = rad_lw_in
+  dyn['rad_sw_in'] = rad_sw_in
+  dyn['rad_sw_in_dif'] = rad_sw_in_dif
+  
+  dyn.to_netcdf('radtest_withrad_dynamic')
+  ```
+
+  
+
+
+
 ## GIS / GDAL
 
 **Fill empty values in a raster with values from another raster**

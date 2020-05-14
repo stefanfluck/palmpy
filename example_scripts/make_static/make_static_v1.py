@@ -484,8 +484,8 @@ if extentsonly == False:
                 paved = gdt.rasterandcuttlm(pavementareas, subdir_rasteredshp+'pavement'+str(ischild[i])+'.asc',
                                             xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i], burnatt='BELAGSART', alltouched=pavealltouched[i])
                 vegarr = np.where( paved[:,:] != -9999 , mst.fillvalues['vegetation_type'], vegarr[:,:]) #overwrite vegarr where pavement areas are found with fillvalue
-                if flags[i]['dovegpars'] == True:
-                    vegpars[:,:,:] = np.where( paved[:,:] != -9999, mst.fillvalues['vegetation_pars'], vegpars[:,:,:])
+                # if flags[i]['dovegpars'] == True:
+                #     vegpars[:,:,:] = np.where( paved[:,:] != -9999, mst.fillvalues['vegetation_pars'], vegpars[:,:,:]) #delete vegpars where there is pavement
                 watarr = np.where( paved[:,:] != -9999 , mst.fillvalues['water_type'], watarr[:,:]) #overwrite watarr where pavement areas are found with fillvalue
                 # pavarr = paved
                 # pavarr = np.where ( pavarr[:,:] != -9999, 1, mst.fillvalues['pavement_type']) #pavement_type set where shp is non-fillvalue. TODO: mit einem map dict auch pavements richtig klassifizieren.
@@ -573,15 +573,18 @@ if extentsonly == False:
             
             roadarr = np.copy(majroads)
             roadarr = np.where( (majroads[:,:] == mst.fillvalues['street_type']), minroads[:,:], majroads[:,:])
-           
-        
-        
+                   
         
         #cleanup: where bulidings exist, non lad should exist.    
         if ((flags[i]['dobuildings3d'] == True or flags[i]['dobuildings2d']==True) and flags[i]['dolad'] == True): 
             for m in range(len(zlad)):
                 ladarr[m,:,:] = np.where( (gebid[:,:] != mst.fillvalues['building_id']), mst.fillvalues['tree_data'], ladarr[m,:,:])
-    
+        #remove vegpars where water type is defined
+        if ((flags[i]['dovegpars'] == True) and (flags[i]['dotlmbb'] == True)):
+            vegpars[:,:,:] = np.where( (watarr[:,:] != mst.fillvalues['water_type']), mst.fillvalues['vegetation_pars'], vegpars[:,:,:] )
+        #delete vegpars where there is pavement
+        if ((flags[i]['dovegpars'] == True) and (flags[i]['dotlmbb'] == True) and (flags[i]['dopavedbb']) == True):
+            vegpars[:,:,:] = np.where( paved[:,:] != -9999, mst.fillvalues['vegetation_pars'], vegpars[:,:,:]) 
     
         ######### create static netcdf file
         static = xr.Dataset()
