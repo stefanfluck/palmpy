@@ -1,7 +1,6 @@
 <header>
     <font size="+3"><b>palmpy Framework 1.0 Documentation</b></font>
 </header>
-
 **Table of Contents**
 
 [TOC]
@@ -12,32 +11,30 @@
 
 # Introduction
 
-Welcome to palmpy! This package will help you create static files for your PALM simulation. It contains various elements that deal with certain aspects of handling data for PALM, initially built around geodata products by swisstopo (*swissALTI3D, swissTLM3D*) and expanded since. Palmpy assists you in the following tasks:
+Welcome to palmpy! This collection of useful software code will help you create static files for your PALM simulation. It contains various elements that deal with certain aspects of handling data for PALM, initially built around geodata products by swisstopo (*swissALTI3D, swissTLM3D*) and expanded since. Palmpy assists you in the following tasks:
 
 - input data processing
   - raster data and shapefiles -> _static files
   - COSMO data preprocessor scripts to make them usable with INIFOR
 - runtime analysis
-  - plotting of *tmp/id.#/RUN_CONTROL* data (available soon)
-- postprocessing of output data
-  - regridding (available soon)
-
-
+  - plotting of *tmp/id.#/RUN_CONTROL* data
 
 ...with a clear focus on the first, as it is clearly the most labor-intensive and tedious step of them all. Part of the Framework are also supporting files, such as conda environment setup files and bash routines, that support PALM simulation activities in general.
 
+Furthermore, this documentation is set up to be a helpful source of information regarding many operations around PALM, be it from geodata handling, to regridding operatinons and more. Refer to the Table of Contents above for a full overview of the contents.
+
 This Framework is the result of student work at the Center for Aviation, ZHAW School of Engineering in Winterthur and is work in progress.
 
-DISCLAIMER: No liability is assumed regarding the correctness of the provided routines. Users shall check the behavior and the produced results carefull. Reporting of bugs is highly appreciated.
+DISCLAIMER: No liability is assumed regarding the correctness of the provided routines. Users shall check the behavior and the produced results careful. Reporting of bugs is highly appreciated.
 
 
 
-## Applied Paradigms - how it works
+## Applied Paradigms - how it works XX
 
 Framework Components
 
 - palmpy Python Package
-- supporting Bash Scripts
+- supporting Bash scripts
 - 
 
 
@@ -60,21 +57,37 @@ manual control with python programming language.
 
 <div style="page-break-after: always; break-after: page;"></div>
 
-# Palmpy Description
+# palmpy Python Package Description
+
+The palmpy python package consists of three submodules, that contain python functions dedicated to one specific flavor of tasks that are to be performed regarding PALM static file generation and beyond. These submodules are:
+
+- *palmpy.staticcreation*
+  - *geodatatools*
+  - *makestatictools*
+    - *dictfolder*
+- *palmpy.postprocessing*
 
 
 
+palmpy.geodatatools* provides functions that can be used with resprect to handling geodata. This includes functions to clip data to specific extents, rasterize shapefiles and perform operations on shapefiles.
+
+*palmpy.makestatictools* provides functions that are required to generate a static driver file. These code sections are called repeatedly, hence a modularization as functions was appropriate. It contains functions to perform consistency checks, load geodata, perform operations on datasets  and others, in total over 30 functions.
+
+*palmpy.staticcreation.dictfolder* contains various files with dictionaries, that govern the mapping of source data classes to palm classes for vegetation, streets, pavements, water and others. Keeping them separates allows an extension of palmpy with an infinite set of possible mappings.
+
+*palmpy.postprocessing* contains only one basic plotting function at the moment. Initially it was planned to include a whole set of plotting functions for PALM. However, a new plotting module was announced to be proposed by the PALM team that leverages python plotting functions, which is why this plan was abandoned. The new plotting mechanisms are not available though (as of May 2020), but their publication is imminent.
 
 
-## *geodatatools*
+
+## *geodatatools*XX
 
 
 
-## *makestatictools*
+## *makestatictools*XX
 
 
 
-## *mapdicts*
+## *mapdicts*XX
 
 
 
@@ -121,6 +134,14 @@ Depending on your system, choose the appropriate .yml file from the ``env`` fold
 
 The string after ``-f`` represents the path to the .yml file, the string after ``-n`` the name of the environment that you create. If it does not work because some packages are not found, use the .yml file without version numbers attached to the packages. If there are errors relating to "invalid name" or similar, check your path to the .yml file.
 
+Should there be a need for a new export of a working environment from conda, this can be done with the following command (while the environment in question is activated):
+
+```bash
+conda env export --nobuilds --from-history > out.yml
+```
+
+
+
 
 
 #### A Word on Environments and Packages
@@ -143,8 +164,6 @@ print(sys.path)
 This will output a list of paths, that are searched for the module. Your best bet is to put the palmpy module folder into your ``...\\Miniconda3\\envs\envname\\lib`` folder.
 
 If you are able to import the module palmpy with ``import palmpy`` and no error appears, the package was installed correctly.
-
-
 
 
 
@@ -175,47 +194,221 @@ To create a static file, you need the palmpy *geodatatools*, *makestatictools* a
 
 <div style="page-break-after: always; break-after: page;"></div>
 
-# Create a PALM Static driver using palmpy
+# PALM static driver setup with palmpy
 
-### QGIS Input File Preparation
+This section will outlines the steps needed to create a static driver using the make_static script (in the following sections referred to as "the script"), which leverages the functions of palmpy to create static driver from geodata. When it comes to geodata, due to the different ways and standards, how people record geographical features, it is extremely difficult to write a script that does not require any data preprocessing. In order to create a simulation setup procedure that is easy to employ, some generalization standards were outlined about how geodata should look like in order for the script to be able to understand it. 
+
+It must be noted here that there is also a script shipped with PALM that can be used to create a static driver file. However, at the time it was needed to create static drivers for various projects at the Center for Aviation, this script was not usable as it relied heavily on geodata that was preprocessed by the DLR. Furthermore, the input files were not optional. Therefore, it was decided to create a new script, that fulfilled the needs at the Center for Aviation for projects, that were not necessarily focussed around urban climate simulations, but it turned out to be generally applicable. The core of the script created here was set up completely on its own without reusing code from the shipped PALM script. Regarding the implementation of [leaf area density arrays](#Resolved Vegetation), the approach of the shipped script was analyzed before implementing our own approach. Therefore, while the outcome of both scripts may be comparable, the mechanics behind are two separate pair of shoes.
+
+Below, it will be outlined how the corresponding vector and raster data shall look like to be able to be handled by the script. For each type of data a rough how-to procedure is given on how to perform certain operations in QGIS to reach the required state. It is assumed that a user with minor QGIS experience is able to follow the instructions perfectly fine. Note that the presented procedures are not the only way to achieve the desired outcome - other methods may include leveraging the powerful functions of the [geopandas](https://geopandas.org/) python library or any other GIS Software. It shall be ensured though that the end results fulfills the presented requirements for a usage in the script.
 
 
 
-#### Paradigms and Standards
+### Geodata Preprocessing
 
+#### Applied Paradigms and Standards
 
+In the process of designing this workflow, it was found that is required to decide on a specific data format, that data needs to have in order to be able to be automatically forged into a PALM static driver file. With the vastness of different sources of geodata in the world, it is almost impossible to write a script that can adapt to an arbitrary naming of fields in a GIS attribute table. Therefore, the following requirements were set up in order to homogenize the input data for an automated script. In doing so, a sensible balance had to be struck between the generalization of data and the flexibility to systematically change parameters in the static drivers. This was all done keeping in mind the functionalities in PALM as of May 2020. It may be great to have data about the detailed position of a water fountain that is only temporarily active, but there is currently to option to include temporarily active water fountains in a PALM simulation - a grid point can either be vegetation, pavement or water. Therefore, to setup a PALM simulation in practice, geodata needs to be collected, then it needs to be searched for relevant information. And as the relevant data often does not come collected in a single dataset, the relevant data needs to be subset and exported into new files. The following sections will outline how these files need to look like. It shall be mentioned here that not all datasets need to be provided - which information is used can be steered by setting appropriate flags in the namelist. This will be discussed further below (see [Static File Generation](#Static File Generation)).
 
 
 
 #### Rastered Data
 
-geotiff
+The static generation script requires some data to be present in rastered form, i.e. as a geotiff. For the moment, the format needs to be **geotiff** (a .tif-File with a header containing geographical metadata) - other formats may be possible in the future. The following data can be supplied:
 
-##### Topography
-
-
-
-##### Surface Classification
+- Orthoimage
+- Digital Surface/Height Model (DHM, DOM) (*Note: Topography only, without buildings or trees!*)
 
 
 
+##### Orthoimage
+
+An orthoimage refers to a georeferenced image of the area in question. In the script, if an orthoimage is supplied, it is clipped to the domain extents and nest and proble locations will be plotted on it. For an example, refer to the following image.
+
+![orthoimage_example](palmpy-documentation.assets/domainoverview.png)
+
+<center><font size="-1">Plot of selected domain extents and probe locations on the clipped orthoimage.</font></center>
 
 
-#### Shapefiles
 
-insert Table here
+##### Topography Data
+
+Topography data is usually available in raster format. Notable examples are swisstopo's swissALTI3D DHM dataset with two meter resolution or NASA's SRTM Dataset with one arcsecond resolution (about 20x30m (N/E) in swiss latitudes). Note that there are various represenations of topography data available. To create a PALM static driver file, we require a DHM, a digital height model, which includes the height of the underlying topography only. Often, there is also a DTM, a digital terrain model, available, which includes features such as trees and buildings in the dataset. It is assumed that building information comes from separate data files, hence a DHM is intended to be used in conjunction with the static generation script.
+
+
+
+![image-20200518222254688](palmpy-documentation.assets/image-20200518222254688.png)
+
+<center><font size="-1">An extract of Switzerland from the NASA SRTM DHM dataset.</font></center>
+
+
+
+
+
+#### Vector Data - Shape Files
+
+While raster data requirements are straightforward, it gets more complicated with data in vector format. This is due to the manifold ways information can be included in a shapefile. There are different types of features (line, points, polygons) and the naming of fields (columns in an attribute table) are more or less up to the entity that produces the data (unproven claim by the author based on practical experience with multiple datasets).
+
+*Note: A shape file may consist of up to six files with different file endings that separately contain information like attributes, coordinate reference systems, etc. When moving files around on the computer, move all files together. When providing files in a namelist, provide the filename with ``.shp`` in the end.*
+
+In order for the workflow to work, the vector data supplied to the script needs to conform to certain requirements, namely it shall possess certain fields with a certain title and data in a certain format. An overview over the required attribute fields for each file, refer to the following table.
+
+
+
+
+
+##### Quick Reference Table
+
+Entries in brackets are optional or required for preprocessing steps in QGIS.
+
+| **Feature Type**            | **Format** | **Attribute  1** | **Attribute  2** | **Attribute  3** | **Attribute  4** | Attribute 5 |
+| --------------------------- | ---------- | ---------------- | ---------------- | ---------------- | ---------------- | ----------- |
+| Land Cover (Bodenbedeckung) | Polygon    | OBJEKTART        |                  |                  |                  |             |
+| Single Trees                | Polygon    | HEIGHT_TOP       | HEIGHT_BOT       | ID               | (LAI)            | (RADIUS)    |
+| Tree Lines                  | Polygon    | HEIGHT_TOP       | HEIGHT_BOT       | ID               | (LAI)            | (RADIUS)    |
+| Resolved Forests            | Polygon    | HEIGHT_TOP       | HEIGHT_BOT       | ID               | (LAI)            | (OBJEKTART) |
+| Streets                     | Polygon    | OBJEKTART        | BELAGSART        | STRASSENROUTE    | STUFE            |             |
+| Building Footprints         | Polygon    | HEIGHT_TOP       | HEIGHT_BOT       | ID               | BLDGTYP          |             |
+| Paved Surfaces              | Polygon    | ID               | BELAGSART        |                  |                  |             |
+| Crop fields                 | Polygon    |                  |                  |                  |                  |             |
+
+
+
+*Information: PALM requires raster data in the static driver file. The script will convert any non-raster data to raster format. The reason for working with vector data for preprocessing is that it is much simpler to edit a vector file than raster data.*
+
+
+
+##### Bodenbedeckung (Land Cover)
+
+- *Required feature type:* Polygon
+
+- *Required attributes:* OBJEKTART
+
+This file shall contain land cover information including vegetation and water surfaces. The focus here lies on natural land cover, such as rocks, desert, glaciers etc. Artificially paved or sealed areas are to be put in a separate file. 
+
+If features are added manually, make sure the classification matches the mapping dictionary or assign a new class number that is also included as a new entry in the mapping dictionaries. 
 
 
 
 ##### Resolved Vegetation
 
+In PALM, it is possible to resolve vegetation instead of just parameterizing it. Resolving vegetation acts as a momentum sink for the flow, affects radiation calculations and influences latent heat balances. The script requires information about vegetation positions and heights and forges this information into a 3D leaf area density array. The vertical leaf area density profile is calculated based on chosen values for the leaf area index (LAI) and shape parameters alpha and beta. The LAI values are currently provided as bulk values for all single trees, all tree lines and all forests separately. It is planned to have the LAI as an attribute in the corresponding shape files to allow for a heterogeneous definition of this parameter to account for different types of trees.
+
+The script know where to place vegetation based on polygons provided by one to three vegetation files. The script also collects the provided vegetation information and turns it into a leaf area density array based on the supplied field values for HEIGHT_TOP and HEIGHT_BOT and some shape parameters. Assuming the tree top view corresponds to the polygon information provided to the script, the tree is rastered and will be represented as follows:
+
+![image-20200519102238680](palmpy-documentation.assets/image-20200519102238680.png)
+
+<center><font size="-1">Illustration how a tree polygon is rastered. View from above and from the side.</font></center>
+
+The leaf area density array will be filled between HEIGHT_BOT and HEIGHT_TOP based on the chosen LAI and two shape parameters [alpha and beta](https://en.wikipedia.org/wiki/Beta_distribution). The following figure provides an overview about possible tree shapes that can be constructed with alpha and beta. This figure can be called with the function call ``mst.showbetadistribution()`` with a loaded palmpy module.
+
+<img src="palmpy-documentation.assets/alphabeta.jpg" alt="alphabeta"  />
+
+<center><font size="-1">Resulting shapes for different alpha and beta values. A fractional tree height of 1 represents tree top, 0 the ground level.</font></center>
 
 
-##### Pavement / Sealed Surfaces
+
+With that, it is possible to create a variety of tree crowns. Currently, only the leaf area density is used in a palm simulation. In the future, also the basal area density of a tree will be used in calculation. This feature is not yet implemented in the script.
+
+There is the possibility to provide resolved vegetation information with three files: one for resolved forest patches, one for tree lines and one for single trees. This approach emerged from the fact that forest patches are usually present as polygons, tree lines as line information and single trees as point information.  In order to be processed in the script, these all need to be transformed into polygon features, which requires different treatments of the different source features types. If desired, all information can be provided in a single file (leave the other path variables in the namelist blank). 
 
 
 
-##### Crops
+
+
+###### Single Trees
+
+![image-20200519114216100](palmpy-documentation.assets/image-20200519114216100.png)
+
+<center><font size="-1">Single Trees at the lakefront in Yverdon.</font></center>
+
+- *Required feature type:* Polygon
+
+- *Required attributes:* `HEIGHT_TOP`,  `HEIGHT_BOT`,  `ID` 
+
+- *Optional/Planned attributes:* `RADIUS`, `LAI`
+
+Single trees are mostly available as point features in a shape file. We need to forge this into a polygon shape file. To that end, the function "[Buffer](#Buffer)" (german: Puffern) can be used, which creates a circular polygon around the point feature with a defined radius. The radius can be defined for each point feature individually, which is why I recommend to include a `RADIUS` attribute for each point. The radius can be set to a bulk value and changed individually at known locations, or the information can be copied from another field if available. 
+
+The height of a single tree is represented by the fields `HEIGHT_TOP` and can also be set to a bulk value. Alternatively, if a LIDAR DTM and DOM is available, tree height can also be extracted by means of a [zonal statistics](#Zonal Statistics). The parameter `HEIGHT_BOT` represents the bottom limit of the tree crown. Between those values the crown / leaf area density array is constructed corresponding the shape parameters alpha and beta.
+
+
+
+Possible workflow coming from a point shape file:
+
+1. create `RADIUS` attribute with bulk value
+2. modify `RADIUS` where tree widths are either relevant, exceptionally large or small
+3. Puffer by `RADIUS`: creates polygon shape file
+4. Add new attributes `HEIGHT_TOP` and `HEIGHT_BOT`
+5. 1. assign bulk values and be done
+   2. perform [Zonal statistics](#Zonal Statistics) (requires LIDAR DTM minus DOM data (so trees heights are present))
+6. Check if the performed actions make sense and are realistic.
+
+
+
+###### Tree Lines
+
+![image-20200519115259406](palmpy-documentation.assets/image-20200519115259406.png)
+
+<center><font size="-1">Tree lines and single trees around Yverdon airfield.</font></center>
+
+- *Required feature type:* Polygon
+
+- *Required attributes:* `HEIGHT_TOP`,  `HEIGHT_BOT`,  `ID` 
+
+- *Optional/Planned attributes:* `RADIUS`, `OBJEKTART`, `LAI`
+
+Tree lines are often available as line features in a shape file. We need to transform this into a polygon shape file. The same techniques as for single trees can be applied. Assign a `RADIUS` (if needed based on the ``OBJEKTART``, which could point to bushes, hedges or actual tree lines) to each line and [Buffer](#Buffer) it to get a Polygon shape file. Add `HEIGHT_TOP` and `HEIGHT_BOT` attributes as well, populate them with either bulk values based on ``OBJEKTART`` or perform [zonal statistics](#Zonal Statistics) again.
+
+
+
+Possible workflow from tree line shape file to a polygon shape file:
+
+1. create `RADIUS` attribute with bulk value based on the ``OBJEKTART`` with the [field calculator](#Field Calculator)
+2. modify `RADIUS` where tree widths are either relevant, exceptionally large or small
+3. Puffer by `RADIUS`: creates polygon shape file
+4. Add new attributes `HEIGHT_TOP` and `HEIGHT_BOT`
+5. 1. assign bulk values and be done
+   2. perform [Zonal statistics](#Zonal Statistics) (requires LIDAR DTM minus DOM data (so trees heights are present))
+6. Check if the performed actions make sense and are realistic.
+
+
+
+
+
+###### Resolved Forests
+
+![image-20200519120612862](palmpy-documentation.assets/image-20200519120612862.png)
+
+<center><font size="-1">A resolved forest with some visible tree lines and single trees north of the Yverdon airfield.</font></center>
+
+- *Required feature type:* Polygon
+
+- *Required attributes:* OBJEKTART
+
+- *Optional/Planned attributes:* LAI
+
+
+
+  Subset von  Bodenbedeckung -> Kat 6,12,13.
+
+
+
+##### Paved or Sealed Surfaces
+
+- *Required feature type:* Polygon
+
+- *Required attributes:* OBJEKTART
+
+- *Optional/Planned attributes:* LAI
+
+
+
+Merge aus  strassen, eisenbahn, verkehrsflächen. Braucht nur 1 nonzero attribut für alle  (filtern für != 0 in python.
+
+
+
+##### CropsXX
 
 | OBJEKTART | Crop Type                            |
 | --------- | ------------------------------------ |
@@ -229,7 +422,15 @@ insert Table here
 
 
 
-##### Buildings
+
+
+
+
+##### Streets
+
+
+
+##### Buildings Footprints
 
 
 
@@ -237,13 +438,19 @@ insert Table here
 
 
 
-### Static File Generation Script
+### Static File Generation
 
 
 
-#### Script
+#### ScriptXX
 
 How the Script works
+
+not all data needs to be provided
+
+
+
+**flowchart!**
 
 
 
@@ -414,6 +621,22 @@ To get maximum usage out of speedflyer, use for example the following number of 
 <div style="page-break-after: always; break-after: page;"></div>
 
 # Further Information
+
+## QGIS Operations Examples
+
+### Field Calculator
+
+
+
+### Buffer
+
+
+
+### Zonal Statistics
+
+
+
+
 
 ## Dynamic Driver Generation with INIFOR
 
@@ -729,7 +952,7 @@ For every QGIS operation there is a gdal equivalent, multiple steps can be done 
 
 <div style="page-break-after: always; break-after: page;"></div>
 
-# Glossary
+# Glossary XX
 
 
 
