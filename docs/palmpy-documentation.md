@@ -87,7 +87,7 @@ palmpy.geodatatools* provides functions that can be used with resprect to handli
 
 
 
-## *mapdicts*XX
+## *dictfolder*
 
 
 
@@ -212,6 +212,22 @@ In the process of designing this workflow, it was found that is required to deci
 
 
 
+#### A note on Coordinate Reference Systems (CRS)
+
+At this stage, an important note needs to be brought up regarding coordinate reference systems (CRS) and the impact they have on the whole static file generation process. While users with some familiarity with geodata will be comfortable with CRS, but to new users this could prove to be an obstacle in the learning process.
+
+Geodata is basically data that is linked to certain geographical coordinates. While for raster layers this geographical data may be fixed by an origin and certain extents on the globe, it could be for vector layers that each point has its own geographical coordinate. These geographical coordinates are not of much use without knowing which geographical map projection they refer to. There are multiple map projections available, each with its own strengths and weaknesses. Some may be conformal (true angles) and others equal-area (true areas), and depending on the type of question that is asked, another CRS may be more appropriate. 
+
+PALM calculates all its equation on a cartesian grid, where the axes are perpendicular amongst each other. Therefore, it is recommended to transform any geodata into a CRS that has somewhat equal properties, should reality be reproduced correctly. 
+
+For Switzerland, source data from swisstopo are mostly available in either Switzerlands own CRS LV03 or LV95, which can be directly processed with the static creation script. Should locations out of Switzerland be of interest, geodata could be transformed into an EPSG coordinate system. As it is not possible to represent the whole world with a single, large conformal CRS, there is a regional EPSG coordinate system available for practically every location on earth. These EPSG CRS have a validity range, i.e. outside of these valid extents the errors get rather large, so another EPSG CRS may be more appropriate. 
+
+**Takeaway**: Transform all your geodata into a single conformal CRS before proceeding to create a static driver from it.
+
+
+
+
+
 #### Rastered Data
 
 The static generation script requires some data to be present in rastered form, i.e. as a geotiff. For the moment, the format needs to be **geotiff** (a .tif-File with a header containing geographical metadata) - other formats may be possible in the future. The following data can be supplied:
@@ -232,6 +248,8 @@ An orthoimage refers to a georeferenced image of the area in question. In the sc
 
 
 ##### Topography Data
+
+- *relevant namelist flag:* ``doterrain`` 
 
 Topography data is usually available in raster format. Notable examples are swisstopo's swissALTI3D DHM dataset with two meter resolution or NASA's SRTM Dataset with one arcsecond resolution (about 20x30m (N/E) in swiss latitudes). Note that there are various represenations of topography data available. To create a PALM static driver file, we require a DHM, a digital height model, which includes the height of the underlying topography only. Often, there is also a DTM, a digital terrain model, available, which includes features such as trees and buildings in the dataset. It is assumed that building information comes from separate data files, hence a DHM is intended to be used in conjunction with the static generation script.
 
@@ -278,7 +296,13 @@ Entries in brackets are optional or required for preprocessing steps in QGIS.
 
 
 
-##### Bodenbedeckung (Land Cover)
+##### Land Cover (Bodenbedeckung)
+
+- *relevant namelist flag:* ``dotlmbb``
+
+![image-20200520110159132](C:\Users\stefa\Documents\Python Scripts\ZAV-PALM-Scripts\docs\palmpy-documentation.assets\image-20200520110159132.png)
+
+<center><font size="-1">Land Cover in the Glarner Sernftal from the swissTLM3D BB dataset, overlay with a satellite image. Note that not all surfaces are covered!</font></center>
 
 - *Required feature type:* Polygon
 
@@ -286,21 +310,25 @@ Entries in brackets are optional or required for preprocessing steps in QGIS.
 
 This file shall contain land cover information including vegetation and water surfaces. The focus here lies on natural land cover, such as rocks, desert, glaciers etc. Artificially paved or sealed areas are to be put in a separate file. 
 
-If features are added manually, make sure the classification matches the mapping dictionary or assign a new class number that is also included as a new entry in the mapping dictionaries. 
+If features are added manually, make sure the classification matches the mapping dictionary or assign a new class number that is also included as a new entry in the mapping dictionaries. A good practice is to give  manually defined classes an identifier starting with 100X or similar, so they can be clearly identified as individual changes to the dataset.
+
+This file (and the [crops](#Crops) dataset described further below) will decide, which pixels in the static driver will be classified as a `vegetation_type` and which ones as a `water_type`. Pixels that are not covered by a polygon in those datasets will be set to a bulk value that is to be set in the [namelist](#Namelist). [Paved or sealed surfaces](#Paved or Sealed Surfaces) will be added on top of this information and overwrite any set `vegetation_` or `water_type`.
 
 
 
 ##### Resolved Vegetation
 
+- *relevant namelist flag:* ``dolad``
+
 In PALM, it is possible to resolve vegetation instead of just parameterizing it. Resolving vegetation acts as a momentum sink for the flow, affects radiation calculations and influences latent heat balances. The script requires information about vegetation positions and heights and forges this information into a 3D leaf area density array. The vertical leaf area density profile is calculated based on chosen values for the leaf area index (LAI) and shape parameters alpha and beta. The LAI values are currently provided as bulk values for all single trees, all tree lines and all forests separately. It is planned to have the LAI as an attribute in the corresponding shape files to allow for a heterogeneous definition of this parameter to account for different types of trees.
 
-The script know where to place vegetation based on polygons provided by one to three vegetation files. The script also collects the provided vegetation information and turns it into a leaf area density array based on the supplied field values for HEIGHT_TOP and HEIGHT_BOT and some shape parameters. Assuming the tree top view corresponds to the polygon information provided to the script, the tree is rastered and will be represented as follows:
+The script know where to place vegetation based on polygons provided by one to three vegetation files. The script also collects the provided vegetation information and turns it into a leaf area density array based on the supplied field values for `HEIGHT_TOP` and `HEIGHT_BOT` and some shape parameters. Assuming the tree top view corresponds to the polygon information provided to the script, the tree is rastered and will be represented as follows:
 
 ![image-20200519102238680](palmpy-documentation.assets/image-20200519102238680.png)
 
 <center><font size="-1">Illustration how a tree polygon is rastered. View from above and from the side.</font></center>
 
-The leaf area density array will be filled between HEIGHT_BOT and HEIGHT_TOP based on the chosen LAI and two shape parameters [alpha and beta](https://en.wikipedia.org/wiki/Beta_distribution). The following figure provides an overview about possible tree shapes that can be constructed with alpha and beta. This figure can be called with the function call ``mst.showbetadistribution()`` with a loaded palmpy module.
+The leaf area density array will be filled between `HEIGHT_BOT` and `HEIGHT_TOP` based on the chosen LAI and two shape parameters [alpha and beta](https://en.wikipedia.org/wiki/Beta_distribution). The following figure provides an overview about possible tree shapes that can be constructed with alpha and beta. This figure can be called with the function call ``mst.showbetadistribution()`` with a loaded palmpy module.
 
 <img src="palmpy-documentation.assets/alphabeta.jpg" alt="alphabeta"  />
 
@@ -383,32 +411,100 @@ Possible workflow from tree line shape file to a polygon shape file:
 <center><font size="-1">A resolved forest with some visible tree lines and single trees north of the Yverdon airfield.</font></center>
 
 - *Required feature type:* Polygon
+- *Required attributes:* `HEIGHT_TOP`,  `HEIGHT_BOT`,  `ID` 
+- *Optional/Planned attributes:* ``OBJEKTART``, ``LAI``
 
-- *Required attributes:* OBJEKTART
-
-- *Optional/Planned attributes:* LAI
+Larger vegetation patches, such as forests or grass fields that are higher than one or multiple grid cells can be present as polygons in the source datasets. As they are already represented as polygons, there is no need for buffering or similar techniques. However, the information may be extracted from a dataset with more than just the required information. This can be done by copying the shape file and deleting the obsolete data, in order to only retain the relevant vegetation classes. For example, the swissTLM3D BB dataset contains three types of land cover classes that can be represented by resolved vegetation: Gebüschwald/Brush Land (`OBJEKTART` 6), Forest (``OBJEKTART`` 12) and interrupted forest (``OBJEKTART`` 13). This information can be [subset](#Subsetting a Shape File) into a new file. Again, ``HEIGHT_TOP`` and ``HEIGHT_BOT`` can be gotten by applying [zonal statistics](#Zonal Statistics) using a LIDAR DTM-DOM dataset.
 
 
 
-  Subset von  Bodenbedeckung -> Kat 6,12,13.
+Possible workflow from a swissTLM BB polygon shape file to a finished resolved forests shape file:
+
+1. Select Objects by expression ![image-20200520112932543](C:\Users\stefa\Documents\Python Scripts\ZAV-PALM-Scripts\docs\palmpy-documentation.assets\image-20200520112932543.png) (Ctrl+F3)
+2. Create query for ``OBJEKTART != 6 AND OBJEKTART != 12 AND OBJEKTART !=13``. This selects all objects that are **not** vegetation.
+3. Delete the selected features.
+4. Add fields for ``HEIGHT_TOP`` and ``HEIGHT_BOT``
+5. 1. Use the [Field calculator](#Field Calculator) to assign different bulk values for the height fields based on `OBJEKTART`.
+   2. perform [Zonal statistics](#Zonal Statistics) (requires LIDAR DTM minus DOM data (so trees heights are available))
+6. Check if the performed actions make sense and are realistic.
+
+
+
+
+
+##### Street Types (for Emission Modeling)
+
+- *relevant namelist flag:* ``dostreettypes``
+
+![image-20200520113539311](C:\Users\stefa\Documents\Python Scripts\ZAV-PALM-Scripts\docs\palmpy-documentation.assets\image-20200520113539311.png)
+
+<center><font size="-1">Required streets dataset as polygons (extract south of Zurich airport).</font></center>
+
+- *Required feature type:* Polygon
+- *Required attributes:* ``OBJEKTART``
+- *Optional/Planned attributes:* ``RADIUS``, `BELAGSART`, `STRASSENROUTE`, `STUFE`
+
+Streets appear in the static driver twofold: once as an area of paved or sealed surfaces and once as dedicated street type array, which classifies streets by their relevance for emission contributions. The latter is only required if PALM is run with chemistry activated. As street information is often available as line features, they need to be [buffered](#Buffer) again. 
+
+*Practical note*: For simulations in Switzerland, streets could be taken from Openstreetmap data or from swissTLM3D data. The OSM street dataset contains a clear classification by street type (highway, trunk, residential etc.), which the PALM street classification system is also built upon. However, The OSM dataset does not include a classification by width. The swissTLM3D street dataset does contain a rough width information under `OBJEKTART`, but not about the "importance" of the road. Depending on the application, either case could be used. 
+
+Possible workflow from a swissTLM3D street shape file with line features to a finished resolved forests shape file, with atmospheric Simulations in mind (no emission modeling is intended)
+
+1. Drop all features where the BELAGSART is not paved (e.g. by Select by Expression ![image-20200520112925035](C:\Users\stefa\Documents\Python Scripts\ZAV-PALM-Scripts\docs\palmpy-documentation.assets\image-20200520112925035.png))
+2. Drop all features that are underground (`STUFE < 0`)
+3. Create new field ``RADIUS`` and assign values based on the ``OBJEKTART`` with the [field calculator](#Field Calculator). 
+4. Buffer the dataset by the ``RADIUS``. 
+5. If required, assign a field that allows to map a certain amount of traffic to the street type (e.g. classify an actual highway as a highway). The classification mapping is done by the dictionary in the [mapdicts-folder](#dictfolder).
+
+
 
 
 
 ##### Paved or Sealed Surfaces
 
+*relevant namelist flag:* ``dopavedbb``
+
+![image-20200520140942195](C:\Users\stefa\Documents\Python Scripts\ZAV-PALM-Scripts\docs\palmpy-documentation.assets\image-20200520140942195.png)
+
+<center><font size="-1">Basic paved land cover around Zurich airport.</font></center>
+
 - *Required feature type:* Polygon
 
-- *Required attributes:* OBJEKTART
+- *Required attributes:* ``OBJEKTART``
 
-- *Optional/Planned attributes:* LAI
-
-
-
-Merge aus  strassen, eisenbahn, verkehrsflächen. Braucht nur 1 nonzero attribut für alle  (filtern für != 0 in python.
+- *Optional/Planned attributes:* ``STUFE``,``BELAGSART``,``STRASSENROUTE``
 
 
 
-##### CropsXX
+While there may be specific datasets available that contain the necessary information to construct the land cover regarding water surfaces (most obvious) or vegetation, there is hardly any dataset available that specifically contains paved and sealed surfaces (*Note: Personal experience by the author*). Based on the employed pavement surface classification in PALM, information about asphalt, concrete, sett, gravel, cobblestone and other surfaces of that kind need to be collected in this single file. As the source of this information is most definitely heterogeneous as well, specific guidance how to proceed cannot be given in this location. It is recommended to gather all information available that may relate to paved or sealed surfaces, convert them if necessary to a polygon shape file and merge all information into a single file.
+
+For example, working with swissTLM3D data, to get an initial pavement/sealed surface dataset, one could collect [streets](#Street Types (for Emission Modeling)), traffic areas ("Verkehrsareale") and railway lines (the underlying gravel respectively) information and [summarize](#Merge Vector Layers) it in a single file. Processing all those single datasets can be done applied with the [described operations in QGIS](#QGIS Operations Examples).
+
+
+
+
+
+##### Crops
+
+*relevant namelist flag:* ``docropfields``
+
+![image-20200520155154196](C:\Users\stefa\Documents\Python Scripts\ZAV-PALM-Scripts\docs\palmpy-documentation.assets\image-20200520155154196.png)
+
+<center><font size="-1">Manually recorded fields around Yverdon Airfield.</font></center>
+
+- *Required feature type:* Polygon
+- *Required attributes:* ``OBJEKTART``
+- *Optional/Planned attributes:* ``HEIGHT_TOP``,``CROP``,``ID``
+
+
+
+As can be seen in the image in the section [Land Cover (Bodenbedeckung)](#Land Cover (Bodenbedeckung)), potential land cover datasets do not cover the entire land surface sufficiently to allow for a complete definition of surfaces. This is the case for swisstopo datasets, as well as in Openstreetmap datasets. This is especially often the case where farming is done, as the land cover may quickly change (and corn is significantly different from sugar beet from an aerodynamic and climatic point of view). Originally used for a simulation for Yverdon, where unclassified regions mostly were related to farm land, this enters the whole palmpy ecosystem under the name "crops". As swissTLM3D data also does not include farmland information, a way was found to only include farming information into the static driver. Hence, information provided by this file will appear as `vegetation_type = 2` (mixed farming) in the static driver.
+
+As mixed farming is a broad term and, as described above, a corn field has very different parameters for LAI and roughness lenght etc. than a sugar beet field. Therefore, crop classes (as listed in the following table as as guidance) can be individually changed by the [namelist](#Namelist) parameters `veg-/pav-/soil-/wat-/bldg-/albedoparchanges`. These parameters also allow individual changes of the base land surface parameters already implemented in PALM. 
+
+As mentioned, the following table gives some hints how potential fields could be classified in a GIS. This table can be extended and changed arbitrarily, as 1) all classes will appear as `vegetation_type = 2` anyway, and 2) each change to each class needs to be individually specified in the mentioned [namelist](#Namelist) parameters.
+
+
 
 | OBJEKTART | Crop Type                            |
 | --------- | ------------------------------------ |
@@ -417,6 +513,7 @@ Merge aus  strassen, eisenbahn, verkehrsflächen. Braucht nur 1 nonzero attribut
 | 1002      | Low Crops (Such as beet, Potatoes, ) |
 | 1003      | Wheat                                |
 | 1004      | Corn                                 |
+| ...       | ...                                  |
 
 
 
@@ -424,13 +521,36 @@ Merge aus  strassen, eisenbahn, verkehrsflächen. Braucht nur 1 nonzero attribut
 
 
 
+##### Buildings
+
+![image-20200520162929288](C:\Users\stefa\Documents\Python Scripts\ZAV-PALM-Scripts\docs\palmpy-documentation.assets\image-20200520162929288.png)
+
+<center><font size="-1">Buildings footprints (orange) of the Zürich Zoo area, including the Masoala Halle, the Elephant Building in the north and the FIFA building in the south with various sport areas around it (green).</font></center>
+
+- *Required feature type:* Polygon
+- *Required attributes:* ``ID``, ``HEIGHT_TOP``, ``HEIGHT_BOT``, ``BLDGTYP``
+- *Optional/Planned attributes:* 
+
+In order to perform urban climate simulations, the positions and heights of buildings is an important metric to include in a simulation. Therefore, we need to create a shape file that contains these two pieces of information. This mode of representation has a downside as well. Buildings with round roof shapes need to represented by multiple polygons, if the roof shape shall be represented in a realistic way. Looking at the Masoala Halle at the Zurich Zoo with is rounded shape, if it is represented with a single polygon as in the image above, the Masoala Halle will only be represented by its mean height in a simulation. For coarse resolutions, this approach is definitely fine. However, if resolutions approach 4 or 2 meters, complex roof shapes can be resolved and may influence the flow also in a different way than a flat roof would. This must be kept in mind when creating building information.
+
+The source information to create a building dataset may come in various forms. While for example the City of Zurich publicly shares a 2.5D shapefile, which contains all building footprints and building height information, for some other regions this will be more complicated. For example may information only be available as a dxf file or an stl file, from where new procedures for data preprocessing need to be found. Also there is a possibility for building information to be available in multipolygon format, which could be processed in ArcPro from ESRI, but not with open source tools. 
+
+Depending on the available source data, construct a building dataset containing information about its height, its lower limit in space, its type and an identification number. The lower limit is used to represent bridges or overhanging buildings in the dataset. The identification number will allow individual changes to buildings based on their identification numbers. A method for this is not implemented though.
 
 
-##### Streets
+
+Possible workflow to forge a simple building footprint shapefile paired with LIDAR DTM-DOM data into a compliant buildings dataset:
+
+1. get rid of obsolete data fields, as they may slow QGIS down significantly.
+2. Create new fields ``HEIGHT_TOP``, ``HEIGHT_BOT``, ``BLDGTYP`` and ``ID``, if not yet present.
+3. Assign a building type based on the building ID. If not available, assign bulk values.
+4. Perform [zonal statistics](#Zonal Statistics) to assign building heights to the features.
+5. Use the calculated median value as `HEIGHT_TOP` attribute.
+6. Check, if the performed classifications and rooftop heights are realistic.
 
 
 
-##### Buildings Footprints
+
 
 
 
@@ -624,7 +744,43 @@ To get maximum usage out of speedflyer, use for example the following number of 
 
 ## QGIS Operations Examples
 
+### Subsetting a Shape File
+
+
+
+### Merge Vector Layers
+
+Vector layers can be merged into one file. Before performing this operation, make sure that they share the same feature types (lines, points or polygons).
+
+Vector layers can be merged by using the following operation in QGIS:
+
+![image-20200520151248984](C:\Users\stefa\Documents\Python Scripts\ZAV-PALM-Scripts\docs\palmpy-documentation.assets\image-20200520151248984.png)
+
+
+
+This opens the following mask (example from QGIS 3.8):
+
+![image-20200520151607220](C:\Users\stefa\Documents\Python Scripts\ZAV-PALM-Scripts\docs\palmpy-documentation.assets\image-20200520151607220.png)
+
+Procedure:
+
+1. Select the layers that are to be merged. 
+2. Select a location and file name, where the merged dataset is to be saved. $
+3. Start the operation. 
+
+
+
+Note: This operation can also be performed in batch mode (button on the bottom left).
+
+
+
+
+
 ### Field Calculator
+
+![image-20200520152019502](C:\Users\stefa\Documents\Python Scripts\ZAV-PALM-Scripts\docs\palmpy-documentation.assets\image-20200520152019502.png)
+
+
 
 
 
@@ -847,7 +1003,7 @@ Example: get SW and LW in data from lafXX.nc files to put as boundary condition 
 
 - Use ``xarray`` to create an average over the spatial dimensions (``ds.ASWDIR_S.mean(dim=[lon','lat'])``)
 
-  ```
+  ```python
   >>> import xarray as xr
   >>> ds = xr.open_dataset('jor1rmp.nc')
   >>> ds
@@ -888,7 +1044,7 @@ Example: get SW and LW in data from lafXX.nc files to put as boundary condition 
 
 - Add this time series to the dynamic driver with
 
-  ```
+  ```Python
   import xarray as xr
   import numpy as np
   import os
