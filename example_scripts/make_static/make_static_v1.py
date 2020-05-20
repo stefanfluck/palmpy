@@ -129,7 +129,8 @@ for i in range(0,len(cfp.sections())):
         index = int(section.split('_')[1])
         print('\n'+section)
         try:
-            ischild[index] = cfp.getint(section, 'ischild', fallback=0)
+            # ischild[index] = cfp.getint(section, 'ischild', fallback=0) #does the same as the next line, but removes to need to define ischild in namelist.
+            ischild[index] = index 
         except IndexError:
             print(f'\n\n{15*"@"+" "}ERROR! totaldomains parameter is wrong.{" "+15*"@"}')
             raise
