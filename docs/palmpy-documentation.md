@@ -95,7 +95,7 @@ palmpy.geodatatools* provides functions that can be used with resprect to handli
 
 ### Python Environment
 
-In order for palmpy to operate, you need the following packages:
+In order for palmpy to operate, you need (most of) the following packages:
 
 
 
@@ -107,7 +107,7 @@ In order for palmpy to operate, you need the following packages:
 |       pillow |               7.0.0               |
 |      netcdf4 |               1.4.2               |
 |         gdal |               3.0.2               |
-|        pynco |               1.0.0               |
+|      (pynco) |              (1.0.0)              |
 |     rasterio |               1.1.0               |
 |     (pandas) |               1.0.3               |
 |  (geopandas) |               0.6.1               |
@@ -146,7 +146,7 @@ conda env export --nobuilds --from-history > out.yml
 
 #### A Word on Environments and Packages
 
-This concept of having various environments with the same packages over and over again may be confusing to new python users at first. However, it makes perfect sense to have controlled package versions for a project. As python modules are updated, some functions may stop working, and new functions may be added that make life much easier. Having a python environment for everyone working on a project ensures that everyone is able to execute this particular code and it can be shared among coworkers. Therefore, and because palmpy is the result of a student project, continuous maintenance will not be available. Should therefore e.g. numpy be updated and a specific function be made obsolete, on which palmpy relied on heavily, the code will simply stop working. Therefore, installing a python environment from a yml file ensures that the environment is set up correctly with correct version numbers. However, this process can be prone to errors, especially when installing an environment on different operating systems. Therefore, a .yml file without version names is included, that should work on any given operating system. 
+This concept of having various environments with the same packages over and over again may be confusing to new python users at first. However, it makes perfect sense to have controlled package versions for a project. As python modules are updated, some functions may stop working, and new functions may be added that make life much easier. Having a python environment for everyone working on a project ensures that everyone is able to execute this particular code and it can be shared among coworkers. Therefore, and because palmpy is the result of a student project, continuous maintenance will not be available. Should therefore e.g. numpy be updated and a specific function be made obsolete, on which palmpy relied on heavily, the code will simply stop working. Therefore, installing a python environment from a .yml file ensures that the environment is set up correctly with correct version numbers. However, this process can be prone to errors, especially when installing an environment on different operating systems. Therefore, a .yml file without version names is included, that should work on any given operating system. 
 
 For this project, Spyder was used to write palmpy. Spyder is a package like any other and can be installed with conda. When installing multiple environments and you intend to use spyder for every one of them, it seems that you have to include the spyder package in these environments as well. In the end, when you start up spyder to work on a particular project, make sure to open the correct one - you can recognize that on the Shortcut name "Spyder (palm)" or "Spyder" (no env name for the base environment) or "Spyder (randomproject)".
 
@@ -194,7 +194,7 @@ To create a static file, you need the palmpy *geodatatools*, *makestatictools* a
 
 <div style="page-break-after: always; break-after: page;"></div>
 
-# PALM static driver setup with palmpy
+# PALM Static Driver Setup with palmpy
 
 This section will outlines the steps needed to create a static driver using the make_static script (in the following sections referred to as "the script"), which leverages the functions of palmpy to create static driver from geodata. When it comes to geodata, due to the different ways and standards, how people record geographical features, it is extremely difficult to write a script that does not require any data preprocessing. In order to create a simulation setup procedure that is easy to employ, some generalization standards were outlined about how geodata should look like in order for the script to be able to understand it. 
 
@@ -300,7 +300,7 @@ Entries in brackets are optional or required for preprocessing steps in QGIS.
 
 - *relevant namelist flag:* ``dotlmbb``
 
-![image-20200520110159132](C:\Users\stefa\Documents\Python Scripts\ZAV-PALM-Scripts\docs\palmpy-documentation.assets\image-20200520110159132.png)
+![image-20200520110159132](palmpy-documentation.assets\image-20200520110159132.png)
 
 <center><font size="-1">Land Cover in the Glarner Sernftal from the swissTLM3D BB dataset, overlay with a satellite image. Note that not all surfaces are covered!</font></center>
 
@@ -420,7 +420,7 @@ Larger vegetation patches, such as forests or grass fields that are higher than 
 
 Possible workflow from a swissTLM BB polygon shape file to a finished resolved forests shape file:
 
-1. Select Objects by expression ![image-20200520112932543](C:\Users\stefa\Documents\Python Scripts\ZAV-PALM-Scripts\docs\palmpy-documentation.assets\image-20200520112932543.png) (Ctrl+F3)
+1. Select Objects by expression ![image-20200520112932543](palmpy-documentation.assets\image-20200520112932543.png) (Ctrl+F3)
 2. Create query for ``OBJEKTART != 6 AND OBJEKTART != 12 AND OBJEKTART !=13``. This selects all objects that are **not** vegetation.
 3. Delete the selected features.
 4. Add fields for ``HEIGHT_TOP`` and ``HEIGHT_BOT``
@@ -436,7 +436,7 @@ Possible workflow from a swissTLM BB polygon shape file to a finished resolved f
 
 - *relevant namelist flag:* ``dostreettypes``
 
-![image-20200520113539311](C:\Users\stefa\Documents\Python Scripts\ZAV-PALM-Scripts\docs\palmpy-documentation.assets\image-20200520113539311.png)
+![image-20200520113539311](palmpy-documentation.assets\image-20200520113539311.png)
 
 <center><font size="-1">Required streets dataset as polygons (extract south of Zurich airport).</font></center>
 
@@ -444,13 +444,17 @@ Possible workflow from a swissTLM BB polygon shape file to a finished resolved f
 - *Required attributes:* ``OBJEKTART``
 - *Optional/Planned attributes:* ``RADIUS``, `BELAGSART`, `STRASSENROUTE`, `STUFE`
 
+
+
 Streets appear in the static driver twofold: once as an area of paved or sealed surfaces and once as dedicated street type array, which classifies streets by their relevance for emission contributions. The latter is only required if PALM is run with chemistry activated. As street information is often available as line features, they need to be [buffered](#Buffer) again. 
 
 *Practical note*: For simulations in Switzerland, streets could be taken from Openstreetmap data or from swissTLM3D data. The OSM street dataset contains a clear classification by street type (highway, trunk, residential etc.), which the PALM street classification system is also built upon. However, The OSM dataset does not include a classification by width. The swissTLM3D street dataset does contain a rough width information under `OBJEKTART`, but not about the "importance" of the road. Depending on the application, either case could be used. 
 
-Possible workflow from a swissTLM3D street shape file with line features to a finished resolved forests shape file, with atmospheric Simulations in mind (no emission modeling is intended)
 
-1. Drop all features where the BELAGSART is not paved (e.g. by Select by Expression ![image-20200520112925035](C:\Users\stefa\Documents\Python Scripts\ZAV-PALM-Scripts\docs\palmpy-documentation.assets\image-20200520112925035.png))
+
+Possible workflow from a swissTLM3D street shape file with line features to a finished resolved forests shape file, with atmospheric simulations in mind (no emission modeling is intended):
+
+1. Drop all features where the BELAGSART is not paved (e.g. by Select by Expression ![image-20200520112925035](palmpy-documentation.assets\image-20200520112925035.png))
 2. Drop all features that are underground (`STUFE < 0`)
 3. Create new field ``RADIUS`` and assign values based on the ``OBJEKTART`` with the [field calculator](#Field Calculator). 
 4. Buffer the dataset by the ``RADIUS``. 
@@ -464,7 +468,7 @@ Possible workflow from a swissTLM3D street shape file with line features to a fi
 
 *relevant namelist flag:* ``dopavedbb``
 
-![image-20200520140942195](C:\Users\stefa\Documents\Python Scripts\ZAV-PALM-Scripts\docs\palmpy-documentation.assets\image-20200520140942195.png)
+![image-20200520140942195](palmpy-documentation.assets\image-20200520140942195.png)
 
 <center><font size="-1">Basic paved land cover around Zurich airport.</font></center>
 
@@ -488,7 +492,7 @@ For example, working with swissTLM3D data, to get an initial pavement/sealed sur
 
 *relevant namelist flag:* ``docropfields``
 
-![image-20200520155154196](C:\Users\stefa\Documents\Python Scripts\ZAV-PALM-Scripts\docs\palmpy-documentation.assets\image-20200520155154196.png)
+![image-20200520155154196](palmpy-documentation.assets\image-20200520155154196.png)
 
 <center><font size="-1">Manually recorded fields around Yverdon Airfield.</font></center>
 
@@ -523,7 +527,7 @@ As mentioned, the following table gives some hints how potential fields could be
 
 ##### Buildings
 
-![image-20200520162929288](C:\Users\stefa\Documents\Python Scripts\ZAV-PALM-Scripts\docs\palmpy-documentation.assets\image-20200520162929288.png)
+![image-20200520162929288](palmpy-documentation.assets\image-20200520162929288.png)
 
 <center><font size="-1">Buildings footprints (orange) of the Zürich Zoo area, including the Masoala Halle, the Elephant Building in the north and the FIFA building in the south with various sport areas around it (green).</font></center>
 
@@ -740,55 +744,11 @@ To get maximum usage out of speedflyer, use for example the following number of 
 
 <div style="page-break-after: always; break-after: page;"></div>
 
+
+
+
+
 # Further Information
-
-## QGIS Operations Examples
-
-### Subsetting a Shape File
-
-
-
-### Merge Vector Layers
-
-Vector layers can be merged into one file. Before performing this operation, make sure that they share the same feature types (lines, points or polygons).
-
-Vector layers can be merged by using the following operation in QGIS:
-
-![image-20200520151248984](C:\Users\stefa\Documents\Python Scripts\ZAV-PALM-Scripts\docs\palmpy-documentation.assets\image-20200520151248984.png)
-
-
-
-This opens the following mask (example from QGIS 3.8):
-
-![image-20200520151607220](C:\Users\stefa\Documents\Python Scripts\ZAV-PALM-Scripts\docs\palmpy-documentation.assets\image-20200520151607220.png)
-
-Procedure:
-
-1. Select the layers that are to be merged. 
-2. Select a location and file name, where the merged dataset is to be saved. $
-3. Start the operation. 
-
-
-
-Note: This operation can also be performed in batch mode (button on the bottom left).
-
-
-
-
-
-### Field Calculator
-
-![image-20200520152019502](C:\Users\stefa\Documents\Python Scripts\ZAV-PALM-Scripts\docs\palmpy-documentation.assets\image-20200520152019502.png)
-
-
-
-
-
-### Buffer
-
-
-
-### Zonal Statistics
 
 
 
@@ -855,6 +815,8 @@ inifor -p <path> -d <YYYYMMDDHH (in UTC)> -i <init-mode> -n <namelist> --input-p
 
 
 
+
+
 **Hints / Troubleshooting:**
 
 - Date format: YYYYMMDDHH. Start time stamp is used, it know how far to process from the end_time parameter in the namelist.
@@ -915,7 +877,7 @@ module load gnu mpich2/3.3.1-gnu hdf5/1.8.15-gnu7 netcdf/4.6.1-gnu7 netcdf/4.4.4
 
 use RRTMG as well (if compiled): run the following command before starting a simulation:
 
-```bash
+​```bash
 export LD_LIBRARY_PATH=/cluster/home/<rrtmg_install_location>/lib/rrtmg/shared/lib:$LD_LIBRARY_PATH
 ```
 
@@ -1084,7 +1046,7 @@ Example: get SW and LW in data from lafXX.nc files to put as boundary condition 
 
 
 
-## GIS / GDAL
+## GDAL
 
 **Fill empty values in a raster with values from another raster**
 
@@ -1102,13 +1064,279 @@ For every QGIS operation there is a gdal equivalent, multiple steps can be done 
 
 
 
+## QGIS Operations Examples
+
+### Subsetting a Shape File
+
+In order to select certain features of a shape file based on field values the "select by expression" operation in QGIS can be used. There are multiple ways to achieve the same thing, but one straight forward way is described below.
+
+Open the attribute table and click on the "Select by Expression" button ![image-20200520112932543](palmpy-documentation.assets\image-20200520112932543.png) (Ctrl+F3). In the mask that opens, enter your expression in the form on the left. If you want to select by multiple expressions, separate them by ``OR`` (with `AND` the search will fail, as the `OBJEKTART` cannot equal two different values in the example).
+
+![image-20200520210329398](palmpy-documentation.assets/image-20200520210329398.png)
+
+
+
+Once the desired features are selected, right click on the layer export the selected objects by selecting the following buttons. 
+
+![image-20200520210604404](palmpy-documentation.assets/image-20200520210604404.png)
+
+
+
+In the new mask, chose your export settings as desired and export your subset of data.
+
+
+
+Another way would be as follows (see section [Resolved Forests](#Resolved Forests)):
+
+1. Export the file as it is under a new name.
+2. Select Objects by expression 
+3. Create query for ``OBJEKTART != 6 AND OBJEKTART != 12 AND OBJEKTART !=13``. This selects all objects that are **not** vegetation.
+4. Delete the selected features and save the file again. Your new file now only contains your desired features.
+
+
+
+
+
+### Merge Raster Layers
+
+Some raster data, such as SRTM DHM or DHM or DOM data from the canton of Zurich, it is available as multiple tiles. It is often necessary to merge those tiles to one cohesive dataset in order to process it further.
+
+This can be done with the following action:
+
+![image-20200520212714236](palmpy-documentation.assets/image-20200520212714236.png)
+
+
+
+Then, the following mask pops up:
+
+![image-20200520212816447](palmpy-documentation.assets/image-20200520212816447.png)
+
+
+
+Select the layers that are to be merged into a single file. Select also a location, where the new file will be saved. Start the process with the Start button.
+
+**HINT**: If the raster merge operation does result in a raster with only fill values or zeros (possible in QGIS 3.4), there is a problem with the underlying *numpy* installation in your QGIS. [This link](https://gis.stackexchange.com/questions/307195/getting-black-square-after-merging-two-rasters-in-qgis) provides more insight into this problem. In essence, you'll need to execute the ``OSGeo4W.bat`` file as adminstrator. In the appearing console, run `python -m pip show numpy`, which will probably return ``Version: 1.12.1+mkl``. If it does so, run
+
+````bash
+python -m pip uninstall numpy
+>> Successfully uninstalled 
+python -m pip install numpy
+>> Succesfully installed numpy-1.15.4
+````
+
+This should fix your *numpy* installation within QGIS/OSGeo4W-Project.
+
+
+
+
+
+### Merge Vector Layers
+
+Vector layers can be merged into one file. Before performing this operation, make sure that they share the same feature types (lines, points or polygons).
+
+Vector layers can be merged by using the following operation in QGIS:
+
+![image-20200520151248984](palmpy-documentation.assets\image-20200520151248984.png)
+
+
+
+This opens the following mask (example from QGIS 3.8):
+
+![image-20200520151607220](palmpy-documentation.assets\image-20200520151607220.png)
+
+Procedure:
+
+1. Select the layers that are to be merged. 
+2. Select a location and file name, where the merged dataset is to be saved. $
+3. Start the operation. 
+
+
+
+Note: This operation can also be performed in batch mode (button on the bottom left).
+
+
+
+
+
+### Field Calculator
+
+With the field calculator, values of a field (e.g. `HEIGHT_TOP`) can be updated based on the values of other fields. This can for example be used when setting the values for the field ``RADIUS`` for specific street types and other operations. 
+
+In order to use this feature, click on the Field Calculator button in an open attribute table.
+
+![image-20200520202001823](palmpy-documentation.assets/image-20200520202001823.png)
+
+
+
+This opens the following mask (example from QGIS 3.4):
+
+![image-20200520152019502](palmpy-documentation.assets\image-20200520152019502.png)
+
+
+
+Here, it can be decided if a new field is to be generated or an existing field is updated. In the text box on the left, a statement can be written that is executed. In the example, a Switch-Case structure is implemented. Executing this code snippet sets the ``HEIGHT_TOP`` value to ``10`` if the ``OBJEKTART`` equals ``6`` and so on. Queries that are not fulfilled are not executed, fields are filled with Null values. 
+
+
+
+*Some Guidance / Examples from Practice:*
+
+- A possible mapping of swissTLM3D street ``OBJEKTART`` types to ``RADIUS`` might look as follows. The mapping is already written in the style that is required by the [field calculator](#Field Calculator).
+
+  **IMPORTANT**: This mapping must serve as a starting point and must be checked before applying!
+
+  ````python
+  CASE
+  	WHEN "OBJEKTART" = 8 THEN 5
+  	WHEN "OBJEKTART" = 2 THEN 12.5
+   	WHEN "OBJEKTART" = 6 THEN 5
+  	WHEN "OBJEKTART"= 10 THEN 3
+  	WHEN "OBJEKTART"= 9 THEN 4
+  	WHEN "OBJEKTART"= 11 THEN 2
+  	WHEN "OBJEKTART"= 15 THEN 1.5
+  	WHEN "OBJEKTART"= 16 THEN 1
+  	WHEN "OBJEKTART"=20 THEN 5
+  	WHEN "OBJEKTART"=21 THEN 7.5
+  	WHEN "OBJEKTART"=0 THEN 10
+  	WHEN "OBJEKTART"=1 THEN 10
+  END
+  ````
+
+
+
+- For *railway* lines, a ``RADIUS`` of 1.5 meters may be appropriate.
+
+
+
+
+
+### Buffer
+
+With the buffer function in QGIS, point and line features can be blown up into polygonal structures. QGIS has an implemented algorithm that allows us to prescribe a radius for each feature as an attribute to the feature itself. There are a couple of alternatives to this operation, there is also a GDAL variant available, the same operation can also be done in *geopandas*, which is most probably preferrable when dealing with large data. QGIS seems to struggle when operations need to be performed on huge datasets.
+
+The buffer function can be found here:
+
+![image-20200520202640402](palmpy-documentation.assets/image-20200520202640402.png)
+
+
+
+
+
+This opens the following mask (QGIS 3.4):
+
+![image-20200520202603670](palmpy-documentation.assets/image-20200520202603670.png)
+
+
+
+First, the desired dataset that is to be puffered needs to be selected. The ``RADIUS`` attribute can be chosen by clicking on the highlighted buttons. Select a location, where the file shall be saved, and start the algorith by clicking on "Starte" or "Run".
+
+This results in the following state:
+
+![image-20200520203224604](palmpy-documentation.assets/image-20200520203224604.png)
+
+It can be seen, that the radius is applied to both sides of the line. Hence, a tree line that has a width of 10 meters requires a radius of 5 meters. The cap styles of the resulting polygon can be modified with the corresponding parameter in the mask. 
+
+
+
+*Hint: The GDAL implementation may be able to perform this buffering based on another field as well, but the options for GDAL tools are rather hard to understand from the documentation. Another simple way to buffer a line feature would be through geopandas with ``st.geometry = st.geometry.buffer(st.radius)``, where ``st`` represents a previously imported geopandas geodataframe*.
+
+
+
+### Zonal Statistics
+
+Zonal statistics is a powerful tool that can be leveraged to calculate some statistics of raster pixel values that lie within a designated vector polygon. This is especially useful if you know the positions of building footprints, but do not have their height. The same applies to trees, where you may know their position and width, but not their size. For this approach, a preprocessed difference raster between a LIDAR DTM and a LIDAR DOM is required. The following examples are illustrated using the example of Yverdon airfield.
+
+For the city of Yverdon and Zurich, there are digital terrain and surface models available with resolutions of 0.5 or even 0.25 meters. As a reminder, a digital terrain model (DTM) contains the ground heights including buildings and trees, a DOM does only contain the height of the underlying terrain. The latter is often deduced from the former. For us, we are leveraging the availability of the two files and subtract the DOM data from the DTM data. The result are the heights of the surface mounted objects. 
+
+
+
+![image-20200520211555925](palmpy-documentation.assets/image-20200520211555925.png)
+
+<center><font size="-1">DOM subtracted from the DTM. The brighter a pixel is, the higher it is. The extract shows the airfield of Yverdon with its tree rows.</font></center>
+
+In the above image, it is clearly visible that the trees are very high around the airfield of yverdon. The buildings, in contrast, are quite low and only appear in a dark grey. Black represents a 0 value.
+
+For Yverdon, there is a dataset available that contains the positions of building footprints. An overlay with the above image looks as follows:
+
+
+
+![image-20200520212051670](palmpy-documentation.assets/image-20200520212051670.png)
+
+<center><font size="-1">The DTM-DOM data with a building footprint overlay (red squares).</font></center>
+
+Now, it is possible to calculate the statistics for the pixel values that are enclosed by the overlaid polygons. This can be done with the "zonal statistics" algorithm, which is a raster analysis tool. However, in some QGIS versions (e.g. 3.4), this tool cannot be found by looking in the usual spot. It needs to be searched for in the "Toolbox" that can be made visible with Ctrl-Alt-T, if it is not already visible. In this toolbox, search for "zonal" or "Zonenstatistik".
+
+
+
+![image-20200520212456331](palmpy-documentation.assets/image-20200520212456331.png)
+
+
+
+This results in the following window:
+
+![image-20200520213529334](palmpy-documentation.assets/image-20200520213529334.png)
+
+
+
+On the left side, select your raster that shall be analyzed and the polygon layer that defines the zones. Select the statistics that shall be calculated within each zone based on the raster values. The resulting statistics will appear as new fields for each feature, prepended by the defined prefix (here `_`). It makes sense to compute the following statistics:
+
+- median
+- mean
+- min
+- max
+
+
+
+Start the algorithm with the corresponding button. Once it is finished, this will have added four new fields in the attribute table. 
+
+![image-20200520213838125](palmpy-documentation.assets/image-20200520213838125.png)
+
+
+
+It is visible, that the selected feature has a median height of 4.7 meters. One could now go ahead and set this value to as ``HEIGHT_TOP`` with the following method:
+
+
+
+![image-20200520214120796](palmpy-documentation.assets/image-20200520214120796.png)
+
+
+
+1. Activate layer editing mode
+2. In the quick edit bar, select the field to be changed and to which value (or field) it shall be changed.
+3. Select, whether you would like to overwrite `HEIGHT_TOP` with the `_median` value for every feature or only the ones you have activate.
+
+Now you have successfully populated your building footprint dataset with (estimated) building height information.
+
+
+
+**Practical Information**: It may not be practicable to use the raw median or mean value burnt into the polygons as `HEIGHT_TOP` value, as the LIDAR DTM-DOM dataset does not contain relevant values at every pixel within the designated zones by the shape file. Therefore, a lot of zero values may bias the statistics process to lower values than they would be in reality. So taking the median may not really work well for trees, tree lines or forests, but may work for buildings as their position is rather exact in the datasets and does not change much over time. Trees, on the other hand, grow and the buffered shape files may not reflect the true positions accurately.
+
+This issue can be worked around by taking the ``_max`` value and subtract a fraction of it to account for tree crown shape. A possible approach to calculate the ``HEIGHT_TOP`` value from the ``_max`` value may be the following:
+
+
+
+````
+HEIGHT_TOP = _max - ( 0.15 * _max )
+````
+
+
+
+A thorough test of the heights of the buildings, trees or forests in the area of interest is still required and explicitly recommended.
+
+
+
+
+
+
+
+
+
 
 
 ---
 
 <div style="page-break-after: always; break-after: page;"></div>
 
-# Glossary XX
+# Glossary
 
 
 
