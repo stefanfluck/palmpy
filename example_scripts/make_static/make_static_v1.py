@@ -128,7 +128,12 @@ for i in range(0,len(cfp.sections())):
     if section.split('_')[0] == 'domain':
         index = int(section.split('_')[1])
         print('\n'+section)
-        ischild[index] = cfp.getint(section, 'ischild', fallback=0)
+        try:
+            ischild[index] = cfp.getint(section, 'ischild', fallback=0)
+        except IndexError:
+            print(f'\n\n{15*"@"+" "}ERROR! totaldomains parameter is wrong.{" "+15*"@"}')
+            raise
+            
         xlen[index] = cfp.getfloat(section, 'xlen', fallback=0.0)
         ylen[index] = cfp.getfloat(section, 'ylen', fallback=0.0)
         xmin[index] = cfp.getfloat(section, 'xmin', fallback=0.0)

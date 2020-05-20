@@ -23,7 +23,7 @@ bb2palmveg = {
                     13:18,  # Wald offen > interrupted forest
                     
                     #own categories - put those in own directory with cropfields and call it ownveg iso. cropfields
-                    1000 : 3,
+                    1000 : 1,
                     1001 : 3,
                     1002 : 3,
                     1003 : 3,
