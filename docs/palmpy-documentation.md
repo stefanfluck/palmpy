@@ -1,6 +1,20 @@
-<header>
-    <font size="+3"><b>palmpy Framework 1.0 Documentation</b></font>
-</header>
+
+
+
+
+
+![](palmpy-documentation.assets/palmpy.png)
+
+
+
+
+
+<center><font size="+1"><b>palmpy Framework V1.0 Documentation</b></font></center>
+
+
+
+
+
 **Table of Contents**
 
 [TOC]
@@ -29,7 +43,7 @@ DISCLAIMER: No liability is assumed regarding the correctness of the provided ro
 
 
 
-## Applied Paradigms - how it works XX
+## How it Works XX
 
 Framework Components
 
@@ -194,17 +208,31 @@ To create a static file, you need the palmpy *geodatatools*, *makestatictools* a
 
 <div style="page-break-after: always; break-after: page;"></div>
 
-# PALM Static Driver Setup with palmpy
+# PALM Static Driver Generation with palmpy
 
 This section will outlines the steps needed to create a static driver using the make_static script (in the following sections referred to as "the script"), which leverages the functions of palmpy to create static driver from geodata. When it comes to geodata, due to the different ways and standards, how people record geographical features, it is extremely difficult to write a script that does not require any data preprocessing. In order to create a simulation setup procedure that is easy to employ, some generalization standards were outlined about how geodata should look like in order for the script to be able to understand it. 
 
 It must be noted here that there is also a script shipped with PALM that can be used to create a static driver file. However, at the time it was needed to create static drivers for various projects at the Center for Aviation, this script was not usable as it relied heavily on geodata that was preprocessed by the DLR. Furthermore, the input files were not optional. Therefore, it was decided to create a new script, that fulfilled the needs at the Center for Aviation for projects, that were not necessarily focussed around urban climate simulations, but it turned out to be generally applicable. The core of the script created here was set up completely on its own without reusing code from the shipped PALM script. Regarding the implementation of [leaf area density arrays](#Resolved Vegetation), the approach of the shipped script was analyzed before implementing our own approach. Therefore, while the outcome of both scripts may be comparable, the mechanics behind are two separate pair of shoes.
 
-Below, it will be outlined how the corresponding vector and raster data shall look like to be able to be handled by the script. For each type of data a rough how-to procedure is given on how to perform certain operations in QGIS to reach the required state. It is assumed that a user with minor QGIS experience is able to follow the instructions perfectly fine. Note that the presented procedures are not the only way to achieve the desired outcome - other methods may include leveraging the powerful functions of the [geopandas](https://geopandas.org/) python library or any other GIS Software. It shall be ensured though that the end results fulfills the presented requirements for a usage in the script.
+
+
+### Possibilities and Required Data
+
+WHAT CAN BE INCLUDED IN PALM WITH THE PRESENTED SOFTWARE
+
+WHAT NEEDS TO BE AVAILABLE IN ORDER TO USE FULL POTENTIAL OF THIS SOFTWARE
+
+
+
+
 
 
 
 ### Geodata Preprocessing
+
+Below, it will be outlined how the corresponding vector and raster data shall look like to be able to be handled by the script. For each type of data a rough how-to procedure is given on how to perform certain operations in QGIS to reach the required state. It is assumed that a user with minor QGIS experience is able to follow the instructions perfectly fine. Note that the presented procedures are not the only way to achieve the desired outcome - other methods may include leveraging the powerful functions of the [geopandas](https://geopandas.org/) python library or any other GIS Software. It shall be ensured though that the end results fulfills the presented requirements for a usage in the script.
+
+
 
 #### Applied Paradigms and Standards
 
@@ -237,6 +265,8 @@ The static generation script requires some data to be present in rastered form, 
 
 
 
+
+
 ##### Orthoimage
 
 An orthoimage refers to a georeferenced image of the area in question. In the script, if an orthoimage is supplied, it is clipped to the domain extents and nest and proble locations will be plotted on it. For an example, refer to the following image.
@@ -244,6 +274,8 @@ An orthoimage refers to a georeferenced image of the area in question. In the sc
 ![orthoimage_example](palmpy-documentation.assets/domainoverview.png)
 
 <center><font size="-1">Plot of selected domain extents and probe locations on the clipped orthoimage.</font></center>
+
+
 
 
 
@@ -296,6 +328,8 @@ Entries in brackets are optional or required for preprocessing steps in QGIS.
 
 
 
+
+
 ##### Land Cover (Bodenbedeckung)
 
 - *relevant namelist flag:* ``dotlmbb``
@@ -316,6 +350,8 @@ This file (and the [crops](#Crops) dataset described further below) will decide,
 
 
 
+
+
 ##### Resolved Vegetation
 
 - *relevant namelist flag:* ``dolad``
@@ -330,9 +366,11 @@ The script know where to place vegetation based on polygons provided by one to t
 
 The leaf area density array will be filled between `HEIGHT_BOT` and `HEIGHT_TOP` based on the chosen LAI and two shape parameters [alpha and beta](https://en.wikipedia.org/wiki/Beta_distribution). The following figure provides an overview about possible tree shapes that can be constructed with alpha and beta. This figure can be called with the function call ``mst.showbetadistribution()`` with a loaded palmpy module.
 
+
+
 <img src="palmpy-documentation.assets/alphabeta.jpg" alt="alphabeta"  />
 
-<center><font size="-1">Resulting shapes for different alpha and beta values. A fractional tree height of 1 represents tree top, 0 the ground level.</font></center>
+<center><font size="-1">Resulting shapes for different alpha and beta values. A fractional tree height of 1 represents tree top, 0 the HEIGHT_BOT value, so the lower limit of the tree crown.</font></center>
 
 
 
@@ -371,6 +409,8 @@ Possible workflow coming from a point shape file:
 5. 1. assign bulk values and be done
    2. perform [Zonal statistics](#Zonal Statistics) (requires LIDAR DTM minus DOM data (so trees heights are present))
 6. Check if the performed actions make sense and are realistic.
+
+
 
 
 
@@ -474,9 +514,9 @@ Possible workflow from a swissTLM3D street shape file with line features to a fi
 
 - *Required feature type:* Polygon
 
-- *Required attributes:* ``OBJEKTART``
+- *Required attributes:* ``BELAGSART``
 
-- *Optional/Planned attributes:* ``STUFE``,``BELAGSART``,``STRASSENROUTE``
+- *Optional/Planned attributes:* ``STUFE``, `OBJEKTART`, ``STRASSENROUTE``
 
 
 
@@ -523,8 +563,6 @@ As mentioned, the following table gives some hints how potential fields could be
 
 
 
-
-
 ##### Buildings
 
 ![image-20200520162929288](palmpy-documentation.assets\image-20200520162929288.png)
@@ -558,29 +596,45 @@ Possible workflow to forge a simple building footprint shapefile paired with LID
 
 
 
-
-
-
-
 ### Static File Generation
 
+A big part of the framework is a static file generation script, that should automate a large portion of the required workflow from source geodata to usable PALM static driver file. The script, which is presented in the following sections, evolved over time and went through many iterations. That said, it is nowhere near from perfect and some implementation choices may be questionable. However, it proves to be a valuable tool as it is now and may be used as a starting point for further development, which will most definitely take place.
 
 
-#### ScriptXX
 
-How the Script works
+#### make_static Script
+
+*How the Script works*
 
 not all data needs to be provided
 
 
 
-**flowchart!**
+
+
+The following flowchart provides an insight into the inner workings of the make_static script. The flowchart touches on every aspect of the script, however, not every single line is reproduced. If two lines performed the same action and summarizing them seemed appropriate, this was hence done for better legibility of the flowchart.
+
+
+
+<img src="palmpy-documentation.assets/flowchart_makestatic-Page-1.png" alt="flowchart_makestatic-Page-1" style="zoom:50%;" />
+
+
+
+<img src="palmpy-documentation.assets/flowchart_makestatic-Page-2.png" alt="flowchart_makestatic-Page-2" style="zoom:50%;" />
+
+
+
+<img src="palmpy-documentation.assets/flowchart_makestatic-Page-3.png" alt="flowchart_makestatic-Page-3" style="zoom:50%;" />
 
 
 
 
 
+<img src="palmpy-documentation.assets/flowchart_makestatic-Page-4.png" alt="flowchart_makestatic-Page-4" style="zoom:50%;" />
 
+<img src="palmpy-documentation.assets/flowchart_makestatic-Page-5.png" alt="flowchart_makestatic-Page-5" style="zoom:50%;" />
+
+<img src="palmpy-documentation.assets/flowchart_makestatic-Page-6.png" alt="flowchart_makestatic-Page-6" style="zoom:50%;" />
 
 
 
@@ -592,7 +646,7 @@ The namelist is used to provide all necessary information to create the static d
 
 
 
-``[settings]``
+##### ``[settings]``
 
 This section contains top level information about the simulation.
 
@@ -611,7 +665,7 @@ This section contains top level information about the simulation.
 
 
 
-``[paths]``
+##### ``[paths]``
 
 In this section all paths need to be specified to the required files. The path separator that is used here is ``\`` in windows and ``/`` for linux paths. Preferrably use absolute paths.
 
@@ -634,7 +688,7 @@ In this section all paths need to be specified to the required files. The path s
 
 
 
-``[probes]``
+##### ``[probes]``
 
 It is possible to specify probe locations in the namelist. The script will plot their positions on the overview plot and plot probe coordinates respective to each chosen domain.
 
@@ -645,7 +699,7 @@ It is possible to specify probe locations in the namelist. The script will plot 
 
 
 
-``[change_npars]``
+##### ``[change_npars]``
 
 In order to change vegetation, pavement, water, soil or albedo parameters individually, set the flags ``dovegpars`` or ``doalbpars`` to ``True`` for each domain. If a flag is set to ``True``, values must be provided or an error is raised (``string index out of range``). In the following,  ``filterarr`` refers to an array which is searched for the ``filtervalue`` - where the search matches, the ``newvalue`` is put into the ``x_pars`` array on the ``npar``'th level (see PALM documentation, PIDS Tables). The four values to be provided can be remembered as: "Set the parameter ``npar`` to ``newvalue`` where the pixel in ``filterarr`` equals ``filtervalue``".
 
@@ -660,7 +714,7 @@ In order to change vegetation, pavement, water, soil or albedo parameters indivi
 
 
 
-``[domain_N]``
+##### ``[domain_N]``
 
 For each domain, the following parameters shall be given. 
 
@@ -699,6 +753,10 @@ For each domain, the following parameters shall be given.
 | *b_ebgebu*        | float   | beta shape parameter for beta-distribution for single tree polygons. Parameter to construct a Leaf Area Density vertical profile.                                                     |
 
 
+
+
+
+#### Generated Output by the Script XX
 
 
 
@@ -865,9 +923,9 @@ The following questions are written down here for a reason. They are important q
 <div style="page-break-after: always; break-after: page;"></div>
 
 
-# Useful Code Snippets
+## Useful Code Snippets
 
-## Castor / Pollux Cluster
+### Castor / Pollux Cluster
 
 load required modules to run PALM (**basic configuration**, without parallel I/O, no RRTMG!)
 
@@ -877,7 +935,7 @@ module load gnu mpich2/3.3.1-gnu hdf5/1.8.15-gnu7 netcdf/4.6.1-gnu7 netcdf/4.4.4
 
 use RRTMG as well (if compiled): run the following command before starting a simulation:
 
-​```bash
+```bash
 export LD_LIBRARY_PATH=/cluster/home/<rrtmg_install_location>/lib/rrtmg/shared/lib:$LD_LIBRARY_PATH
 ```
 
@@ -899,8 +957,7 @@ The config does not have to be recompiled. The flag ``-T`` does not have an effe
 
 
 
-## NCO
-
+### NCO
 ```bash
 # overwrite attribute grid_mapping in variable SOILTYP (if global, write global) by a c(haracter) entry
 ncatted -O -a grid_mapping,SOILTYP,o,c,'rotated_pole' soil.nc
@@ -925,7 +982,7 @@ ncrcat yv-jor-2_av_3d_N02.00{0..5}.nc yv-jor-2_av_3d_N02.nc
 
 
 
-## CDO
+### CDO
 
 **Regridding**
 
@@ -1001,6 +1058,7 @@ Example: get SW and LW in data from lafXX.nc files to put as boundary condition 
   >>> dsa.to_netcdf('joravg.nc')
   
   ```
+```
 
   
 
@@ -1040,13 +1098,13 @@ Example: get SW and LW in data from lafXX.nc files to put as boundary condition 
   dyn['rad_sw_in_dif'] = rad_sw_in_dif
   
   dyn.to_netcdf('radtest_withrad_dynamic')
-  ```
+```
 
   
 
 
 
-## GDAL
+### GDAL
 
 **Fill empty values in a raster with values from another raster**
 
@@ -1064,9 +1122,9 @@ For every QGIS operation there is a gdal equivalent, multiple steps can be done 
 
 
 
-## QGIS Operations Examples
+### QGIS Operations Examples
 
-### Subsetting a Shape File
+#### Subsetting a Shape File
 
 In order to select certain features of a shape file based on field values the "select by expression" operation in QGIS can be used. There are multiple ways to achieve the same thing, but one straight forward way is described below.
 
@@ -1097,7 +1155,7 @@ Another way would be as follows (see section [Resolved Forests](#Resolved Forest
 
 
 
-### Merge Raster Layers
+#### Merge Raster Layers
 
 Some raster data, such as SRTM DHM or DHM or DOM data from the canton of Zurich, it is available as multiple tiles. It is often necessary to merge those tiles to one cohesive dataset in order to process it further.
 
@@ -1130,7 +1188,7 @@ This should fix your *numpy* installation within QGIS/OSGeo4W-Project.
 
 
 
-### Merge Vector Layers
+#### Merge Vector Layers
 
 Vector layers can be merged into one file. Before performing this operation, make sure that they share the same feature types (lines, points or polygons).
 
@@ -1158,7 +1216,7 @@ Note: This operation can also be performed in batch mode (button on the bottom l
 
 
 
-### Field Calculator
+#### Field Calculator
 
 With the field calculator, values of a field (e.g. `HEIGHT_TOP`) can be updated based on the values of other fields. This can for example be used when setting the values for the field ``RADIUS`` for specific street types and other operations. 
 
@@ -1209,7 +1267,7 @@ Here, it can be decided if a new field is to be generated or an existing field i
 
 
 
-### Buffer
+#### Buffer
 
 With the buffer function in QGIS, point and line features can be blown up into polygonal structures. QGIS has an implemented algorithm that allows us to prescribe a radius for each feature as an attribute to the feature itself. There are a couple of alternatives to this operation, there is also a GDAL variant available, the same operation can also be done in *geopandas*, which is most probably preferrable when dealing with large data. QGIS seems to struggle when operations need to be performed on huge datasets.
 
@@ -1241,7 +1299,7 @@ It can be seen, that the radius is applied to both sides of the line. Hence, a t
 
 
 
-### Zonal Statistics
+#### Zonal Statistics
 
 Zonal statistics is a powerful tool that can be leveraged to calculate some statistics of raster pixel values that lie within a designated vector polygon. This is especially useful if you know the positions of building footprints, but do not have their height. The same applies to trees, where you may know their position and width, but not their size. For this approach, a preprocessed difference raster between a LIDAR DTM and a LIDAR DOM is required. The following examples are illustrated using the example of Yverdon airfield.
 
@@ -1335,8 +1393,6 @@ A thorough test of the heights of the buildings, trees or forests in the area of
 ---
 
 <div style="page-break-after: always; break-after: page;"></div>
-
-# Glossary
 
 
 
