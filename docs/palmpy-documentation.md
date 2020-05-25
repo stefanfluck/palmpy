@@ -248,11 +248,15 @@ Geodata is basically data that is linked to certain geographical coordinates. Wh
 
 PALM calculates all its equation on a cartesian grid, where the axes are perpendicular amongst each other. Therefore, it is recommended to transform any geodata into a CRS that has somewhat equal properties, should reality be reproduced correctly. 
 
-For Switzerland, source data from swisstopo are mostly available in either Switzerlands own CRS LV03 or LV95, which can be directly processed with the static creation script. Should locations out of Switzerland be of interest, geodata could be transformed into an EPSG coordinate system. As it is not possible to represent the whole world with a single, large conformal CRS, there is a regional EPSG coordinate system available for practically every location on earth. These EPSG CRS have a validity range, i.e. outside of these valid extents the errors get rather large, so another EPSG CRS may be more appropriate. 
+For Switzerland, source data from swisstopo are mostly available in either Switzerlands own CRS LV03 or LV95, which can be directly processed with the static creation script. Should locations out of Switzerland be of interest, geodata could be transformed into an EPSG coordinate system. As it is not possible to represent the whole world with a single, large conformal CRS, there is a regional EPSG coordinate system available for practically every location on earth. These EPSG CRS have a validity range, i.e. outside of these valid extents the errors get rather large, so another EPSG CRS may be more appropriate.  Another possibility is the usage of UTM coordinates.
 
 **Takeaway**: Transform all your geodata into a single conformal CRS before proceeding to create a static driver from it.
 
 
+
+<img src="palmpy-documentation.assets/bad_map_projection_south_america.png" alt="Bad Map Projection: South America" style="zoom: 67%;" />
+
+<center><font size="-1">xkcd comic #2256</font></center>
 
 
 
@@ -313,14 +317,14 @@ Entries in brackets are optional or required for preprocessing steps in QGIS.
 
 | **Feature Type**            | **Format** | **Attribute  1** | **Attribute  2** | **Attribute  3** | **Attribute  4** | Attribute 5 |
 | --------------------------- | ---------- | ---------------- | ---------------- | ---------------- | ---------------- | ----------- |
-| Land Cover (Bodenbedeckung) | Polygon    | OBJEKTART        |                  |                  |                  |             |
-| Single Trees                | Polygon    | HEIGHT_TOP       | HEIGHT_BOT       | ID               | (LAI)            | (RADIUS)    |
-| Tree Lines                  | Polygon    | HEIGHT_TOP       | HEIGHT_BOT       | ID               | (LAI)            | (RADIUS)    |
-| Resolved Forests            | Polygon    | HEIGHT_TOP       | HEIGHT_BOT       | ID               | (LAI)            | (OBJEKTART) |
-| Streets                     | Polygon    | OBJEKTART        | BELAGSART        | STRASSENROUTE    | STUFE            |             |
-| Building Footprints         | Polygon    | HEIGHT_TOP       | HEIGHT_BOT       | ID               | BLDGTYP          |             |
-| Paved Surfaces              | Polygon    | ID               | BELAGSART        |                  |                  |             |
-| Crop fields                 | Polygon    |                  |                  |                  |                  |             |
+| *Land Cover (Bodenbedeckung)* | Polygon    | `OBJEKTART`      |                  |                  |                  |             |
+| *Single Trees*              | Polygon    | `HEIGHT_TOP`     | `HEIGHT_BOT`     | `ID`             | (`LAI`)          | (`RADIUS`)  |
+| *Tree Lines*                | Polygon    | `HEIGHT_TOP`     | `HEIGHT_BOT`     | `ID`             | (`LAI`)          | (`RADIUS`)  |
+| *Resolved Forests*          | Polygon    | `HEIGHT_TOP`     | `HEIGHT_BOT`     | `ID`             | (`LAI`)            | (``OBJEKTART``) |
+| *Streets*                   | Polygon    | `OBJEKTART`      | (`RADIUS`)       | (`STRASSENROUTE`) | (`STUFE`)        | (`BELAGSART`) |
+| *Paved Surfaces*            | Polygon    | `BELAGSART`      |                  |                  |                  |             |
+| *Crop fields*               | Polygon    | `OBJEKTART`      | (`HEIGHT_TOP`)  | (`CROP`)         | (`ID`)           |             |
+| *Building Footprints*       | Polygon    | `HEIGHT_TOP`     | `HEIGHT_BOT`     | `ID`             | `BLDGTYP`        |             |
 
 
 
@@ -340,13 +344,13 @@ Entries in brackets are optional or required for preprocessing steps in QGIS.
 
 - *Required feature type:* Polygon
 
-- *Required attributes:* OBJEKTART
+- *Required attributes:* `OBJEKTART`
 
 This file shall contain land cover information including vegetation and water surfaces. The focus here lies on natural land cover, such as rocks, desert, glaciers etc. Artificially paved or sealed areas are to be put in a separate file. 
 
 If features are added manually, make sure the classification matches the mapping dictionary or assign a new class number that is also included as a new entry in the mapping dictionaries. A good practice is to give  manually defined classes an identifier starting with 100X or similar, so they can be clearly identified as individual changes to the dataset.
 
-This file (and the [crops](#Crops) dataset described further below) will decide, which pixels in the static driver will be classified as a `vegetation_type` and which ones as a `water_type`. Pixels that are not covered by a polygon in those datasets will be set to a bulk value that is to be set in the [namelist](#Namelist). [Paved or sealed surfaces](#Paved or Sealed Surfaces) will be added on top of this information and overwrite any set `vegetation_` or `water_type`.
+This file (and the [crops](#Crops) dataset described further below) will decide, which pixels in the static driver will be classified as a `vegetation_type` and which ones as a `water_type`. Pixels that are not covered by a polygon in those datasets will be set to a bulk value that is to be set in the [namelist](#Namelist). [Paved or sealed surfaces](#Paved or Sealed Surfaces) will be added on top of this information and overwrite any set `vegetation_type` or `water_type`.
 
 
 
@@ -424,7 +428,7 @@ Possible workflow coming from a point shape file:
 
 - *Required attributes:* `HEIGHT_TOP`,  `HEIGHT_BOT`,  `ID` 
 
-- *Optional/Planned attributes:* `RADIUS`, `OBJEKTART`, `LAI`
+- *Optional/Planned attributes:* `RADIUS`, `LAI`
 
 Tree lines are often available as line features in a shape file. We need to transform this into a polygon shape file. The same techniques as for single trees can be applied. Assign a `RADIUS` (if needed based on the ``OBJEKTART``, which could point to bushes, hedges or actual tree lines) to each line and [Buffer](#Buffer) it to get a Polygon shape file. Add `HEIGHT_TOP` and `HEIGHT_BOT` attributes as well, populate them with either bulk values based on ``OBJEKTART`` or perform [zonal statistics](#Zonal Statistics) again.
 
@@ -957,6 +961,8 @@ The config does not have to be recompiled. The flag ``-T`` does not have an effe
 
 
 
+
+
 ### NCO
 ```bash
 # overwrite attribute grid_mapping in variable SOILTYP (if global, write global) by a c(haracter) entry
@@ -978,6 +984,13 @@ ncatted -O -a <attname>,<var>,<mode mostly o>,<dtype (c for char)>,"<attribute>"
 ncrcat -v var1,var2,var3 inputfiles outputfiles
 # as an example with multiple input files and all variables:
 ncrcat yv-jor-2_av_3d_N02.00{0..5}.nc yv-jor-2_av_3d_N02.nc
+
+# concatenate all files in a folder with increasing cycle number
+# !!! Caution: Files with many timestamps (eg. highres _ts_ files or probe output) may take a long time! Also make sure to temporarily move files that dont need concatenation to another directory and move them back afterwards.
+
+for f in *.nc; do echo ${f//\.*}; done | sort | uniq | 
+    while read prefix; do ncrcat "$prefix".*nc "$prefix".nc; done
+
 ```
 
 
@@ -1058,9 +1071,9 @@ Example: get SW and LW in data from lafXX.nc files to put as boundary condition 
   >>> dsa.to_netcdf('joravg.nc')
   
   ```
-```
 
-  
+
+
 
 - Add this time series to the dynamic driver with
 
@@ -1098,9 +1111,10 @@ Example: get SW and LW in data from lafXX.nc files to put as boundary condition 
   dyn['rad_sw_in_dif'] = rad_sw_in_dif
   
   dyn.to_netcdf('radtest_withrad_dynamic')
-```
+  ```
 
-  
+
+
 
 
 
@@ -1175,12 +1189,12 @@ Select the layers that are to be merged into a single file. Select also a locati
 
 **HINT**: If the raster merge operation does result in a raster with only fill values or zeros (possible in QGIS 3.4), there is a problem with the underlying *numpy* installation in your QGIS. [This link](https://gis.stackexchange.com/questions/307195/getting-black-square-after-merging-two-rasters-in-qgis) provides more insight into this problem. In essence, you'll need to execute the ``OSGeo4W.bat`` file as adminstrator. In the appearing console, run `python -m pip show numpy`, which will probably return ``Version: 1.12.1+mkl``. If it does so, run
 
-````bash
+```bash
 python -m pip uninstall numpy
 >> Successfully uninstalled 
 python -m pip install numpy
 >> Succesfully installed numpy-1.15.4
-````
+```
 
 This should fix your *numpy* installation within QGIS/OSGeo4W-Project.
 
@@ -1242,7 +1256,7 @@ Here, it can be decided if a new field is to be generated or an existing field i
 
   **IMPORTANT**: This mapping must serve as a starting point and must be checked before applying!
 
-  ````python
+  ```python
   CASE
   	WHEN "OBJEKTART" = 8 THEN 5
   	WHEN "OBJEKTART" = 2 THEN 12.5
@@ -1257,7 +1271,8 @@ Here, it can be decided if a new field is to be generated or an existing field i
   	WHEN "OBJEKTART"=0 THEN 10
   	WHEN "OBJEKTART"=1 THEN 10
   END
-  ````
+  ```
+
 
 
 
@@ -1372,9 +1387,9 @@ This issue can be worked around by taking the ``_max`` value and subtract a frac
 
 
 
-````
+```
 HEIGHT_TOP = _max - ( 0.15 * _max )
-````
+```
 
 
 
@@ -1393,13 +1408,5 @@ A thorough test of the heights of the buildings, trees or forests in the area of
 ---
 
 <div style="page-break-after: always; break-after: page;"></div>
-
-
-
-
-
-
-
-
 
 
