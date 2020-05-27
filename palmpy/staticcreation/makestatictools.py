@@ -1,13 +1,11 @@
 """
 Created on Thu Jan 30 10:13:51 2020
-STATIC CREATION FILE TURNED INTO FUNCTIONS
 
 TODO: 
     
-    -   dicts to be added and implemented in the mapbbclasses
-
     -   when implementing streets, implement a function that sets pavement_type, street_type,
         etc to fillvalue where it intersects with building_2d (np.where, check palm_csd)
+        (check if not done already)
 
 
 """
@@ -847,7 +845,7 @@ def mapdicttoarray(array, mapdict, fillvalue=np.byte(-127)):
 
 def createstaticcoords(xsize, ysize, pixelsize):
     '''
-    Provide x and y size of the raster by specifying topo.shape[0] for x and topo.shape[1] for y (or bare values with
+    Create static coordinates. Provide x and y size of the raster by specifying topo.shape[0] for x and topo.shape[1] for y (or bare values with
     the danger of it not matching.
 
     Parameters

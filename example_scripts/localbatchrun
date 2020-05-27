@@ -1,21 +1,24 @@
 #!/bin/bash
 echo 'start 1'
-palmrun -X4 -a "d3#" -c default -r example_cbl -T4 -v > log1
+palmrun -X4 -a "d3# restart" -c default -r example_cbl -T4 -v > log1
 sleep 10s
 
 echo 'start 2'
-palmrun -X4 -a "d3#" -c default -r example_cbl -T4 -v > log2
+palmrun -X4 -a "d3r restart" -c default -r example_cbl -T4 -v > log2
 sleep 10s
 
 echo 'start 3'
-palmrun -X4 -a "d3#" -c default -r example_cbl -T4 -v > log3
+palmrun -X4 -a "d3r restart" -c default -r example_cbl -T4 -v > log3
 sleep 10s
 
 echo 'start 4'
-palmrun -X4 -a "d3#" -c default -r example_cbl -T4 -v > log4
+palmrun -X4 -a "d3r restart" -c default -r example_cbl -T4 -v > log4
 sleep 10s
 
 echo 'start 5'
-palmrun -X4 -a "d3#" -c default -r example_cbl -T4 -v > log5
+palmrun -X4 -a "d3r restart" -c default -r example_cbl -T4 -v > log5
 sleep 10s
 
+
+#start this script with
+# nohup bash localbachrun &

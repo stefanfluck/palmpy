@@ -65,7 +65,8 @@ def rasterandcuttlm(filein, fileout, xmin, xmax, ymin, ymax, xres, yres, burnatt
 
     example usage:
         tlmbb = rasterandcuttlm('bb.shp', 'tlm.asc', xmin=730000, xmax=742000, 
-                                ymin=190000, ymax=202000, xres=40, yres=40)
+                                ymin=190000, ymax=202000, xres=40, yres=40, burnatt='OBJEKTART',
+                                'alltouched=False')
 
 
     Parameters
