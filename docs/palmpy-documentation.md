@@ -593,6 +593,33 @@ This dictionary governs the assignment of soil type below certain PALM pavement 
 
 
 
+#### Adding New Dialects
+
+Currently, there are only two dialects included in palmpy, it is the ``tlm`` and a ``custom`` dialect. However, more dialects can be easily implemented by copying and renaming the ``tlm.py`` file and placing it into the ``dictfolder`` location in the palmpy package. To enable the usage of the new dialect, set the ``mapdialect`` namelist parameter to the name of the file, without the ``.py`` extension. To get the script to recognize your new dialect, look for the following section in the `make_static.py` script:
+
+
+
+````python
+if mapdialect == 'tlm':
+    import palmpy.staticcreation.dictfolder.tlm as mpd
+    print('\nINFO: Imported the tlm mapdict.')
+elif mapdialect == 'custom':
+    import palmpy.staticcreation.dictfolder.custom as mpd
+    print('\nINFO: Imported the custom mapdict.')
+elif mapdialect == 'mapdicts':
+    import palmpy.staticcreation.mapdicts as mpd
+    print('\nINFO: Imported the generic mapdicts mapdict.')
+# elif mapdialect == 'NEWDIALECT':
+#     import palmpy.staticcreation.dictfolder.NEWDIALECT as mpd
+#     print('\nINFO: Imported the NEWDIALECT mapdict.')
+````
+
+
+
+To add your newly created dialect to the script, replace the ``NEWDIALECT`` entries with the name of your new dialect, uncomment the three lines and you are good to go. Now, the script wil import your created dialect as ``mpd`` and as a consequence use your defined dictionaries if you specify it in the namelist.
+
+
+
 
 
 ---
@@ -606,6 +633,12 @@ This dictionary governs the assignment of soil type below certain PALM pavement 
 This section will outlines the steps needed to create a static driver using the make_static script (in the following sections referred to as "the script"), which leverages the functions of palmpy to create static driver from geodata. When it comes to geodata, due to the different ways and standards, how people record geographical features, it is extremely difficult to write a script that does not require any data preprocessing. In order to create a simulation setup procedure that is easy to employ, some generalization standards were outlined about how geodata should look like in order for the script to be able to understand it. 
 
 It must be noted here that there is also a script shipped with PALM that can be used to create a static driver file. However, at the time it was needed to create static drivers for various projects at the Center for Aviation, this script was not usable as it relied heavily on geodata that was preprocessed by the DLR. Furthermore, the input files were not optional. Therefore, it was decided to create a new script, that fulfilled the needs at the Center for Aviation for projects, that were not necessarily focussed around urban climate simulations, but it turned out to be generally applicable. The core of the script created here was set up completely on its own without reusing code from the shipped PALM script. Regarding the implementation of [leaf area density arrays](#Resolved Vegetation), the approach of the shipped script was analyzed before implementing our own approach. Therefore, while the outcome of both scripts may be comparable, the mechanics behind are two separate pair of shoes.
+
+
+
+### Applied Paradigms and Standards
+
+In the process of designing this workflow, it was found that is required to decide on a specific data format, that data needs to have in order to be able to be automatically forged into a PALM static driver file. With the vastness of different sources of geodata in the world, it is almost impossible to write a script that can adapt to an arbitrary naming of fields in a GIS attribute table. Therefore, the following requirements were set up in order to homogenize the input data for an automated script. In doing so, a sensible balance had to be struck between the generalization of data and the flexibility to systematically change parameters in the static drivers. This was all done keeping in mind the functionalities in PALM as of May 2020. It may be great to have data about the detailed position of a water fountain that is only temporarily active, but there is currently to option to include temporarily active water fountains in a PALM simulation - a grid point can either be vegetation, pavement or water. Therefore, to setup a PALM simulation in practice, geodata needs to be collected, then it needs to be searched for relevant information. And as the relevant data often does not come collected in a single dataset, the relevant data needs to be subset and exported into new files. The following sections will outline how these files need to look like. It shall be mentioned here that not all datasets need to be provided - which information is used can be steered by setting appropriate flags in the namelist. This will be discussed further below (see [Static File Generation](#Static File Generation)).
 
 
 
@@ -690,10 +723,6 @@ This section outlines which data must be gathered in order to be able to perform
 Below, it will be outlined how the corresponding vector and raster data shall look like to be able to be handled by the script. For each type of data a rough how-to procedure is given on how to perform certain operations in QGIS to reach the required state. It is assumed that a user with minor QGIS experience is able to follow the instructions perfectly fine. Note that the presented procedures are not the only way to achieve the desired outcome - other methods may include leveraging the powerful functions of the [geopandas](https://geopandas.org/) python library or any other GIS Software. It shall be ensured though that the end results fulfills the presented requirements for a usage in the script.
 
 
-
-### Applied Paradigms and Standards
-
-In the process of designing this workflow, it was found that is required to decide on a specific data format, that data needs to have in order to be able to be automatically forged into a PALM static driver file. With the vastness of different sources of geodata in the world, it is almost impossible to write a script that can adapt to an arbitrary naming of fields in a GIS attribute table. Therefore, the following requirements were set up in order to homogenize the input data for an automated script. In doing so, a sensible balance had to be struck between the generalization of data and the flexibility to systematically change parameters in the static drivers. This was all done keeping in mind the functionalities in PALM as of May 2020. It may be great to have data about the detailed position of a water fountain that is only temporarily active, but there is currently to option to include temporarily active water fountains in a PALM simulation - a grid point can either be vegetation, pavement or water. Therefore, to setup a PALM simulation in practice, geodata needs to be collected, then it needs to be searched for relevant information. And as the relevant data often does not come collected in a single dataset, the relevant data needs to be subset and exported into new files. The following sections will outline how these files need to look like. It shall be mentioned here that not all datasets need to be provided - which information is used can be steered by setting appropriate flags in the namelist. This will be discussed further below (see [Static File Generation](#Static File Generation)).
 
 
 
@@ -1083,7 +1112,7 @@ From the start to node A, the script reads the namelist, saves the provided info
 
 
 
-<img src="palmpy-documentation.assets/flowchart_makestatic-Page-1.png" alt="flowchart_makestatic-Page-1" style="zoom:50%;" />
+<img src="palmpy-documentation.assets/flowchart_makestatic-Page-1_v2.png" alt="flowchart_makestatic-Page-1_v2" style="zoom:50%;" />
 
 
 
@@ -1101,7 +1130,7 @@ From the start to node A, the script reads the namelist, saves the provided info
 
 <img src="palmpy-documentation.assets/flowchart_makestatic-Page-5.png" alt="flowchart_makestatic-Page-5" style="zoom:50%;" />
 
-<img src="palmpy-documentation.assets/flowchart_makestatic-Page-6.png" alt="flowchart_makestatic-Page-6" style="zoom:50%;" />
+<img src="palmpy-documentation.assets/flowchart_makestatic-Page-6_v2.png" alt="flowchart_makestatic-Page-6_v2" style="zoom:50%;" />
 
 
 
@@ -1127,7 +1156,7 @@ This section contains top level information about the simulation.
 | *cutorthoimg*   | boolean                 | ``True`` if for each domain an orthoimage shall be cut to the correct extents. Can be used in VAPOR visualizations. ``False`` if not needed. |
 | *extentsonly*   | boolean                 | If ``True``, only the config file is read, checks are done and the extents are plotted in a graph. This can be used to fine-tune the choice of extents and probe locations. |
 | *mapdialect*    | string                  | Keyword, which mapping dictionaries shall be used. Available options are ``tlm``, ``custom``. This will decide which python file with which dictionaries is loaded as ``mpd.*`` module. |
-| *orthores*      | int                     | Resolution of the image on which the extents are to be plotted. For larger domains this resultion can be increased (5m or higher), for small ones choose a smaller resolution (2 m). Lower resultions result in larger file sizes. |
+| *orthores*      | int                     | Resolution of the image, on which the extents are plotted. 5 seems to be a good number to provide enough resolution on the satellite image to identify important landmarks. For larger domains this number may need to be increased, as larger domains with the same resolution leads to larger file sizes. |
 | *rotationangle* | float                   | Angle by which the domain is rotated. Useful in runs with noncyclic BC as specific wind-tunnel like setups. Not really supported at the moment by PALM. |
 | *set_vmag*      | float                   | Estimated velocities that are set by you or INIFOR. Used to calculate a runtime score, that gives a hint about the cases complexity and therefore its runtime. |
 | *simtime*       | float                   | Used to construct the inifor namelist, that is also output when running the make_static.py script. |
@@ -1195,7 +1224,6 @@ For each domain, the following parameters shall be given.
 
 | Parameter         | dtype   | Description                                                  |
 | ----------------- | ------- | ------------------------------------------------------------ |
-| *ischild*         | int     | Domain Number. Parent is 0, every child domain has a value above 0. |
 | *xlen*            | int     | X extent of the domain (eastwards) in meter.                 |
 | *ylen*            | int     | Y extent of the domain (northwards) in meter.                |
 | *xmin*            | float   | X (Easting) coordinate position of the lower left domain corner. |
@@ -1204,7 +1232,7 @@ For each domain, the following parameters shall be given.
 | *xres*            | float   | Domain resolution in X direction.                            |
 | *yres*            | float   | Domain resolution in Y direction.                            |
 | *zres*            | float   | Domain resolution in Z direction.                            |
-| *doterrain*       | boolean | D                                                            |
+| *doterrain*       | boolean | Create the topography height variable for this domain.       |
 | *dotlmbb*         | boolean | Create vegetation_type variable for this domain.             |
 | *dopavedbb*       | boolean | Create pavement_type variable for this domain.               |
 | *docropfields*    | boolean | Incorporate additional crop field information (set vegetation_type = 2) based on an additional shapefile. |
@@ -1221,11 +1249,11 @@ For each domain, the following parameters shall be given.
 | *lai_breihe*      | float   | Leaf Area Index for tree line polygons. Parameter to construct a Leaf Area Density vertical profile. |
 | *lai_ebgebu*      | float   | Leaf Area Index for single tree polygons. Parameter to construct a Leaf Area Density vertical profile. |
 | *a_forest*        | float   | alpha Shape parameter for beta-distribution for forest polygons. Parameter to construct a Leaf Area Density vertical profile. |
-| *b_forest*        | float   | beta shape parameter for beta-distribution for forest polygons. Parameter to construct a Leaf Area Density vertical profile.                                                          |
-| *a_breihe*        | float   | alpha shape parameter for beta-distribution for tree line polygons. Parameter to construct a Leaf Area Density vertical profile.                                                           |
-| *b_breihe*        | float   | beta shape parameter for beta-distribution for tree line polygons. Parameter to construct a Leaf Area Density vertical profile.                                                          |
-| *a_ebgebu*        | float   | alpha shape parameter for beta-distribution for single tree polygons. Parameter to construct a Leaf Area Density vertical profile.                                                        |
-| *b_ebgebu*        | float   | beta shape parameter for beta-distribution for single tree polygons. Parameter to construct a Leaf Area Density vertical profile.                                                     |
+| *b_forest*        | float   | beta shape parameter for beta-distribution for forest polygons. Parameter to construct a Leaf Area Density vertical profile. |
+| *a_breihe*        | float   | alpha shape parameter for beta-distribution for tree line polygons. Parameter to construct a Leaf Area Density vertical profile. |
+| *b_breihe*        | float   | beta shape parameter for beta-distribution for tree line polygons. Parameter to construct a Leaf Area Density vertical profile. |
+| *a_ebgebu*        | float   | alpha shape parameter for beta-distribution for single tree polygons. Parameter to construct a Leaf Area Density vertical profile. |
+| *b_ebgebu*        | float   | beta shape parameter for beta-distribution for single tree polygons. Parameter to construct a Leaf Area Density vertical profile. |
 
 
 
@@ -1555,9 +1583,11 @@ VAPOR is a visualization tool for scientific 3D data. From VAPOR 3 and above, ne
 
 In order to have terrain in the 3D, file this information needs to be copied from the static driver to the 3D-File. This can be achieved with the following command:
 
+```bash
+ncks -A -v <var> <static-file> <3d_output_file>
 ```
-ncks -A -v <static-file> <3d_output_file>
-```
+
+The variable would be ``zt`` in that case. In order to also include ``lad``, copy that variable as well. Make sure to assign the ``axis:Z`` attribute to the ``lad`` variable. The LAD can be displayed as grid volumes in VAPOR, which  is not beautiful, but at leasts gives a hint about tree positions. In the same way, ``buildings_3d`` can be included in the visualization.
 
 Bear in mind, that this is currently only easily doable for netcdf-3 output on the PALM side (netcdf_output_format == 3). 
 

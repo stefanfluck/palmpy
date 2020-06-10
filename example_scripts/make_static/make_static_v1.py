@@ -48,7 +48,9 @@ elif mapdialect == 'custom':
 elif mapdialect == 'mapdicts':
     import palmpy.staticcreation.mapdicts as mpd
     print('\nINFO: Imported the generic mapdicts mapdict.')
-
+# elif mapdialect == 'NEWDIALECT':
+#     import palmpy.staticcreation.dictfolder.NEWDIALECT as mpd
+#     print('\nINFO: Imported the NEWDIALECT mapdict.')
 
 #parse settings and paths
 filenames = cfp.get('settings','casename', fallback='default')+'_static'
