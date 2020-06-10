@@ -1,0 +1,303 @@
+&initialization_parameters
+
+
+
+      nx                        =     383,
+      ny                        =     383,
+      nz                        =      32,
+
+      dx                        =    4.0,
+      dy                        =    4.0,
+      dz                        =    4.0, 
+      
+  
+      
+      
+
+   !-- pressure solver
+      fft_method                = 'temperton-algorithm',     ! fast, but restrictions apply
+      psolver                   = 'multigrid',
+      !ngsrb                     =     2,                     ! 2 is default, when mg apch fails change to 4
+      
+   !-- advection schemes
+      momentum_advec            = 'ws-scheme',               ! default advection scheme
+      scalar_advec              = 'ws-scheme',
+
+
+
+
+       constant_flux_layer      =    .T.,
+       humidity                 =    .T.,
+       !omega                    =    0.0,                   ! no Coriolis force. if commented out -> default value
+
+
+
+ 
+    initializing_actions                =        'read_restart_data',
+     
+    origin_date_time                    =     '2019-06-07 04:00:00 +02',
+    topography                          =              'read_from_file',
+
+   !-- wind speed setup
+      !ug_surface                        =    1.00,
+      !vg_surface                        =    0.00,
+
+   !-- temperature pressure humidity setup
+      !pt_surface                        = 283.15, 
+      !pt_vertical_gradient              = 0.1,
+      !pt_vertical_gradient_level        = 500.00,
+      !surface_pressure                  = 970.0,
+      !q_surface                         = 0.0005,
+
+   !-- boundary conditions
+      bc_uv_t                           = 'nested',               ! free-slip boundary condition
+      bc_lr                             = 'nested',
+      bc_ns                             = 'nested',
+      !roughness_length                  = 0.5,                    ! applies to all surfaces locally
+
+
+
+   !-- spinup
+    spinup_time               = 86400.0,   ! 24h wall/soil spinup
+    spinup_pt_mean            = 292.2,     
+    spinup_pt_amplitude       = 11.67,       
+    dt_spinup                 = 120.0,
+    data_output_during_spinup = .F.,
+
+    /
+
+
+&runtime_parameters
+      !npex = 4,
+      !npey = 6,
+
+      end_time = 72000.0,
+
+      create_disturbances               =     .T.,
+      disturbance_energy_limit          =     0.1,
+
+
+    !-- output settings
+      debug_output                      =     .T.,
+      netcdf_data_format                =      3,
+      
+      skip_time_data_output    =     0.0,      !global value
+      skip_time_data_output_av =     0.0,      !global value for av
+      skip_time_do2d_xy        =     0.0,
+      skip_time_do2d_xz        =     0.0,
+      skip_time_do2d_yz        =     0.0,
+      skip_time_do3d           =     0.0,
+      
+      dt_data_output           =   600.0,      !global value
+      dt_data_output_av        =   600.0,      !global value for av
+      dt_do2d_xy               =   600.0,
+      dt_do2d_xz               =   600.0,
+      dt_do2d_yz               =   600.0,
+      dt_do3d                  =   600.0,
+
+      averaging_interval    =      600.0,
+      dt_averaging_input    =        0.0,
+      
+      do2d_at_begin         =        .T.,
+      do3d_at_begin         =        .T.,
+
+   !-- time series / run control
+      dt_run_control        =   5.0,
+      dt_dots               =   0.0,
+
+   !-- profiles
+      skip_time_dopr        =    0.0,
+      dt_dopr               =  600.0,
+      averaging_interval_pr =  600.0,
+      dt_averaging_input_pr =    0.0,
+
+      data_output_pr = '#u', 'u*2', 'wu', 'w*u*', 'w"u"',
+                       '#v', 'v*2', 'wv', 'w*v*', 'w"v"',
+                        'w', 'w*2',
+                        'e', 'e*',
+                        '#theta', 
+                        'wtheta', 'w*theta*', 'w"theta"',
+                        'rho',
+                        'ug', 'vg', 
+                        'q', 'hyp',
+                        'm_soil', 't_soil',
+                        
+
+   !-- output variables
+      data_output = 'u',            'u_av',
+                    'v',            'v_av',
+                    'w',            'w_av',
+                    'e',            'e_av',
+                    'theta',        'theta_av',
+                    'ti',           'ti_av',
+                                    'q_av',
+                                    'p_av',
+                    't_soil',       't_soil_av',
+                    'pcm_lad',
+
+                    
+                    'u_xy',         'u_xy_av',
+                    'v_xy',         'v_xy_av',
+                    'w_xy',         'w_xy_av',
+                    'e_xy',         'e_xy_av',
+                    'theta_xy',     'theta_xy_av',
+                    'ti_xy',        'ti_xy_av',
+                    'shf*_xy',      'shf*_xy_av',
+                    'tsurf*_xy',    'tsurf*_xy_av',
+                    'theta_2m*_xy', 'theta_2m*_xy_av',
+                    'wspeed_10m*_xy', 'wspeed_10m*_xy_av',
+                    'us*_xy', 
+                    'z0*_xy',  
+                    'ghf*_xy',      'ghf*_xy_av',
+                    'm_liq*_xy',    'm_liq*_xy_av',
+                                    'qsws_liq*_xy_av',
+                    'r_a*_xy',      'r_a*_xy_av',
+                    'r_s*_xy',      'r_s*_xy_av',
+                    'rad_net*_xy',  'rad_net*_xy_av',
+                    'rad_lw_in*_xy','rad_lw_in*_xy_av',
+                    'rad_lw_out*_xy','rad_lw_out*_xy_av',
+                    'rad_sw_in*_xy','rad_sw_in*_xy_av',
+                    'rad_sw_out*_xy','rad_sw_out*_xy_av',
+                    
+                    'u_xz',         'u_xz_av',
+                    'v_xz',         'v_xz_av',
+                    'w_xz',         'w_xz_av',
+                    'e_xz',         'e_xz_av',
+                    'theta_xz',     'theta_xz_av',
+                    'ti_xz',        'ti_xz_av',
+                    
+                    'u_yz',         'u_yz_av',
+                    'v_yz',         'v_yz_av',
+                    'w_yz',         'w_yz_av',
+                    'e_yz',         'e_yz_av',
+                    'theta_yz',     'theta_yz_av',
+                    'ti_yz',        'ti_yz_av',
+
+
+
+   !-- sections definitions
+      section_xy   =  0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,25,
+      section_xz   =  80, 128, 220,
+      section_yz   =  60, 140, 200,
+
+
+    !-- position outputs at mast
+    data_output_masks(1,:)     =  'u','v','w','e','theta','ti',
+    mask_x(1,:)                =   1016.0,
+    mask_y(1,:)                =   416.0, 
+    mask_z_loop(1,:)           =    0., 100., 4., 
+    
+    !-- position outputs at 02
+    data_output_masks(2,:)     =  'u','v','w','e','theta','ti',
+    mask_x(2,:)                =   425.0,
+    mask_y(2,:)                =   244.0, 
+    mask_z_loop(2,:)           =    0., 100., 4., 
+    
+    !-- position outputs at 03
+    data_output_masks(3,:)     =  'u','v','w','e','theta','ti',
+    mask_x(3,:)                =   709.0,
+    mask_y(3,:)                =   515.0, 
+    mask_z_loop(3,:)           =    0., 100., 4., 
+    
+    !-- position outputs at 04
+    data_output_masks(4,:)     =  'u','v','w','e','theta','ti',
+    mask_x(4,:)                =   858.0,
+    mask_y(4,:)                =   650.0, 
+    mask_z_loop(4,:)           =    0., 100., 4., 
+    
+    !-- position outputs at 05
+    data_output_masks(5,:)     =  'u','v','w','e','theta','ti',
+    mask_x(5,:)                =   982.0,
+    mask_y(5,:)                =   768.0, 
+    mask_z_loop(5,:)           =    0., 100., 4., 
+    
+    !-- position outputs at 06
+    data_output_masks(6,:)     =  'u','v','w','e','theta','ti',
+    mask_x(6,:)                =   1117.0,
+    mask_y(6,:)                =   893.0, 
+    mask_z_loop(6,:)           =    0., 100., 4., 
+    
+    !-- position outputs at 07
+    data_output_masks(7,:)     =  'u','v','w','e','theta','ti',
+    mask_x(7,:)                =   1242.0,
+    mask_y(7,:)                =   1010.0, 
+    mask_z_loop(7,:)           =    0., 100., 4., 
+    
+    !-- position outputs at 08
+    data_output_masks(8,:)     =  'u','v','w','e','theta','ti',
+    mask_x(8,:)                =   1367.0,
+    mask_y(8,:)                =   1121.0, 
+    mask_z_loop(8,:)           =    0., 100., 4., 
+
+    !-- masked output
+    dt_domask                =      0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 
+    skip_time_domask         =      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+
+
+
+  /
+   
+
+
+
+&land_surface_parameters  
+ 
+    !skip_time_do_lsm            = 3600.0, 
+    surface_type                = 'netcdf'
+    !soil_temperature            = 280.0, 280.0, 280.0, 280.0, 280.0, 280.0, 280.0, 280.0,
+    !deep_soil_temperature       = 263.0,
+    constant_roughness          = .T.,
+    !soil_moisture               = 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+  /
+
+
+&radiation_parameters
+  !skip_time_do_radiation       = 3600.0,
+  radiation_scheme             = 'clear-sky',
+  dt_radiation                 = 60.0,
+  radiation_interactions_on    = .T.,
+
+  /
+    
+
+
+&urban_surface_parameters
+
+    usm_material_model     = .T.,
+    usm_wall_mod = .T.,
+
+ / 
+ 
+ 
+
+&plant_canopy_parameters
+ 
+    canopy_mode       = 'read_from_file',
+    canopy_drag_coeff = 0.3,
+      
+ /
+ 
+   
+
+&virtual_flight_parameters
+
+  flight_begin     =   129600.0,     !43200.0 added to spinup time 86400
+  flight_end       =   145800.0,     !59400.0,
+  leg_mode         =  'return', 
+  flight_level     =   7.0,!     433.0,  
+  rate_of_climb    =   2.51179, 
+  max_elev_change  =   78.0383, 
+  speed_agl        =   35.9202, 
+  x_start          =     1242.0,
+  x_end            =      425.0, 
+  y_start          =     1010.0,
+  y_end            =      244.0,
+
+  /
+  
+   
+   
+   
+   
+   
+   
