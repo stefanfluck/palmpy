@@ -2,8 +2,7 @@
 
 
 
-
-![drawing](palmpy-documentation.assets/drawing-1590586285799.svg)
+<img src="palmpy-documentation.assets/drawing-1590586285799.svg" alt="drawing" style="zoom:150%;" />
 
 
 

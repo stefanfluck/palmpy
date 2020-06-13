@@ -1,0 +1,57 @@
+#!/bin/bash
+
+
+mv JOBS/yv-bre-2/INPUT/a/yv-bre-2_p3dr* JOBS/yv-bre-2/INPUT/.
+
+sleep 10s
+
+palmrun -X96 -a "d3r restart" -c twins18 -r yv-bre-2 -v > bre2run1
+
+sleep 10s
+
+mv JOBS/yv-bre-2/INPUT/yv-bre-2_p3dr* JOBS/yv-bre-2/INPUT/a/.
+
+#-----
+
+mv JOBS/yv-bre-2/INPUT/b/yv-bre-2_p3dr* JOBS/yv-bre-2/INPUT/.
+
+sleep 10s
+
+palmrun -X96 -a "d3r restart" -c twins18 -r yv-bre-2 -v > bre2run2
+
+sleep 10s
+
+mv JOBS/yv-bre-2/INPUT/yv-bre-2_p3dr* JOBS/yv-bre-2/INPUT/b/.
+
+#-----
+
+
+
+mv JOBS/yv-bre-2/INPUT/c/yv-bre-2_p3dr* JOBS/yv-bre-2/INPUT/.
+
+sleep 10s
+
+palmrun -X96 -a "d3r restart" -c twins18 -r yv-bre-2 -v > bre1run3
+
+sleep 10s
+
+mv JOBS/yv-bre-2/INPUT/yv-bre-2_p3dr* JOBS/yv-bre-2/INPUT/c/.
+
+#-----
+
+
+mv JOBS/yv-bre-2/INPUT/d/yv-bre-2_p3dr* JOBS/yv-bre-2/INPUT/.
+
+sleep 10s
+
+palmrun -X96 -a "d3r restart" -c twins18 -r yv-bre-2 -v > bre2run4
+
+sleep 10s
+
+mv JOBS/yv-bre-2/INPUT/yv-bre-2_p3dr* JOBS/yv-bre-2/INPUT/d/.
+
+#-----
+
+
+
+
