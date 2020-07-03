@@ -5,65 +5,48 @@ MAPPING DICTIONARIES BETWEEN DIFFERENT CLASSIFICATIONS TO PALM CLASSES
 - SOIL CLASSES
 - PAVEMENT CLASSES
 
-by Stefan Fluck, 24.06.2020
-Usable with Stadt Zürichs Geodaten (Amtl. Vermessungsdaten)
+by Stefan Fluck, 15.04.2020
 
 '''
 
 import palmpy.staticcreation.makestatictools as mst
 
-#%% BB 2 PALM
-#  BB vegetation classes to PALM vegetation types
-bb2palmveg = {   21:3,
-                 22:2,
-                 23:2,
-                 24:3,
-                 25:3,
-                 26:3,
-                 27:3,
-                 28:14,
-                 29:3,
-                 31:3,
-                 35:17,
-                 38:16,
-               1001:3,
-               1002:2,
-               1003:1,
-               1004:8,
-               1005:3,
-               1006:2,
-               1007:2,
-                   }
-
-
-# BB water classes to PALM water types
-bb2palmwat =    {   33:2,    #fliessgewaesser > river
-                    32:1,   #stehendes gewaesser > lake
+#%% swissTLM3D BB 2 PALM
+# swissTLM3D BB vegetation classes to PALM vegetation types
+bb2palmveg = {   
+                    1:9,    # fels > desert
+                    6:16,   # gebueschwald > deciduous shrubs
+                    7:9,    # lockergestein > desert
+                    9:13,   # Gletscher > ice caps and glaciers
+                    11:14,  # Feuchtgebiet > bogs and marshes
+                    12:17,  # Wald > mixed Forest/woodland
+                    13:18,  # Wald offen > interrupted forest
+                    
+                    #own categories - put those in own directory with cropfields and call it ownveg iso. cropfields
+                    1000 : 1,
+                    1001 : 3,
+                    1002 : 3,
+                    1003 : 3,
+                    1004 : 3,
+                    1005 : 3,
                 }
 
 
-# pavement file 8,9,10,11,12,13,14,15,17,18,19,20
+# swissTLM3D BB water classes to PALM water types
+bb2palmwat =    {   5:2,    #fliessgewaesser > river
+                    10:1,   #stehendes gewaesser > lake
+                }
+
+
+# swissTLM3D assembled pavement file (from streets, vkareal, eisenbahn)
 pav2palmpav = {  -9999.:mst.fillvalues['pavement_type'],
-                    8:  1, 
-                    9:  2,
-                    10: 1,
-                    11: 4,
-                    12: 2,
-                    13: 2,
-                    14: 9,
-                    15: 3,
-                    17: 1,
-                    18: 2,
-                    19: 13,
-                    20: 1,
-                    2001:1,
-                    2002:1,
-                    2003:1,
-                    
+                    100: 1, #eisenbahntrassees meist 99 -> gravel
+                    101: 1,
+                    103: 2,#perrons meist 4 -> concrete
                   }
 
 
-#  street !only! Objektart to PALM street type
+# swissTLM3D street !only! Objektart to PALM street type
 str2palmstyp =   {     
                           #-9999 : mst.fillvalues['street_type'],
                            0    : 18,
@@ -93,8 +76,8 @@ str2palmstyp =   {
 
 #classification into major and minor roads: which tlm classes are major (emission relevant)
 #(if minor and major roads overlap, the major road type is on top).
-#majroads = [0,1,2,4,5,6,8,9,20,21]
-#minroads = [3,10,11,12,13,15,16,17,18,19,22]
+majroads = [0,1,2,4,5,6,8,9,20,21]
+minroads = [3,10,11,12,13,15,16,17,18,19,22]
 
 #%% PALM 2 PALM
 # assign PALM soil type to PALM vegetation types
@@ -102,7 +85,6 @@ palmveg2palmsoil = {    mst.fillvalues['vegetation_type']:mst.fillvalues['soil_t
                         1:1,
                         2:6,
                         3:1,
-                        8:2,
                         9:1,
                         13:1,
                         14:1,
@@ -116,20 +98,20 @@ palmveg2palmsoil = {    mst.fillvalues['vegetation_type']:mst.fillvalues['soil_t
 palmpav2palmsoil = {    mst.fillvalues['pavement_type']:mst.fillvalues['soil_type'],
                         0:3,
                         1:3,
-                        2:3,
-                        3:3,
-                        4:3,
-                        5:3,
-                        6:3,
-                        7:3,
-                        8:3,
-                        9:3,
-                        10:3,
-                        11:3,
-                        12:3,
-                        13:3,
-                        14:3,
-                        15:3,
+                        # 2:3,
+                        # 3:3,
+                        # 4:3,
+                        # 5:3,
+                        # 6:3,
+                        # 7:3,
+                        # 8:3,
+                        # 9:3,
+                        # 10:3,
+                        # 11:3,
+                        # 12:3,
+                        # 13:3,
+                        # 14:3,
+                        # 15:3,
                     }
 
 
