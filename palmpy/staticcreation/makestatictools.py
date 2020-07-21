@@ -31,6 +31,7 @@ fillvalues = {
    "pavement_type": np.byte(-127),
    "water_type": np.byte(-127),
    "street_type": np.byte(-127), 
+   "albedo_type": np.byte(-127), 
    "street_crossings": np.byte(-127),   
    "soil_type": np.byte(-127),
    "surface_fraction": float(-9999.0),
@@ -719,7 +720,16 @@ def setalbedovalue(albedopars, vegpars, filterarr, filtervalue, newvalue, npar):
 
     '''
     
-    vegpars = modifyparsarray(vegpars,10,0,filterarr,filtervalue)
+    if vegpars.shape[0] == 12:
+        index = 10
+    if vegpars.shape[0] == 7:
+        index = 5
+    if vegpars.shape[0] == 4:
+        index = 2
+    
+    
+    vegpars = modifyparsarray(vegpars,index,0,filterarr,filtervalue)
+#    vegpars = modifyparsarray(vegpars,10,0,filterarr,filtervalue)
   
     # zeroarr = albedopars[0,:,:]
     # zeroarr[(filterarr == filtervalue) & (vegpars[10,:,:] == 0)] = newvalue
@@ -752,12 +762,12 @@ def setalbedovalue(albedopars, vegpars, filterarr, filtervalue, newvalue, npar):
     if npar == -1:
         for i in range(albedopars.shape[0]):
             zeroarr = albedopars[i,:,:]
-            zeroarr[(filterarr == filtervalue) & (vegpars[10,:,:] == 0)] = newvalue
+            zeroarr[(filterarr == filtervalue) & (vegpars[index,:,:] == 0)] = newvalue
             albedopars[i,:,:]  = zeroarr
     
     else:
         zeroarr = albedopars[npar,:,:]
-        zeroarr[(filterarr == filtervalue) & (vegpars[10,:,:] == 0)] = newvalue
+        zeroarr[(filterarr == filtervalue) & (vegpars[index,:,:] == 0)] = newvalue
         albedopars[npar,:,:]  = zeroarr
     
     return vegpars,albedopars
@@ -869,6 +879,11 @@ def createstaticcoords(xsize, ysize, pixelsize):
         nvegetation_pars coordinates in correct spacing.
     nalbedo_pars : np.array
         nalbedo_pars coordinates in correct spacing.
+    npavement_pars
+    
+    nsoil_pars
+    nwater_pars
+    nbuilding_pars
     '''
     import numpy as np
     
@@ -987,6 +1002,10 @@ def setneededattributes(dataarray, staticvariable):
     if staticvariable == 'vegetation_pars':
         dataarray.attrs['_FillValue'] = fillvalues[staticvariable]
         dataarray.attrs['long_name'] = 'vegetation_parameters'    
+     
+    if staticvariable == 'albedo_type':
+        dataarray.attrs['_FillValue'] = fillvalues[staticvariable]
+        dataarray.attrs['long_name'] = 'albedo type classification'    
      
     if staticvariable == 'albedo_pars':
         dataarray.attrs['_FillValue'] = fillvalues[staticvariable]
@@ -1171,6 +1190,8 @@ def setupencodingdict(flags):
         encodingdict['nsurface_fraction'] = {'dtype': 'float32'}
     if flags['dovegpars'] == True:
         encodingdict['vegetation_pars'] = {'dtype':'float32'}
+    if flags['dopavpars'] == True:
+        encodingdict['pavement_pars'] = {'dtype':'float32'}
     if flags['doalbedopars'] == True:
         encodingdict['albedo_pars'] = {'dtype':'float32'}
     if flags['dolad'] == True:

@@ -593,6 +593,14 @@ if extentsonly == False:
         #delete vegpars where there is pavement
         if ((flags[i]['dovegpars'] == True) and (flags[i]['dotlmbb'] == True) and (flags[i]['dopavedbb']) == True):
             vegpars[:,:,:] = np.where( paved[:,:] != -9999, mst.fillvalues['vegetation_pars'], vegpars[:,:,:]) 
+
+        #where building_type is set, do not set a vegetation type or pavement type
+        if ((flags[i]['dobuildings3d'] == True or flags[i]['dobuildings2d']==True ) and flags[i]['dotlmbb'] == True):
+            vegarr[:,:] = np.where( gebtyp[:,:] != np.byte(-127), mst.fillvalues['vegetation_type'], vegarr[:,:] )
+            
+        if ((flags[i]['dobuildings3d'] == True or flags[i]['dobuildings2d']==True ) and flags[i]['dopavedbb'] == True):
+            pavarr[:,:] = np.where( gebtyp[:,:] != np.byte(-127), mst.fillvalues['pavement_type'], pavarr[:,:] )
+
     
         ######### create static netcdf file
         static = xr.Dataset()
