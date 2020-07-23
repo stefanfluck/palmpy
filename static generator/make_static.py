@@ -499,10 +499,6 @@ if extentsonly == False:
                 # pavarr = np.where ( pavarr[:,:] != -9999, 1, mst.fillvalues['pavement_type']) #pavement_type set where shp is non-fillvalue. TODO: mit einem map dict auch pavements richtig klassifizieren.
                 pavarr = mst.mapdicttoarray(paved, mpd.pav2palmpav, fillvalue = np.byte(bulkpavclass[i])) #classify pavement array acc. to dict.
     
-            #create surface fraction array
-            # soilarr = mst.makesoilarray(vegarr,pavarr) #old version.
-            soilarr = mst.makesoilarray2(vegarr,pavarr, mpd.palmveg2palmsoil, mpd.palmpav2palmsoil) #finally do soilarray depending on vegarr and pavarr, mapping see makestaticotools in palmpy
-            sfrarr = mst.makesurffractarray(vegarr,pavarr,watarr) #create surfacefraction in end, as now only 0 and 1 fractions are allowed (ca r4400)
             
         if flags[i]['dobuildings2d'] == True:  
             gebhoehe = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudehoehe'+str(ischild[i])+'.asc', 
@@ -601,7 +597,13 @@ if extentsonly == False:
         if ((flags[i]['dobuildings3d'] == True or flags[i]['dobuildings2d']==True ) and flags[i]['dopavedbb'] == True):
             pavarr[:,:] = np.where( gebtyp[:,:] != np.byte(-127), mst.fillvalues['pavement_type'], pavarr[:,:] )
 
-    
+        
+        #create surface fraction array and soilarray in the end, but still only if dotlm is active.
+        if flags[i]['dotlmbb'] == True:
+            soilarr = mst.makesoilarray2(vegarr,pavarr, mpd.palmveg2palmsoil, mpd.palmpav2palmsoil) #finally do soilarray depending on vegarr and pavarr, mapping see makestaticotools in palmpy
+            sfrarr = mst.makesurffractarray(vegarr,pavarr,watarr) #create surfacefraction in end, as now only 0 and 1 fractions are allowed (ca r4400)
+
+
         ######### create static netcdf file
         static = xr.Dataset()
         x,y = mst.createstaticcoords(nx[i],ny[i],xres[i])[0:2] #create x and y cordinates. 
