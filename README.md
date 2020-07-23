@@ -3,6 +3,9 @@
 palmpy consists of a python package and a python and bash scripts that support a user in the data preprocessing steps for conducting simulations with the [PALM Model System](https://palm.muk.uni-hannover.de/trac). The supplied static generator script makes it easy to generate static driver files containing the terrain variable, vegetation/water/pavement/soil_types, resolved vegetation and more. It is built to handle standard geodata formats (shape file vector data and geotiff raster data). 
 
 
+![Geodata to Static Driver with palmpy](https://github.com/stefanfluck/palmpy/blob/master/docs/palmpy-documentation.assets/geodatatostaticwithpalmpy.jpg?raw=true)
+
+
 
 
 ## What is the PALM Model System?
