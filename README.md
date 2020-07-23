@@ -4,11 +4,6 @@ palmpy consists of a python package and a python and bash scripts that support a
 
 
 
-![geodatatostaticwithpalmpy](C:\Users\stefa\Documents\Python Scripts\palmpy-repo\README.assets\geodatatostaticwithpalmpy.jpg)
-
-
-
-
 
 ## What is the PALM Model System?
 
