@@ -42,6 +42,9 @@ import palmpy.staticcreation.makestatictools as mst
 if mapdialect == 'tlm':
     import palmpy.staticcreation.dictfolder.tlm as mpd
     print('\nINFO: Imported the tlm mapdict.')
+elif mapdialect == 'tutorial':
+    import palmpy.staticcreation.dictfolder.tutorial as mpd
+    print('\nINFO: Imported the tutorial mapdict.')
 elif mapdialect == 'custom':
     import palmpy.staticcreation.dictfolder.custom as mpd
     print('\nINFO: Imported the custom mapdict.')
@@ -114,7 +117,7 @@ dotlmbb = totaldomains*[None];          dopavedbb = totaldomains*[None]
 docropfields = totaldomains*[None];     dolad = totaldomains*[None]
 dobuildings_2d = totaldomains*[None];   dobuildings_3d = totaldomains*[None]
 dovegpars = totaldomains*[None];        doalbedopars = totaldomains*[None]
-dobldgpars = totaldomains*[None]; 
+dobldgpars = totaldomains*[None];       dopavpars = totaldomains*[None]
 dostreettypes = totaldomains*[None];    lai_forest = totaldomains*[None]
 lai_breihe = totaldomains*[None];       lai_ebgebu = totaldomains*[None]
 a_forest = totaldomains*[None];         b_forest = totaldomains*[None]
@@ -161,6 +164,7 @@ for i in range(0,len(cfp.sections())):
         dobuildings_2d[index] = cfp.getboolean(section,'dobuildings_2d', fallback=False)
         dobuildings_3d[index] = cfp.getboolean(section,'dobuildings_3d', fallback=False)
         dovegpars[index] = cfp.getboolean(section,'dovegpars', fallback=False)
+        dopavpars[index] = cfp.getboolean(section,'dopavpars', fallback=False)
         doalbedopars[index] = cfp.getboolean(section,'doalbedopars', fallback=False)
         dobldgpars[index] = cfp.getboolean(section,'dobldgpars', fallback=False)
         dostreettypes[index] = cfp.getboolean(section,'dostreettypes', fallback=False)
@@ -191,6 +195,7 @@ for i in range(0,len(cfp.sections())):
                         'dobuildings2d':   dobuildings_2d[index],
                         'dobuildings3d':   dobuildings_3d[index],
                         'dovegpars':       dovegpars[index],
+                        'dopavpars':       dopavpars[index],
                         'doalbedopars':    doalbedopars[index],
                         'dobldgpars':      dobldgpars[index],
                         'dostreettypes':   dostreettypes[index]}
