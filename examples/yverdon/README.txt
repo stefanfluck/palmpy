@@ -1,5 +1,5 @@
 example case Yverdon
-
+(as an example for a more sophisticated simulation setup)
 
 Part of Master Thesis of Stefan Fluck (fluf@zhaw.ch)
 PALM r4489
