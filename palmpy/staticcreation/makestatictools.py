@@ -1181,7 +1181,7 @@ def setupencodingdict(flags):
                     'y':  {'dtype': 'float64'}}
     if flags['doterrain'] == True:
         encodingdict['zt'] = {'dtype': 'float32'}
-    if flags['dotlmbb'] == True:
+    if flags['dolandcover'] == True:
         encodingdict['vegetation_type'] = {'dtype': 'int8'}
         encodingdict['water_type'] = {'dtype': 'int8'}
         encodingdict['soil_type'] = {'dtype': 'int8'}
