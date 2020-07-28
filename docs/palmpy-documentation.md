@@ -823,7 +823,7 @@ Entries in brackets are optional or required for preprocessing steps in QGIS.
 
 #### Land Cover (Bodenbedeckung)
 
-- *relevant namelist flag:* ``dotlmbb``
+- *relevant namelist flag:* ``dolandcover``
 
 <img src="palmpy-documentation.assets\image-20200520110159132.png" alt="image-20200520110159132" style="zoom: 67%;" />
 
@@ -1232,7 +1232,7 @@ For each domain, the following parameters shall be given.
 | *yres*            | float   | Domain resolution in Y direction.                            |
 | *zres*            | float   | Domain resolution in Z direction.                            |
 | *doterrain*       | boolean | Create the topography height variable for this domain.       |
-| *dotlmbb*         | boolean | Create vegetation_type variable for this domain.             |
+| *dolandcover*     | boolean | Create vegetation_type variable for this domain.             |
 | *dopavedbb*       | boolean | Create pavement_type variable for this domain.               |
 | *docropfields*    | boolean | Incorporate additional crop field information (set vegetation_type = 2) based on an additional shapefile. |
 | *dolad*           | boolean | Create 3D resolved vegetation for this domain.               |

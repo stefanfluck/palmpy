@@ -113,7 +113,7 @@ xmax = totaldomains*[None];             ymax = totaldomains*[None]
 nx = totaldomains*[None];               ny = totaldomains*[None]
 ylen = totaldomains*[None];             nz = totaldomains*[None]
 doterrain = totaldomains*[None];        bulkvegclass = totaldomains*[None]
-dotlmbb = totaldomains*[None];          dopavedbb = totaldomains*[None]
+dolandcover = totaldomains*[None];      dopavedbb = totaldomains*[None]
 docropfields = totaldomains*[None];     dolad = totaldomains*[None]
 dobuildings_2d = totaldomains*[None];   dobuildings_3d = totaldomains*[None]
 dovegpars = totaldomains*[None];        doalbedopars = totaldomains*[None]
@@ -157,7 +157,7 @@ for i in range(0,len(cfp.sections())):
             llx[index] = xmin[index]-xmin[0]  #compute domain origin distance to parent origin, only for domains that are not parent
             lly[index] = ymin[index]-ymin[0]
         doterrain[index] = cfp.getboolean(section,'doterrain', fallback=False)  #read flags from config file
-        dotlmbb[index] = cfp.getboolean(section,'dotlmbb', fallback=False)
+        dolandcover[index] = cfp.getboolean(section,'dolandcover', fallback=False)
         dopavedbb[index] = cfp.getboolean(section,'dopavedbb', fallback=False)
         docropfields[index] = cfp.getboolean(section,'docropfields', fallback=False)
         dolad[index] = cfp.getboolean(section,'dolad', fallback=False)
@@ -188,10 +188,10 @@ for i in range(0,len(cfp.sections())):
             mst.checknestcoordsvalid(xres[index-1],xres[index],llx[index],lly[index])  #for childs check nest coordinates validity
         
         flags[index] = {'doterrain':       doterrain[index], #create flags dictionary 
-                        'dotlmbb':         dotlmbb[index],
-                        'dopavedbb':       dopavedbb[index], #requires dotlmbb = True
-                        'docropfields':    docropfields[index], #requires dotlmbb = true
-                        'dolad':           dolad[index], #for now: resolved tree file, treerows file and singletree file needed, requires dotlmbb=true
+                        'dolandcover':     dolandcover[index],
+                        'dopavedbb':       dopavedbb[index], #requires dolandcover = True
+                        'docropfields':    docropfields[index], #requires dolandcover = true
+                        'dolad':           dolad[index], #for now: resolved tree file, treerows file and singletree file needed, requires dolandcover=true
                         'dobuildings2d':   dobuildings_2d[index],
                         'dobuildings3d':   dobuildings_3d[index],
                         'dovegpars':       dovegpars[index],
@@ -349,7 +349,7 @@ if extentsonly == False:
             infodict['origin_z'] = origin_z    #modify the origin_z attribute according to the shift
         
         ##### treat tlm-bb bulk parametrization
-        if flags[i]['dotlmbb'] == True:
+        if flags[i]['dolandcover'] == True:
             bbdat = gdt.rasterandcuttlm(bb, subdir_rasteredshp+'bb'+str(ischild[i])+'.asc',xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i], burnatt='OBJEKTART')
             # vegarr, pavarr, watarr = mst.mapbbclasses(bbdat)  #map tlm bodenbedeckungs-kategorien to the palm definitions.
             vegarr, pavarr, watarr = mst.mapbbclasses2(bbdat, mpd.bb2palmveg, mpd.bb2palmwat)  #map tlm bodenbedeckungs-kategorien to the palm definitions.
@@ -589,14 +589,14 @@ if extentsonly == False:
             for m in range(len(zlad)):
                 ladarr[m,:,:] = np.where( (gebid[:,:] != mst.fillvalues['building_id']), mst.fillvalues['tree_data'], ladarr[m,:,:])
         #remove vegpars where water type is defined
-        if ((flags[i]['dovegpars'] == True) and (flags[i]['dotlmbb'] == True)):
+        if ((flags[i]['dovegpars'] == True) and (flags[i]['dolandcover'] == True)):
             vegpars[:,:,:] = np.where( (watarr[:,:] != mst.fillvalues['water_type']), mst.fillvalues['vegetation_pars'], vegpars[:,:,:] )
         #delete vegpars where there is pavement
-        if ((flags[i]['dovegpars'] == True) and (flags[i]['dotlmbb'] == True) and (flags[i]['dopavedbb']) == True):
+        if ((flags[i]['dovegpars'] == True) and (flags[i]['dolandcover'] == True) and (flags[i]['dopavedbb']) == True):
             vegpars[:,:,:] = np.where( paved[:,:] != -9999, mst.fillvalues['vegetation_pars'], vegpars[:,:,:]) 
 
         #where building_type is set, do not set a vegetation type or pavement type
-        if ((flags[i]['dobuildings3d'] == True or flags[i]['dobuildings2d']==True ) and flags[i]['dotlmbb'] == True):
+        if ((flags[i]['dobuildings3d'] == True or flags[i]['dobuildings2d']==True ) and flags[i]['dolandcover'] == True):
             vegarr[:,:] = np.where( gebtyp[:,:] != np.byte(-127), mst.fillvalues['vegetation_type'], vegarr[:,:] )
             
         if ((flags[i]['dobuildings3d'] == True or flags[i]['dobuildings2d']==True ) and flags[i]['dopavedbb'] == True):
@@ -604,7 +604,7 @@ if extentsonly == False:
 
         
         #create surface fraction array and soilarray in the end, but still only if dotlm is active.
-        if flags[i]['dotlmbb'] == True:
+        if flags[i]['dolandcover'] == True:
             soilarr = mst.makesoilarray2(vegarr,pavarr, mpd.palmveg2palmsoil, mpd.palmpav2palmsoil) #finally do soilarray depending on vegarr and pavarr, mapping see makestaticotools in palmpy
             sfrarr = mst.makesurffractarray(vegarr,pavarr,watarr) #create surfacefraction in end, as now only 0 and 1 fractions are allowed (ca r4400)
 
@@ -618,7 +618,7 @@ if extentsonly == False:
             zt = mst.createdataarrays(ztdat,['y','x'],[y,x]) #create xr.DataArray object
             mst.setneededattributes(zt, 'zt') #set attributes to dataarray object
             static['zt'] = zt    #add dataarray object to dataset object
-        if flags[i]['dotlmbb'] == True:
+        if flags[i]['dolandcover'] == True:
             nsurface_fraction = mst.createstaticcoords(ny[i],nx[i],xres[i])[2] #create coordinates of the item
             vegetation_type = mst.createdataarrays(vegarr,['y','x'],[y,x])    #create dataarray object
             pavement_type = mst.createdataarrays(pavarr,['y','x'],[y,x])
