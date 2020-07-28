@@ -1,7 +1,7 @@
 """
 Static File generation script.
 written by Stefan Fluck, fluf@zhaw.ch in FS2020.
-test
+
 """
 import xarray as xr
 import sys
