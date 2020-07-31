@@ -519,7 +519,9 @@ if extentsonly == False:
                                             xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_TOP')
             gebbot = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudebot'+str(ischild[i])+'.asc', 
                                             xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_BOT')
-            maxbldgheight = np.max(gebtop)+zres[i]
+            maxbldgheight = np.max(gebtop) #+zres[i]
+            if maxbldgheight > zmax[i]:         #if maxbldgheight is larger than domain height, set maxbldgheight to domain height.
+                maxbldgheight = zmax[i]
             z = mst.createzcoord(maxbldgheight,zres[i])              #create z coordinate
             bldarr = np.ones((len(z), ny[i], nx[i]))*np.byte(0) #create empty buliding3d array
             
@@ -538,11 +540,13 @@ if extentsonly == False:
             
             gebid = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudeid'+str(ischild[i])+'.asc', 
                                             xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='ID')
-            gebid = np.where( bldarr[0] == np.byte(0) , mst.fillvalues['building_id'], gebid[:,:] ) #set id to fillvalue where 3d bldg is not resolved/subgrid scale (especially vertical dimension)
+#            gebid = np.where( bldarr[0] == np.byte(0) , mst.fillvalues['building_id'], gebid[:,:] ) #set id to fillvalue where 3d bldg is not resolved/subgrid scale (especially vertical dimension)
+            gebid = np.where( np.maximum.reduce(bldarr) == np.byte(0) , mst.fillvalues['building_id'], gebid[:,:] ) #set id to fillvalue where 3d bldg is not resolved/subgrid scale (especially vertical dimension)
             gebtyp = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudetyp'+str(ischild[i])+'.asc', 
                                             xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='BLDGTYP')
             gebtyp = np.where((gebtyp[:,:]==-9999.), mst.fillvalues['building_type'], gebtyp[:,:]) #change fillvalue to right one, import fcn defatults to -9999.0
-            gebtyp = np.where( bldarr[0] == np.byte(0) , mst.fillvalues['building_type'], gebtyp[:,:] ) #set type to fillvalue where 3d bldg is too small to be resolved.
+#            gebtyp = np.where( bldarr[0] == np.byte(0) , mst.fillvalues['building_type'], gebtyp[:,:] ) #set type to fillvalue where 3d bldg is too small to be resolved.
+            gebtyp = np.where( np.maximum.reduce(bldarr) == np.byte(0) , mst.fillvalues['building_type'], gebtyp[:,:] ) #set type to fillvalue where 3d bldg is too small to be resolved.
             
         #change buliding pars if buildings are created and dobuildingpars flag is set.
         if (flags[i]['dobuildings2d'] == True or flags[i]['dobuildings3d'] == True) and flags[i]['dobldgpars'] == True:
@@ -597,16 +601,33 @@ if extentsonly == False:
 
         #where building_type is set, do not set a vegetation type or pavement type
         if ((flags[i]['dobuildings3d'] == True or flags[i]['dobuildings2d']==True ) and flags[i]['dolandcover'] == True):
-            vegarr[:,:] = np.where( gebtyp[:,:] != np.byte(-127), mst.fillvalues['vegetation_type'], vegarr[:,:] )
+#            vegarr[:,:] = np.where( gebtyp[:,:] != np.byte(-127), mst.fillvalues['vegetation_type'], vegarr[:,:] )
+#            watarr[:,:] = np.where( gebtyp[:,:] != np.byte(-127), mst.fillvalues['water_type'], watarr[:,:] ) #für 3d evtl falsch? muss ja nicht surf. mounted sein.
+            vegarr[:,:] = np.where( np.isin(gebtyp[:,:],[0,1,2,3,4,5,6]), mst.fillvalues['vegetation_type'], vegarr[:,:] )
+            watarr[:,:] = np.where( np.isin(gebtyp[:,:],[0,1,2,3,4,5,6]), mst.fillvalues['water_type'], watarr[:,:] ) #für 3d evtl falsch? muss ja nicht surf. mounted sein.
             
         if ((flags[i]['dobuildings3d'] == True or flags[i]['dobuildings2d']==True ) and flags[i]['dopavedbb'] == True):
-            pavarr[:,:] = np.where( gebtyp[:,:] != np.byte(-127), mst.fillvalues['pavement_type'], pavarr[:,:] )
+#            pavarr[:,:] = np.where( gebtyp[:,:] != np.byte(-127), mst.fillvalues['pavement_type'], pavarr[:,:] )
+            pavarr[:,:] = np.where( np.isin(gebtyp[:,:],[0,1,2,3,4,5,6]), mst.fillvalues['pavement_type'], pavarr[:,:] )
 
         
         #create surface fraction array and soilarray in the end, but still only if dotlm is active.
         if flags[i]['dolandcover'] == True:
             soilarr = mst.makesoilarray2(vegarr,pavarr, mpd.palmveg2palmsoil, mpd.palmpav2palmsoil) #finally do soilarray depending on vegarr and pavarr, mapping see makestaticotools in palmpy
             sfrarr = mst.makesurffractarray(vegarr,pavarr,watarr) #create surfacefraction in end, as now only 0 and 1 fractions are allowed (ca r4400)
+
+        #cleanup those two arrays (sfrarr and soilarr) as well
+        if (flags[i]['dobuildings2d'] == True):
+            soilarr[:,:] = np.where( gebtyp[:,:] != mst.fillvalues['building_type'], mst.fillvalues['soil_type'], soilarr[:,:] )        
+            sfrarr[:,:,:] = np.where( gebtyp[:,:] != mst.fillvalues['building_type'], mst.fillvalues['surface_fraction'], sfrarr[:,:,:])
+
+        if (flags[i]['dobuildings3d'] == True):
+            #bei 3d: geh nach erstem gridpoint in bldarr. wenn buliding: set to fillvalue, sonst nicht.
+            soilarr[:,:] = np.where( np.isin(gebtyp[:,:], [0,1,2,3,4,5,6]), mst.fillvalues['soil_type'], soilarr[:,:] )        
+            sfrarr[:,:,:] = np.where( np.isin(gebtyp[:,:], [0,1,2,3,4,5,6]), mst.fillvalues['surface_fraction'], sfrarr[:,:,:])
+#            soilarr[:,:] = np.where( bldarr[0,:,:] == 1, mst.fillvalues['soil_type'], soilarr[:,:] )        
+#            sfrarr[:,:,:] = np.where( bldarr[0,:,:] == 1, mst.fillvalues['surface_fraction'], sfrarr[:,:,:])
+    
 
 
         ######### create static netcdf file
