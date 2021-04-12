@@ -58,7 +58,7 @@ elif mapdialect == 'mapdicts':
 #parse settings and paths
 filenames = cfp.get('settings','casename', fallback='default')+'_static'
 origin_time = cfp.get('settings', 'origin_time', fallback='2020-08-01 12:00:00 +02')
-totaldomains = cfp.getint('settings', 'totaldomains', fallback=1)
+# totaldomains = cfp.getint('settings', 'totaldomains', fallback=1)
 cutorthoimg = cfp.getboolean('settings', 'cutorthoimg', fallback=False)
 extentsonly = cfp.getboolean('settings', 'extentsonly', fallback=False)
 orthores = cfp.getfloat('settings', 'orthores', fallback=5.0)
@@ -103,6 +103,8 @@ try:
     print('create subdir for rastered data:')
 except:
     pass    
+
+totaldomains = sum(1 for s in cfp.sections() if 'domain' in s)
 
 #initialize all variable lists
 ischild = totaldomains*[None];          xmin = totaldomains*[None]
