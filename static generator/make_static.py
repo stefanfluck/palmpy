@@ -792,7 +792,7 @@ if extentsonly == False:
     parfile.close() 
   
     
-    #write to prompt
+    ############# write same again to prompt
     print('\n\n-----------------------------------------\nSIMULATION SETUP SUMMARY')
     print('-----------------------------------------')
     domaincells = totaldomains*[0]
@@ -814,7 +814,7 @@ if extentsonly == False:
     print('\n----------------------\nTotal Number of Cells:\t\t'+"%4.2e" % (sum(domaincells)))
     for m in range(len(domaincells)):
         # print('  Domain '+str(m)+':\t\t\t%4.3e\t= %3.2d %%' % (domaincells[m], round(domaincells[m]/sum(domaincells),4)*100))
-        print(f'   Domain {m}:\t\t\t{domaincells[m]:4.3e}\t{domaincells[m]/sum(domaincells)*100:.2f}%')
+        print(f'   Domain {m}:\t\t\t{domaincells[m]:4.3e}\t\t\t{domaincells[m]/sum(domaincells)*100:.2f}%')
     
     print('\nRuntime length score:\t\t'+str(round((sum(domaincells)*setvmag/min(xres))/1e06,2)))
     

@@ -1072,6 +1072,8 @@ The source information to create a building dataset may come in various forms. W
 
 Depending on the available source data, construct a building dataset containing information about its height, its lower limit in space, its type and an identification number. The lower limit is used to represent bridges or overhanging buildings in the dataset. The identification number will allow individual changes to buildings based on their identification numbers. A method for this is not implemented though.
 
+**Note**: Check the source, where the building height is measured from and compare it with the PALM definition of building height. As an example, PALM bulidings are put on top of the highest topo grid point in the building footprint pixels. That is quite opposite to e.g. the definition for building height in the Zurich LOD1 building dataset, where a the height represents the height of the building measured from the lowest intersection with topography, plus three meters to account for any underground stories. A possible workaround could be to do a zonal statistics for each building polygon to get min and max of the topography for each building. Then subtract the spread from the building height field. Also subtract three meters for the underground stories (not relevant in PALM simulation, at least right now).
+
 
 
 Possible workflow to forge a simple building footprint shapefile paired with LIDAR DTM-DOM data into a compliant buildings dataset:
@@ -1683,6 +1685,13 @@ ncrcat yv-jor-2_av_3d_N02.00{0..5}.nc yv-jor-2_av_3d_N02.nc
 
 for f in *.nc; do echo ${f//\.*}; done | sort | uniq | 
     while read prefix; do ncrcat "$prefix".*nc "$prefix".nc; done
+    
+# select only certain variables and concat them (assuming 10min output, first output at 600s, but you want only every hour)
+ncks -d time,5,107,6 -v wspeed,wdir,ta in.000.nc in_subset.000.nc
+ncks -d time,5,71,6 -v wspeed,wdir,ta in.001.nc in_subset.001.nc
+ncrcat in_subset.00* in_subset.nc
+rm in.00*
+
 
 ```
 
