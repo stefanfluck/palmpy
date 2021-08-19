@@ -34,6 +34,12 @@
 
 
 
+**Quick Links:**
+
+ *[Geodata Reference Table](#Geodata Shopping List)*
+
+*[INIFOR](#INIFOR)*
+
 
 
 
@@ -2106,7 +2112,6 @@ HEIGHT_TOP = _max - ( 0.15 * _max )
 
 
 A thorough test of the heights of the buildings, trees or forests in the area of interest is still required and explicitly recommended.
-
 
 
 
