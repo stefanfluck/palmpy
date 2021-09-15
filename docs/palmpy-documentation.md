@@ -1846,6 +1846,21 @@ For every QGIS operation there is a gdal equivalent, multiple steps can be done 
 
 
 
+**Merge multiple geotiff raster files using `gdal_translate`**
+
+Example: Terrain data can be downloaded via the swisstopo website, but only as separate tiles. You can specify a rectangle in their map viewer and you can create a csv, containing all download links required to get all tiles that intersect with your drawn rectangle. These will have to be merged to one large geotiff raster file.
+
+1. download all data using the created csv file, with the command `wget -i <filename>`
+2. Open the Osgeo4W Shell that comes with QGIS
+3. enter `py3_env`, which loads more functions of gdal
+4. navigate to your downloaded raster files. If they are on another drive, in the windows shell, you'll have to enter e.g. `e:` first, then you can `cd` around on that drive. 
+5. to merge them, we'll go via a `vrt` file. Run the command `gdalbuildvrt out.vrt <*inputfiles>`. The input files start with `ch.*`, in the swisstopo case.
+6. To get a tiff out of the vrt-File, run `gdal_translate out.vrt out.tif`, and it should take a few moments to complete.
+
+
+
+
+
 ---
 
 
