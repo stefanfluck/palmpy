@@ -45,6 +45,9 @@ if mapdialect == 'tlm':
 elif mapdialect == 'tutorial':
     import palmpy.staticcreation.dictfolder.tutorial as mpd
     print('\nINFO: Imported the tutorial mapdict.')
+elif mapdialect == 'DM01AVZH24':
+    import palmpy.staticcreation.dictfolder.DM01AVZH24 as mpd
+    print('\nINFO: Imported the DM01AVZH24 mapdict.')
 elif mapdialect == 'custom':
     import palmpy.staticcreation.dictfolder.custom as mpd
     print('\nINFO: Imported the custom mapdict.')
