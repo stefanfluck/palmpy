@@ -1855,7 +1855,7 @@ Example: Terrain data can be downloaded via the swisstopo website, but only as s
 3. enter `py3_env`, which loads more functions of gdal
 4. navigate to your downloaded raster files. If they are on another drive, in the windows shell, you'll have to enter e.g. `e:` first, then you can `cd` around on that drive. 
 5. to merge them, we'll go via a `vrt` file. Run the command `gdalbuildvrt out.vrt <*inputfiles>`. The input files start with `ch.*`, in the swisstopo case.
-6. To get a tiff out of the vrt-File, run `gdal_translate out.vrt out.tif`, and it should take a few moments to complete.
+6. To get a tiff out of the vrt-File, run `gdal_translate out.vrt out.tif`, and it should take a few moments to complete. If it is wished to change the resolution as well, one can provide the option `-tr 1 1` in the above command, which changes the target resolution to 1 meter in N and E directions.
 
 
 
