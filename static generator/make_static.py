@@ -608,8 +608,8 @@ if extentsonly == False:
         if ((flags[i]['dobuildings3d'] == True or flags[i]['dobuildings2d']==True ) and flags[i]['dolandcover'] == True):
 #            vegarr[:,:] = np.where( gebtyp[:,:] != np.byte(-127), mst.fillvalues['vegetation_type'], vegarr[:,:] )
 #            watarr[:,:] = np.where( gebtyp[:,:] != np.byte(-127), mst.fillvalues['water_type'], watarr[:,:] ) #für 3d evtl falsch? muss ja nicht surf. mounted sein.
-            vegarr[:,:] = np.where( np.isin(gebtyp[:,:],[0,1,2,3,4,5,6]), mst.fillvalues['vegetation_type'], vegarr[:,:] )
-            watarr[:,:] = np.where( np.isin(gebtyp[:,:],[0,1,2,3,4,5,6]), mst.fillvalues['water_type'], watarr[:,:] ) #für 3d evtl falsch? muss ja nicht surf. mounted sein.
+            vegarr[:,:] = np.where( np.isin(gebtyp[:,:], np.arange(0,21,1) ), mst.fillvalues['vegetation_type'], vegarr[:,:] ) #
+            watarr[:,:] = np.where( np.isin(gebtyp[:,:], np.arange(0,21,1) ), mst.fillvalues['water_type'], watarr[:,:] ) #für 3d evtl falsch? muss ja nicht surf. mounted sein.
             
         if ((flags[i]['dobuildings3d'] == True or flags[i]['dobuildings2d']==True ) and flags[i]['dopavedbb'] == True):
 #            pavarr[:,:] = np.where( gebtyp[:,:] != np.byte(-127), mst.fillvalues['pavement_type'], pavarr[:,:] )
