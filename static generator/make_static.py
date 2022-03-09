@@ -468,8 +468,14 @@ if extentsonly == False:
                         if not chidxtop[k,j] == -9999:
                             botindex = int(chidxbot[k,j])
                             topindex = int(chidxtop[k,j])+1
+                            #what happens if top and bot index equal? -> division by 0
                             pdf = beta.pdf(x=np.arange(0,1,(1/(topindex-botindex))),a=canalpha[k,j],b=canbeta[k,j]) #get a beta distribution (pdf) for given a and b values
-                            ladarr[botindex:topindex,k,j] = pdf/pdf.max()*lai[k,j]/canopyheight[k,j] #scale a by the max pdf value, multiply by lai/treeheight (definition of lad)
+                            
+                            if pdf.max() == 0.0: #if topindex and botindex equal, pdf returns an array with only 0. this throws an error with pdf/pdf.max(). add 1/further factors in order to have one cell of valid LAD value.
+                                pdf = pdf+(1/(lai[k,j]/canopyheight[k,j]))
+                                ladarr[botindex:topindex,k,j] = pdf*lai[k,j]/canopyheight[k,j]
+                            else:
+                                ladarr[botindex:topindex,k,j] = pdf/pdf.max()*lai[k,j]/canopyheight[k,j] #scale a by the max pdf value, multiply by lai/treeheight (definition of lad)
                             
                 vegarr = np.where((canopyid[:,:] != -9999) & (watarr[:,:] == -127), 3, vegarr[:,:]) #where there is a tree id assigned/where a tree is and no water, set land surface to grass
                 vegarr = np.where( (np.maximum.reduce(ladarr) == mst.fillvalues['lad']) & 
