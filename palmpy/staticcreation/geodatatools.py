@@ -107,7 +107,7 @@ def rasterandcuttlm(filein, fileout, xmin, xmax, ymin, ymax, xres, yres, burnatt
     srclayer = srcds.GetLayer()
     x_res = int((xmax - xmin) / xres)
     y_res = int((ymax - ymin) / yres)
-    trgds = gdal.GetDriverByName('GTiff').Create('tmp.tif', x_res,y_res,1,gdal.GDT_Float32)
+    trgds = gdal.GetDriverByName('GTiff').Create(os.path.join(os.path.dirname(fileout),'tmp.tif'), x_res,y_res,1,gdal.GDT_Float32)
     trgds.SetGeoTransform((xmin,xres,0,ymax,0,-xres))
     band = trgds.GetRasterBand(1)
     band.SetNoDataValue(-9999)
@@ -117,11 +117,11 @@ def rasterandcuttlm(filein, fileout, xmin, xmax, ymin, ymax, xres, yres, burnatt
     else:
         gdal.RasterizeLayer(trgds, [1], srclayer, options=['ALL_TOUCHED=TRUE', 'ATTRIBUTE='+burnatt])
     trgds=None
-    ds = gdal.Open('tmp.tif')
+    ds = gdal.Open(os.path.join(os.path.dirname(fileout),'tmp.tif'))
     ds = gdal.Translate(fileout, ds)
     array = ds.ReadAsArray()
     ds = None
-    os.remove('tmp.tif')
+    os.remove(os.path.join(os.path.dirname(fileout),'tmp.tif'))
     return array
 
 
