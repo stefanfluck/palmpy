@@ -817,12 +817,12 @@ Entries in brackets are optional or required for preprocessing steps in QGIS.
 
 | **Feature Type**            | **Format** | **Attribute  1** | **Attribute  2** | **Attribute  3** | **Attribute  4** | Attribute 5 |
 | --------------------------- | ---------- | ---------------- | ---------------- | ---------------- | ---------------- | ----------- |
-| *Land Cover (Bodenbedeckung)* | Polygon    | `OBJEKTART`      |                  |                  |                  |             |
+| *Land Cover (Bodenbedeckung)* | Polygon    | `OBJEKTART` or value of `src_pav_type` in namelist      |                  |                  |                  |             |
 | *Single Trees*              | Polygon    | `HEIGHT_TOP`     | `HEIGHT_BOT`     | `ID`             | (`LAI`)          | (`RADIUS`)  |
 | *Tree Lines*                | Polygon    | `HEIGHT_TOP`     | `HEIGHT_BOT`     | `ID`             | (`LAI`)          | (`RADIUS`)  |
 | *Resolved Forests*          | Polygon    | `HEIGHT_TOP`     | `HEIGHT_BOT`     | `ID`             | (`LAI`)            | (``OBJEKTART``) |
 | *Streets*                   | Polygon    | `OBJEKTART`      | (`RADIUS`)       | (`STRASSENROUTE`) | (`STUFE`)        | (`BELAGSART`) |
-| *Paved Surfaces*            | Polygon    | `BELAGSART`      |                  |                  |                  |             |
+| *Paved Surfaces*            | Polygon    | `BELAGSART` or value of `src_pav_type` in namelist      |                  |                  |                  |             |
 | *Crop fields*               | Polygon    | `OBJEKTART`      | (`HEIGHT_TOP`)  | (`CROP`)         | (`ID`)           |             |
 | *Building Footprints*       | Polygon    | `HEIGHT_TOP`     | `HEIGHT_BOT`     | `ID`             | `BLDGTYP`        |             |
 
@@ -1170,16 +1170,18 @@ This section contains top level information about the simulation.
 | --------------- | ----------------------- | ------------------------------------------------------------ |
 | *casename*      | string                  | Name of the case. Used to construct the file names for the script output. |
 | *origin_time*   | YYYY-MM-DD HH:mm:SS +TZ | Origin time of the PALM simulation. This is a critical parameter and needs to be set correctly, otherwise the sun position and COSMO forcing may be incorrect. |
-| *totaldomains*  | int                     | Number of Domains that are to be set.                        |
 | *cutorthoimg*   | boolean                 | ``True`` if for each domain an orthoimage shall be cut to the correct extents. Can be used in VAPOR visualizations. ``False`` if not needed. |
 | *extentsonly*   | boolean                 | If ``True``, only the config file is read, checks are done and the extents are plotted in a graph. This can be used to fine-tune the choice of extents and probe locations. |
-| *mapdialect*    | string                  | Keyword, which mapping dictionaries shall be used. Available options are ``tlm``, ``custom``. This will decide which python file with which dictionaries is loaded as ``mpd.*`` module. |
+| *mapdialect*    | string                  | Keyword, which mapping dictionaries shall be used. Available options are ``tlm``, ``tutorial``, ``DM01AVZH24``,``custom``. This will decide which python file with which dictionaries is loaded as ``mpd.*`` module. |
 | *orthores*      | int                     | Resolution of the image, on which the extents are plotted. 5 seems to be a good number to provide enough resolution on the satellite image to identify important landmarks. For larger domains this number may need to be increased, as larger domains with the same resolution leads to larger file sizes. |
 | *rotationangle* | float                   | Angle by which the domain is rotated. Useful in runs with noncyclic BC as specific wind-tunnel like setups. Not really supported at the moment by PALM. |
 | *set_vmag*      | float                   | Estimated velocities that are set by you or INIFOR. Used to calculate a runtime score, that gives a hint about the cases complexity and therefore its runtime. |
 | *simtime*       | float                   | Used to construct the inifor namelist, that is also output when running the make_static.py script. |
-
-
+| *veg_format* | string | Write `shp` or `tif` or `tiff` depending on which format your vegetation is. |
+| *veg_height_bot* | int | Height of lower border of tree crowns. In Zurich, this is set at three meters. |
+| *surf_data_mode* | string | Future: you can provide land use and pavement shapefiles separately or together. Write `separate` or `together` respectively. |
+| *src_luse_type* | string | Name of the attribute, where the surface type is defined. Default is "OBJEKTART" |
+| *src_pav_type* | string | Name of the attribute, where the pavement surface type is defined. Default is "BELAGSART" |
 
 
 
@@ -1203,6 +1205,7 @@ In this section all paths need to be specified to the required files. The path s
 | *gebaeudefoots*  | Filename of the shapefile with information about building footprints. Used to create buildings in 2D and 3D (to benefit from the latter, ``HEIGHT_BOT`` needs to be provided as an attribute). |
 | *crops*          | Filename of the shapefile with information about crop fields. Crop field information may not be present in land cover data as it changes often. |
 | *streetsonly*    | Filename of a shapefile with street information only (needs to be provided for creating the ``street_type`` variable for emission representation). |
+| *veg_raster*     | Filename of a raster file containing tree height information relative to above ground. |
 
 
 
