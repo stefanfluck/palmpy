@@ -20,8 +20,6 @@ try:
     cfp.read(sys.argv[1]) #check if commandline argument is given for config file.
 except:
     print('No command line argument given. Choose your config file.')
-    # cfp.read("C:\\Users\\Stefan Fluck\\Documents\\Python Scripts\\ZAV-PALM-Scripts\\example_scripts\\make_static\\make_static.ini")
-    # cfp.read("C:\\Users\\Stefan Fluck\\Desktop\\yv-jor-3\\yv-jor-3.ini")
     from tkinter import Tk
     from tkinter.filedialog import askopenfilename
     Tk().withdraw()
@@ -65,11 +63,16 @@ origin_time = cfp.get('settings', 'origin_time', fallback='2020-08-01 12:00:00 +
 # totaldomains = cfp.getint('settings', 'totaldomains', fallback=1)
 cutorthoimg = cfp.getboolean('settings', 'cutorthoimg', fallback=False)
 extentsonly = cfp.getboolean('settings', 'extentsonly', fallback=False)
+surf_data_mode = cfp.get('settings','surf_data_mode',fallback='separate') #are land use and pavement separate or together
+src_luse_type = cfp.get('settings','src_luse_type',fallback='OBJEKTART') #attribute name of land use type in source shapefile
+src_pav_type = cfp.get('settings','src_pav_type',fallback='BELAGSART') #attribute name of pavement type in source shapefile
 orthores = cfp.getfloat('settings', 'orthores', fallback=5.0)
 rotationangle = cfp.getfloat('settings', 'rotationangle', fallback=0.0)
 setvmag = cfp.getfloat('settings', 'set_vmag', fallback=1.0)
 simtime = cfp.getfloat('settings', 'simtime', fallback = 14400.0)
 
+
+#parse paths
 inputfilepath = cfp.get('paths', 'inputfilepath')
 ortho = inputfilepath+cfp.get('paths', 'orthoimage')
 dhm = inputfilepath+cfp.get('paths', 'dhm')
@@ -367,7 +370,7 @@ if extentsonly == False:
         
         ##### treat tlm-bb bulk parametrization
         if flags[i]['dolandcover'] == True:
-            bbdat = gdt.rasterandcuttlm(bb, subdir_rasteredshp+'bb'+str(ischild[i])+'.asc',xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i], burnatt='OBJEKTART')
+            bbdat = gdt.rasterandcuttlm(bb, subdir_rasteredshp+'bb'+str(ischild[i])+'.asc',xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i], burnatt=src_luse_type)
             # vegarr, pavarr, watarr = mst.mapbbclasses(bbdat)  #map tlm bodenbedeckungs-kategorien to the palm definitions.
             vegarr, pavarr, watarr = mst.mapbbclasses2(bbdat, mpd.bb2palmveg, mpd.bb2palmwat)  #map tlm bodenbedeckungs-kategorien to the palm definitions.
                 #or: function content in three lines.
@@ -515,6 +518,8 @@ if extentsonly == False:
                             else:
                                 ladarr[botindex:topindex,k,j] = pdf/pdf.max()*lai[k,j]/canopyheight_maxperid[k,j] #scale a by the max pdf value, multiply by lai/treeheight (definition of lad)
 
+                ladarr = np.where(ladarr[:,:,:] == 0, -9999., ladarr[:,:,:]) #where lad is 0, make it to nan
+
                 vegarr = np.where((canopyid[:,:] != -9999) & (watarr[:,:] == -127), 3, vegarr[:,:]) #where there is a tree id assigned/where a tree is and no water, set land surface to grass
                 vegarr = np.where( (np.maximum.reduce(ladarr) == mst.fillvalues['lad']) & 
                                    (watarr[:,:] == mst.fillvalues['water_type']) &
@@ -527,7 +532,7 @@ if extentsonly == False:
             
             if flags[i]['docropfields'] == True:
                 croptype = gdt.rasterandcuttlm(crops, subdir_rasteredshp+'croptype'+str(ischild[i])+'.asc', 
-                                               xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='OBJEKTART')
+                                               xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt=src_luse_type)
                 vegarr = np.where( (vegarr[:,:]==bulkvegclass[i]) & (croptype[:,:] != -9999), 2, vegarr[:,:]) #where vegarr is set to bulk class and crops are found, set class to 2 (crops)
             
                 
@@ -628,10 +633,10 @@ if extentsonly == False:
             gdt.splitroadsshp(streetsonly, subdir_rasteredshp, mpd.majroads, mpd.minroads)
             
             majroads = gdt.rasterandcuttlm(subdir_rasteredshp+'majorroads.shp', subdir_rasteredshp+'streettypemajor'+str(ischild[i])+'.asc', 
-                                    xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='OBJEKTART', alltouched=pavealltouched[i])
+                                    xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt=src_luse_type, alltouched=pavealltouched[i])
             majroads = mst.mapdicttoarray(majroads, mpd.str2palmstyp, mst.fillvalues['street_type'])
             minroads = gdt.rasterandcuttlm(subdir_rasteredshp+'minorroads.shp', subdir_rasteredshp+'streettypeminor'+str(ischild[i])+'.asc', 
-                                    xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='OBJEKTART', alltouched=pavealltouched[i])
+                                    xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt=src_luse_type, alltouched=pavealltouched[i])
             minroads = mst.mapdicttoarray(minroads, mpd.str2palmstyp, mst.fillvalues['street_type'])
             
             roadarr = np.copy(majroads)
