@@ -760,6 +760,8 @@ The static generation script requires some data to be present in rastered form, 
 - Orthoimage
 - Digital Surface/Height Model (DHM, DOM) (*Note: Topography only, without buildings or trees!*)
 
+optional:
+- Resolved vegetation from a digital surface model (DSM/DOM). This file should only contain trees with their height relative to the ground. 
 
 
 
@@ -788,6 +790,13 @@ Topography data is usually available in raster format. Notable examples are swis
 
 <center><font size="-1">An extract of Switzerland from the NASA SRTM DHM dataset.</font></center>
 
+
+#### Optional: Resolved Vegetation
+
+- *relevant namelist flag:* ``veg_format`` in ``settings`` section, ``veg_height_bot``
+
+From May 2022, it is possible to provide high resolution vegetation as raster into palmpy. For that, a digital surface model is needed that *only* contains tree height information. The tree crown bottom height is given by the parameter ``veg_height_bot``. In the city of Zurich, this height is usually 3 meters. 
+The path to the raster file is given in the ``paths`` section in the namelist, under ``veg_raster``. The alpha, beta and LAI values for each individual domain are taken from the parameters ``lai_forest``, ``a_forest``, ``b_forest``.
 
 
 <div style="page-break-after: always; break-after: page;"></div>
@@ -850,6 +859,8 @@ This file (and the [crops](#Crops) dataset described further below) will decide,
 <div style="page-break-after: always; break-after: page;"></div>
 
 #### Resolved Vegetation
+
+Since May 2022, it is possible to supply resolved vegetation as a raster file. Refer to the ['Rastered Data'](#Rastered Data) section above.
 
 - *relevant namelist flag:* ``dolad``
 
