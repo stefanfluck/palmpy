@@ -475,7 +475,7 @@ if extentsonly == False:
                     print('\nVegetation supplied by tiff file. Read, cut and resample it now:')
                     veg_raster = gdt.cutalti(veg_raster_path, subdir_rasteredshp+'vegraster'+str(ischild[i])+'.asc',xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i])
                     canopyheight = np.where(veg_raster[:,:]<= veg_height_bot+zres[i], -9999., veg_raster[:,:])
-                    canopybottom = np.where(canopyheight[:,:]==-9999., veg_height_bot, canopyheight[:,:])
+                    canopybottom = np.where(canopyheight[:,:]!=-9999., veg_height_bot, canopyheight[:,:])
                     
                     from scipy.ndimage import label
                     canopyid = label( np.where(canopyheight[:,:]==-9999., 0, canopyheight[:,:] ) )[0]
