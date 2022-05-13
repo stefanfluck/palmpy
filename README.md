@@ -37,8 +37,7 @@ The  [PALM Model System](https://palm.muk.uni-hannover.de/trac) is an advanced l
 
 
 ## Documentation
-
-In the folder ``docs``, an extensive documentation of ``palmpy`` can be found, including guidance on how to preprocess geodata so it can be used with ``palmpy``. The documentation covers:
+Refer to the wiki for an extensive documentation of palmpy. It includes guidance on how to preprocess geodata so it can be used with ``palmpy``. The documentation covers:
 
 - Installation
 - Description of submodules and functions
@@ -50,8 +49,12 @@ In the folder ``docs``, an extensive documentation of ``palmpy`` can be found, i
 
 
 ## Installation
+[More detail here.](https://github.com/stefanfluck/palmpy/wiki/palmpy-Installation)
 
-``palmpy`` requires numpy, matplotlib, netcdf4, gdal and more to be installed in the environment. Guidance is included in the documentation on how to set up a suitable environment for `palmpy`.
+``palmpy`` requires numpy, matplotlib, netcdf4, gdal and more to be installed in the environment. Guidance is included in the documentation on how to set up a suitable environment for `palmpy`. With the following one-liner, you can install an env in conda and install all required packages.
+```python
+conda create -n palmpyenv -c conda-forge pandas geopandas numpy scipy matplotlib pillow netcdf4 gdal rasterio xarray
+```
 
 Static files can be generated simply by running the static generator script ``make_static.py``. In order for it to run, just download the ``palmpy`` folder into an appropriate location, e.g. the python `$PATH`.  Then, copy the path to the ``palmpy`` folder into the ``make_static.ini`` configuration file that is required to define the desired domain. 
 
