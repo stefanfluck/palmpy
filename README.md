@@ -22,14 +22,15 @@ The  [PALM Model System](https://palm.muk.uni-hannover.de/trac) is an advanced l
   - terrain
   - land cover information
   - resolved vegetation
+  - buildings (2.5D & 3D)
   - modify vegetation parameters (level 3 classification)
   - modify building parameters (level 3 classification)
   - street types
 - static generator script steered by a namelist (config file)
 - nested domains are supported
 - process geodata in their standard formats
-  - vector data as shape files (.shp)
-  - raster data as geotiffs (.tif)
+  - vector data as shape files (.shp) for surface classification / 3d vegetation
+  - raster data as geotiffs (.tif) for terrain (and optionally 3d vegetation)
 - perform checks if generated domain will be usable in PALM
 - generate namelist for inifor routine (dynamic driver file generator shipped with PALM)
 - output probe location coordinates for masked output in PALM relative to each domain
