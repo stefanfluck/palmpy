@@ -28,16 +28,18 @@ except:
         raise ImportError('No file chosen in the Wizard. Abort.')
     cfp.read(inipath)
 
-
+#%% set paths
 modulepath = cfp.get('paths', 'modulepath', fallback = '') #read modulepath from config file
 mapdialect = cfp.get('settings', 'mapdialect', fallback = 'mapdicts')
 
 if modulepath not in sys.path:
     sys.path.append(modulepath) #add modulepath to system path if not already there.
-    
+
+#%% import palmpy functions
 import palmpy.staticcreation.geodatatools as gdt         #import modules for static generation
 import palmpy.staticcreation.makestatictools as mst
 
+#make mapping dialect selection
 if mapdialect == 'tlm':
     import palmpy.staticcreation.dictfolder.tlm as mpd
     print('\nINFO: Imported the tlm mapdict.')
@@ -57,7 +59,7 @@ elif mapdialect == 'mapdicts':
 #     import palmpy.staticcreation.dictfolder.NEWDIALECT as mpd
 #     print('\nINFO: Imported the NEWDIALECT mapdict.')
 
-#parse settings and paths
+#%% parse settings and paths
 filenames = cfp.get('settings','casename', fallback='default')+'_static'
 origin_time = cfp.get('settings', 'origin_time', fallback='2020-08-01 12:00:00 +02')
 # totaldomains = cfp.getint('settings', 'totaldomains', fallback=1)
@@ -122,6 +124,8 @@ try:
 except:
     pass    
 
+
+#%% parse domain information
 totaldomains = sum(1 for s in cfp.sections() if 'domain' in s)
 
 #initialize all variable lists
@@ -225,10 +229,11 @@ for i in range(0,len(cfp.sections())):
         #b = a.split(',')
         #c = list(map(int,b))
 
+#%% correct nest coordinates if they are not on parent grid
 if checknestcoord_result == False: #shift coordinates so they match grid of their parents.
     xmin,xmax,ymin,ymax = mst.shift_domain_llxy_to_parent_grid(xmin,ymin,xres,yres,xmax,ymax)
 
-#read in probe locations
+#%% read in probe locations
 probes_E = cfp.get('probes', 'probes_E', fallback=str(xmin[0]))
 if probes_E != '':
     probes_E = list(map(float,probes_E.replace(' ','').rstrip(',').split(',')))
@@ -239,7 +244,7 @@ if probes_N != '':
     probes_N = list(map(round,probes_N))
     
 
-# read in vegpars changes
+#%% read in vegpars changes
 vegparchanges = cfp.get('change_npars', 'vegparchanges').replace(' ','').rstrip(',').split(',')
 if vegparchanges != ['']:
     for it in range(len(vegparchanges)):
@@ -278,7 +283,7 @@ if bldgparchanges != ['']:
 
     
     
-#further checks:
+#%% final checks for initialization phase
 print('\nFinalizing Checks:\n')
 
 mst.checknxyzisint(nx,ny,nz) #checks if nx ny nz values dont have a float part
@@ -286,6 +291,7 @@ nx = list(map(int,nx))
 ny = list(map(int,ny))
 nz = list(map(int,nz))
 
+#%% create satellite image with domain extents on it.
 if cutorthoimg == True:
     #visualize domain boundaries, cut the image new for that with higher res than parent resolution.
     gdt.cutortho(ortho, subdir_rasteredshp+filenames+'_baseortho.tif', 
@@ -296,7 +302,7 @@ if cutorthoimg == True:
     img = plt.imread(subdir_rasteredshp+filenames+'_baseortho.tif')
     ax.imshow(img)
     
-    for a in range(1,totaldomains):
+    for a in range(0,totaldomains):
         rect = patches.Rectangle((llx[a]/orthores,(ylen[0]-lly[a]-ylen[a])/orthores), 
                               xlen[a]/orthores,ylen[a]/orthores, 
                               linewidth=3, edgecolor='r', facecolor='none')
@@ -312,7 +318,7 @@ if cutorthoimg == True:
                   marker='.', markersize=8, color='red')
     
     
-    
+#%% debugging phase: show plot if exentsonly=True.
     if extentsonly == True:
         plt.show()
         print('\n\nINFORMATION: Plot is only shown, not saved.')
@@ -342,7 +348,7 @@ if cutorthoimg == True:
 
 
 #%%generation with for loop
-
+#%%
 if extentsonly == False:
     for i in range(totaldomains):
         print('\n\n---------------------------\nSTART CREATING DOMAIN '+str(i))
@@ -356,14 +362,14 @@ if extentsonly == False:
                     'origin_time':       origin_time,
                     'rotation_angle':    rotationangle}
         
-        #childify filename (add _NXX if necessary)
+        #%%childify filename (add _NXX if necessary)
         filename = mst.childifyfilename(filenames, ischild[i]) #adds _N0X to the filename if needed
         
-        #### cut orthoimage if specified.
+        #%% cut orthoimage if specified.
         if cutorthoimg == True:
             gdt.cutortho(ortho, subdir_rasteredshp+filename+'_ortho.tif', xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i])
         
-        ##### treat terrain
+        #%% treat terrain
         if flags[i]['doterrain'] == True:
             ztdat = gdt.cutalti(dhm, subdir_rasteredshp+'dhm'+str(ischild[i])+'.asc',xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i])
             if ischild[i]==0:
@@ -372,7 +378,7 @@ if extentsonly == False:
                 ztdat, origin_z = mst.shifttopodown(ztdat,ischild[i],shift=origin_z) #shift the domain downwards with origin_z value of parent if its a child.
             infodict['origin_z'] = origin_z    #modify the origin_z attribute according to the shift
         
-        ##### treat tlm-bb bulk parametrization
+        #%% treat tlm-bb bulk parametrization
         if flags[i]['dolandcover'] == True:
             bbdat = gdt.rasterandcuttlm(bb, subdir_rasteredshp+'bb'+str(ischild[i])+'.asc',xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i], burnatt=src_luse_type)
             # vegarr, pavarr, watarr = mst.mapbbclasses(bbdat)  #map tlm bodenbedeckungs-kategorien to the palm definitions.
@@ -383,7 +389,7 @@ if extentsonly == False:
                 # pavarr = np.ones((ny[i],nx[i]))*mst.fillvalues['pavement_type'] #empty array
     
             
-        ##### BLOCK FOR MODIFICATIONS TO VEGPARS AND ALBEDOPARS
+        #%% BLOCK FOR MODIFICATIONS TO VEGPARS AND ALBEDOPARS
             if flags[i]['dovegpars'] == True:
                 vegpars = mst.createparsarrays(nx[i], ny[i])[0] # create vegpars arrays and albedopars arrays
                 # vegpars = mst.modifyparsarray(vegpars,9,2093,bbdat,9)
@@ -409,7 +415,7 @@ if extentsonly == False:
                                                                     albedoparchanges[it][1], int(albedoparchanges[it][0]))
             
         
-        ##### treat LAD
+        #%% treat LAD
             if flags[i]['dolad'] == True:
                 
                 if veg_input_type == 'shp':
@@ -533,7 +539,7 @@ if extentsonly == False:
                 
             vegarr = np.where( (vegarr[:,:]==-127) & (watarr[:,:]==-127) & (pavarr[:,:]==-127), bulkvegclass[i], vegarr[:,:]) #fill unassigned vegetation types to defined bulk vegetation class.
             
-            
+            #%% crop fields
             if flags[i]['docropfields'] == True:
                 croptype = gdt.rasterandcuttlm(crops, subdir_rasteredshp+'croptype'+str(ischild[i])+'.asc', 
                                                xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt=src_luse_type)
@@ -551,7 +557,7 @@ if extentsonly == False:
                             vegpars,albedopars = mst.setalbedovalue(albedopars, vegpars, croptype, albedoparchanges[it][3], 
                                                                     albedoparchanges[it][1], int(albedoparchanges[it][0]))
 
-
+            #%% do paved surfaces
             if flags[i]['dopavedbb'] == True:
                 paved = gdt.rasterandcuttlm(pavementareas, subdir_rasteredshp+'pavement'+str(ischild[i])+'.asc',
                                             xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i], burnatt='BELAGSART', alltouched=pavealltouched[i])
@@ -563,7 +569,7 @@ if extentsonly == False:
                 # pavarr = np.where ( pavarr[:,:] != -9999, 1, mst.fillvalues['pavement_type']) #pavement_type set where shp is non-fillvalue. TODO: mit einem map dict auch pavements richtig klassifizieren.
                 pavarr = mst.mapdicttoarray(paved, mpd.pav2palmpav, fillvalue = np.byte(bulkpavclass[i])) #classify pavement array acc. to dict.
     
-            
+        #%% do buildings
         if flags[i]['dobuildings2d'] == True:  
             gebhoehe = gdt.rasterandcuttlm(gebaeudefoots, subdir_rasteredshp+'gebaeudehoehe'+str(ischild[i])+'.asc', 
                                             xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='HEIGHT_TOP')
@@ -607,7 +613,7 @@ if extentsonly == False:
 #            gebtyp = np.where( bldarr[0] == np.byte(0) , mst.fillvalues['building_type'], gebtyp[:,:] ) #set type to fillvalue where 3d bldg is too small to be resolved.
             gebtyp = np.where( np.maximum.reduce(bldarr) == np.byte(0) , mst.fillvalues['building_type'], gebtyp[:,:] ) #set type to fillvalue where 3d bldg is too small to be resolved.
             
-        #change buliding pars if buildings are created and dobuildingpars flag is set.
+        #%% change buliding pars if buildings are created and dobuildingpars flag is set.
         if (flags[i]['dobuildings2d'] == True or flags[i]['dobuildings3d'] == True) and flags[i]['dobldgpars'] == True:
             bldgpars = mst.createparsarrays(nx[i], ny[i])[4] #create the building pars array
             #INFO: grouped stuff needs to be larger than 0 at the moment! 0 is also a fillvalue!
@@ -628,7 +634,7 @@ if extentsonly == False:
                 bldgpars = mst.modifyparsarray(bldgpars,int(bldgparchanges[it][0]),bldgparchanges[it][1],input2group[bldgparchanges[it][2]],bldgparchanges[it][3])
 
             
-        
+        #%% do street types
         if flags[i]['dostreettypes'] == True: #for chemistry
             # roadarr = gdt.rasterandcuttlm(streetsonly, subdir_rasteredshp+'streettype'+str(ischild[i])+'.asc', 
             #                                 xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt='OBJEKTART', alltouched=pavealltouched[i])
@@ -646,6 +652,8 @@ if extentsonly == False:
             roadarr = np.copy(majroads)
             roadarr = np.where( (majroads[:,:] == mst.fillvalues['street_type']), minroads[:,:], majroads[:,:])
                    
+        
+        #%% cleanup on aisle static driver
         
         #cleanup: where bulidings exist, non lad should exist.    
         if ((flags[i]['dobuildings3d'] == True or flags[i]['dobuildings2d']==True) and flags[i]['dolad'] == True): 
@@ -670,7 +678,7 @@ if extentsonly == False:
             pavarr[:,:] = np.where( np.isin(gebtyp[:,:],[0,1,2,3,4,5,6]), mst.fillvalues['pavement_type'], pavarr[:,:] )
 
         
-        #create surface fraction array and soilarray in the end, but still only if dotlm is active.
+        #%% create surface fraction array and soilarray in the end, but still only if dotlm is active.
         if flags[i]['dolandcover'] == True:
             soilarr = mst.makesoilarray2(vegarr,pavarr, mpd.palmveg2palmsoil, mpd.palmpav2palmsoil) #finally do soilarray depending on vegarr and pavarr, mapping see makestaticotools in palmpy
             sfrarr = mst.makesurffractarray(vegarr,pavarr,watarr) #create surfacefraction in end, as now only 0 and 1 fractions are allowed (ca r4400)
@@ -689,7 +697,7 @@ if extentsonly == False:
     
 
 
-        ######### create static netcdf file
+        #%% create static netcdf file
         static = xr.Dataset()
         x,y = mst.createstaticcoords(nx[i],ny[i],xres[i])[0:2] #create x and y cordinates. 
         
@@ -768,13 +776,13 @@ if extentsonly == False:
         static.attrs['creation_time'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         static.attrs['Conventions'] = 'CF-1.7'
         
-        
         if flags[i]['dobuildings3d'] == True:
             mst.setneededattributes(static.z,'z') #set attributes of coordinate z if buildings are set (only data to require z so far)
         
         encodingdict = mst.setupencodingdict(flags[i]) #create encoding dictionary for saving the netcdf file (maybe not needed if really all fillvalues and dtypes are set correct!)
         mst.setglobalattributes(static,infodict) #set global attributes
         
+        #%% output the file
         mst.outputstaticfile(static,outpath+filename, encodingdict) #output the static file as netcdf file.
     
     
@@ -820,27 +828,27 @@ if extentsonly == False:
         pavparchanges == [''] and soilparchanges == [''] and bldgparchanges == [''] ):
         print('\tNone.', file=parfile)
     if vegparchanges != ['']:
-        print(f'\nManual overrides for vegetation type:', file=parfile)
+        print('\nManual overrides for vegetation type:', file=parfile)
         for e in vegparchanges:
             print(f"\tFor class {int(e[3])}, set npar {int(e[0])} to {e[1]} based on {source[e[2]]}.", file=parfile)
             
     if albedoparchanges != ['']:
-        print(f'\nManual overrides for albedo type:', file=parfile)
+        print('\nManual overrides for albedo type:', file=parfile)
         for e in albedoparchanges:
             print(f"\tFor class {int(e[3])}, set npar {int(e[0])} to {e[1]} based on {source[e[2]]}.", file=parfile)
         
     if watparchanges != ['']:
-        print(f'\nManual overrides for vegetation type:', file=parfile)
+        print('\nManual overrides for vegetation type:', file=parfile)
         for e in watparchanges:
             print(f"\tFor class {int(e[3])}, set npar {int(e[0])} to {e[1]} based on {source[e[2]]}.", file=parfile)
     
     if pavparchanges != ['']:
-        print(f'\nManual overrides for vegetation type:', file=parfile)
+        print('\nManual overrides for vegetation type:', file=parfile)
         for e in pavparchanges:
             print(f"\tFor class {int(e[3])}, set npar {int(e[0])} to {e[1]} based on {source[e[2]]}.", file=parfile)
         
     if soilparchanges != ['']:
-        print(f'\nManual overrides for vegetation type:', file=parfile)
+        print('\nManual overrides for vegetation type:', file=parfile)
         for e in soilparchanges:
             print(f"\tFor class {int(e[3])}, set npar {int(e[0])} to {e[1]} based on {source[e[2]]}.", file=parfile)
 
@@ -848,8 +856,8 @@ if extentsonly == False:
     
     parfile.close() 
   
-    
-    ############# write same again to prompt
+    #%% write same to prompt
+
     print('\n\n-----------------------------------------\nSIMULATION SETUP SUMMARY')
     print('-----------------------------------------')
     domaincells = totaldomains*[0]
@@ -891,27 +899,27 @@ if extentsonly == False:
         pavparchanges == [''] and soilparchanges == [''] and bldgparchanges == [''] ):
         print('\tNone.')
     if vegparchanges != ['']:
-        print(f'\nManual overrides for vegetation type:')
+        print('\nManual overrides for vegetation type:')
         for e in vegparchanges:
             print(f"\tFor class {int(e[3])}, set npar {int(e[0])} to {e[1]} based on {source[e[2]]}.")
             
     if albedoparchanges != ['']:
-        print(f'\nManual overrides for albedo type:')
+        print('\nManual overrides for albedo type:')
         for e in albedoparchanges:
             print(f"\tFor class {int(e[3])}, set npar {int(e[0])} to {e[1]} based on {source[e[2]]}.")
         
     if watparchanges != ['']:
-        print(f'\nManual overrides for vegetation type:')
+        print('\nManual overrides for vegetation type:')
         for e in watparchanges:
             print(f"\tFor class {int(e[3])}, set npar {int(e[0])} to {e[1]} based on {source[e[2]]}.")
     
     if pavparchanges != ['']:
-        print(f'\nManual overrides for vegetation type:')
+        print('\nManual overrides for vegetation type:')
         for e in pavparchanges:
             print(f"\tFor class {int(e[3])}, set npar {int(e[0])} to {e[1]} based on {source[e[2]]}.")
         
     if soilparchanges != ['']:
-        print(f'\nManual overrides for vegetation type:')
+        print('\nManual overrides for vegetation type:')
         for e in soilparchanges:
             print(f"\tFor class {int(e[3])}, set npar {int(e[0])} to {e[1]} based on {source[e[2]]}.")
     
