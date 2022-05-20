@@ -793,19 +793,30 @@ if extentsonly == False:
     print('-----------------------------------------', file = parfile)
     domaincells = totaldomains*[0]
     
-    print(f"\nOrigin Time:\t\t\t{origin_time}", file=parfile)
-    print('Topo shifted down by:\t\t{:.2f} Meter'.format(origin_z), file=parfile)
+    print(f"\norigin_date_time\t\t=\t\t'{origin_time}'", file=parfile)
+    print('Topo shifted down by (origin_z):\t\t{:.2f} Meter'.format(origin_z), file=parfile)
     
+    
+
     for n in range(totaldomains):
         print('\nDomain '+str(n)+':', file=parfile)
-        print('\tnx/ny/nz\t\t'+str(int(nx[n]-1))+'/'+str(int(ny[n]-1))+'/'+str(int(nz[n])), file=parfile)
-        print('\tdx/dy/dz\t\t'+str(xres[n])+'/'+str(yres[n])+'/'+str(zres[n]), file=parfile)
+        print(f'\tnx     = {str(int(nx[n]-1)).rjust(6)},\n\tny     = {str(int(ny[n]-1)).rjust(6)},\n\tnz     = {str(int(nz[n])).rjust(6)},', file=parfile)
+        print(f'\tdx     = {str(xres[n]).rjust(6)},\n\tdy     = {str(yres[n]).rjust(6)},\n\tdz     = {str(zres[n]).rjust(6)},', file=parfile)
         domaincells[n] = nx[n]*ny[n]*nz[n]
-        # rti[n] = domaincells[n]*setvmag/xres[n]
+        
+        # # rti[n] = domaincells[n]*setvmag/xres[n]
         print(f"\tOrigin E/N:\t\t{xmin[n]}/{ymin[n]}", file=parfile)
-        if n > 0:
-            print('\tll-Position for &nesting_parameters\n\tx,y:\t\t\t'+str(llx[n])+', '+str(lly[n]), file=parfile)
+        # if n > 0:
+        #     print('\tll-Position for &nesting_parameters\n\tx,y:\t\t\t'+str(llx[n])+', '+str(lly[n]))
     
+    for n in range(totaldomains):
+        if n == 0:
+            print(f'\nNesting Parameters: Child positions\n\t{"domain_layouts".ljust(25)}= "PAR", {n+1}, -1, #CORES,{str(0).rjust(8)}.,{str(0).rjust(8)}.,', file=parfile)
+        if n > 0:
+            print(f'\t{" ".ljust(25)}= "N{str(n+1).zfill(2)}", {n+1},  {n}, #CORES,{str(llx[n]).rjust(9)},{str(lly[n]).rjust(9)},', file=parfile)
+
+    
+
     print('\n----------------------\nTotal Number of Cells:\t\t'+"%4.2e" % (sum(domaincells)), file=parfile)
     for m in range(len(domaincells)):
         # print('  Domain '+str(m)+':\t\t\t%4.3e\t= %3.2d %%' % (domaincells[m], round(domaincells[m]/sum(domaincells),4)*100), file=parfile)
