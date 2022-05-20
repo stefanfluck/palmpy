@@ -78,7 +78,7 @@ def checknestcoordsvalid(dxyp,dxyn,nllx,nlly):
     result = False
     
     if (dxyp%dxyn==0) & (nllx%dxyp==0) & (nlly%dxyp==0):
-        print('\nSUCCESS: Chosen parameters for dxy of child and parent and llxy of child match')
+        print('\nSUCCESS: Chosen parameters for grid resolution of child and parent and origin coordinates of child match')
         result = True
     if (nllx%dxyp!=0):
         print('\nERROR: llx of nest not integer divisible by dxyp, hence not aligned with parent grid')
@@ -87,6 +87,85 @@ def checknestcoordsvalid(dxyp,dxyn,nllx,nlly):
     if (dxyp%dxyn!=0):
         print('\nERROR: dxyn not an integer divisor of dxyp, does not align')
     return result
+
+
+def shift_domain_llxy_to_parent_grid(xmin,ymin,xres,yres,xmax,ymax):
+    '''
+    Shifts domain lower left x and y coordinates to the east and north, so they
+    match the grid of the respective parent. This is a requirement for the 
+    simulation to run. This allows to provide unexact llxy coordinates in the
+    namelist. The maximum shift is <X/Y grid resolution of the stativ driver.
+
+    Parameters
+    ----------
+    xmin : list
+        list of x coordinates of lower left corners of domains, ordered by domain (Parent, N02, N03...).
+    ymin : list
+        list of y coordinates of lower left corners of domains, ordered by domain.
+    xres : list
+        list of domain resolutions, ordered by domain.
+    yres : list
+        list of domain resolutions, ordered by domain.
+    xmax : TYPE
+        DESCRIPTION.
+    ymax : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    xmin_new : list
+        list of shifted x coordinates of lower left corners of domains, ordered by domain (Parent, N02, N03...).
+    xmax_new : TYPE
+        list of shifted x coordinates of upper right corners of domains, ordered by domain (Parent, N02, N03...).
+    ymin_new : TYPE
+        list of shifted y coordinates of lower left corners of domains, ordered by domain (Parent, N02, N03...).
+    ymax_new : TYPE
+        list of shifted y coordinates of upper right corners of domains, ordered by domain (Parent, N02, N03...).
+
+    '''
+    
+    num_domains = len(xmin)
+    
+    xmin_new = []
+    ymin_new = []
+    xmax_new = []
+    ymax_new = []
+    
+    xmin_new.append(xmin[0])
+    ymin_new.append(ymin[0])
+    xmax_new.append(xmax[0])
+    ymax_new.append(ymax[0])
+    
+    
+    for i in range(1,num_domains):
+        parent_x = xmin_new[-1]
+        parent_y = ymin_new[-1]
+        nest_xmin = xmin[i]
+        nest_xmax = xmax[i]
+        nest_ymin = ymin[i]
+        nest_ymax = ymax[i]
+        parent_xres = xres[i-1]
+        parent_yres = yres[i-1]
+    
+        modulo_x = (nest_xmin - parent_x)%parent_xres
+        modulo_y = (nest_ymin - parent_y)%parent_yres
+        
+        nest_xmin_new = nest_xmin+(parent_xres-modulo_x)
+        nest_xmax_new = nest_xmax+(parent_xres-modulo_x)
+        print('INFO: Nest N{} llx coordinate shifted by +{} m because it does not fit the grid of its parent.'.format(str(i+1).zfill(2),parent_xres-modulo_x))
+        nest_ymin_new = nest_ymin+(parent_yres-modulo_y)
+        nest_ymax_new = nest_ymax+(parent_yres-modulo_y)
+        print('INFO: Nest N{} lly coordinate shifted by +{} m because it does not fit the grid of its parent.'.format(str(i+1).zfill(2),parent_yres-modulo_y))
+
+        
+        xmin_new.append(nest_xmin_new)
+        xmax_new.append(nest_xmax_new)
+        ymin_new.append(nest_ymin_new)
+        ymax_new.append(nest_ymax_new)
+        
+        
+    return xmin_new,xmax_new,ymin_new,ymax_new
+
 
 def checknxyzvalid(nx,ny,nz):
     '''

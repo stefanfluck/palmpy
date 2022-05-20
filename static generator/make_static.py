@@ -112,13 +112,13 @@ outpath = cfp.get('paths', 'outpath')
 #try to generate output folders, don't if they exist (throws error when creating a folder)
 try:
     os.makedirs(outpath)
-    print('create outpath')
+    print('Created the output path as given in the namelist.')
 except:
-    print('couldnt create path')
+    print('Could not creat the output path as given in the namelist (e.g. exists already).')
     pass
 try:
     os.makedirs(subdir_rasteredshp)
-    print('create subdir for rastered data:')
+    print('Create tmp folder for rastered data:')
 except:
     pass    
 
@@ -205,7 +205,8 @@ for i in range(0,len(cfp.sections())):
         
         mst.checknxyzvalid(nx[index],ny[index],nz[index])   #check if nxyz choice is valids
         if index > 0:
-            mst.checknestcoordsvalid(xres[index-1],xres[index],llx[index],lly[index])  #for childs check nest coordinates validity
+            checknestcoord_result = mst.checknestcoordsvalid(xres[index-1],xres[index],llx[index],lly[index])  #for childs check nest coordinates validity
+
         
         flags[index] = {'doterrain':       doterrain[index], #create flags dictionary 
                         'dolandcover':     dolandcover[index],
@@ -223,6 +224,9 @@ for i in range(0,len(cfp.sections())):
         #a = '1,2,3,4' #hint for implementation of vegpars/albedopars
         #b = a.split(',')
         #c = list(map(int,b))
+
+if checknestcoord_result == False: #shift coordinates so they match grid of their parents.
+    xmin,xmax,ymin,ymax = mst.shift_domain_llxy_to_parent_grid(xmin,ymin,xres,yres,xmax,ymax)
 
 #read in probe locations
 probes_E = cfp.get('probes', 'probes_E', fallback=str(xmin[0]))
