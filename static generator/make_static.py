@@ -242,7 +242,9 @@ probes_N = cfp.get('probes', 'probes_N', fallback=str(ymin[0]))
 if probes_N != '':
     probes_N = list(map(float,probes_N.replace(' ','').rstrip(',').split(',')))
     probes_N = list(map(round,probes_N))
-    
+probes_name = cfp.get('probes', 'probes_name', fallback='default')
+if probes_name != '':
+    probes_name = list(probes_name.replace(' ','').rstrip(',').split(','))
 
 #%% read in vegpars changes
 vegparchanges = cfp.get('change_npars', 'vegparchanges').replace(' ','').rstrip(',').split(',')
@@ -824,14 +826,19 @@ if extentsonly == False:
         
     print('\nRuntime length score:\t\t'+str(round((sum(domaincells)*setvmag/min(xres))/1e6,2)), file = parfile)
         
-    print('\n\n---------------------\nProbes (for masked output):\n', file=parfile)
+    print('\n\n---------------------\nProbes (for masked output):\n', file = parfile)
     if probes_E == '':
-        print('\tNone.', file=parfile)
+        print('\tNone.', file = parfile)
     if probes_E != '':
         for b in range(totaldomains):
-            print(f'Domain {b}:', file=parfile)
+            print(f'Domain {b}:', file = parfile)
             for c in range(len(probes_E)):
-                print(f"\tProbe {c+1} x/y\t\t{probes_E[c]-xmin[b]}/{probes_N[c]-ymin[b]}", file=parfile)
+                if ((probes_E[c]-xmin[b])>0) and ((probes_N[c]-ymin[b])>0):
+                    # print(f"\tProbe {probes_name[c]}: x/y\t\t{probes_E[c]-xmin[b]}/{probes_N[c]-ymin[b]}")
+                    print(f"\t{probes_name[c]}: x/y{5*' '}{probes_E[c]-xmin[b]}/{probes_N[c]-ymin[b]}", file = parfile)
+                    print(f"\t\t\tmask_x_loop(X,:)   =   {((probes_E[c]-xmin[b])//xres[b])*xres[b]-xres[b]},{((probes_E[c]-xmin[b])//xres[b])*xres[b]+2*xres[b]},{xres[b]}", file = parfile)
+                    print(f"\t\t\tmask_y_loop(X,:)   =   {((probes_N[c]-ymin[b])//yres[b])*yres[b]-yres[b]},{((probes_N[c]-ymin[b])//yres[b])*yres[b]+2*yres[b]},{yres[b]}", file = parfile)
+
 
     source = {0:'Source Data classes', 1:'PALM classes'}
     print('\n\n----------------------\nChanges to vegetation/albedo/water/pavement/soil_pars', file=parfile)
