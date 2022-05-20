@@ -76,6 +76,7 @@ simtime = cfp.getfloat('settings', 'simtime', fallback = 14400.0)
 
 #parse paths
 inputfilepath = cfp.get('paths', 'inputfilepath')
+inputfilepath = os.path.join(inputfilepath, '')
 ortho = inputfilepath+cfp.get('paths', 'orthoimage')
 dhm = inputfilepath+cfp.get('paths', 'dhm')
 bb = inputfilepath+cfp.get('paths', 'bb')
@@ -109,6 +110,7 @@ gebaeudefoots = inputfilepath+cfp.get('paths', 'gebaeudefoots')
 crops = inputfilepath+cfp.get('paths', 'crops')
 streetsonly = inputfilepath+cfp.get('paths', 'streetsonly')
 outpath = cfp.get('paths', 'outpath')
+outpath = os.path.join(outpath, '')
 subdir_rasteredshp = os.path.join(outpath, 'tmp','')
 
 #try to generate output folders, don't if they exist (throws error when creating a folder)
