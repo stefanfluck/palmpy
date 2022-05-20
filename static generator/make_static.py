@@ -108,8 +108,8 @@ pavementareas = inputfilepath+cfp.get('paths', 'pavementareas')
 gebaeudefoots = inputfilepath+cfp.get('paths', 'gebaeudefoots')
 crops = inputfilepath+cfp.get('paths', 'crops')
 streetsonly = inputfilepath+cfp.get('paths', 'streetsonly')
-subdir_rasteredshp = cfp.get('paths', 'tmp')
 outpath = cfp.get('paths', 'outpath')
+subdir_rasteredshp = os.path.join(outpath, 'tmp','')
 
 #try to generate output folders, don't if they exist (throws error when creating a folder)
 try:
