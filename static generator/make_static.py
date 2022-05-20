@@ -856,76 +856,10 @@ if extentsonly == False:
     
     parfile.close() 
   
-    #%% write same to prompt
+    #%% read the file and print it to console.
+    with open(outpath+filenames[:-7]+'_parameters.txt','r') as param_file:
+        print(param_file.read())
 
-    print('\n\n-----------------------------------------\nSIMULATION SETUP SUMMARY')
-    print('-----------------------------------------')
-    domaincells = totaldomains*[0]
-    
-    print(f"\nOrigin Time:\t\t\t{origin_time}")
-    print('Topo shifted down by:\t\t{:.2f} Meter'.format(origin_z))
-    
-    for n in range(totaldomains):
-        print('\nDomain '+str(n)+':')
-        print('\tnx/ny/nz\t\t'+str(int(nx[n]-1))+'/'+str(int(ny[n]-1))+'/'+str(int(nz[n])))
-        print('\tdx/dy/dz\t\t'+str(xres[n])+'/'+str(yres[n])+'/'+str(zres[n]))
-        domaincells[n] = nx[n]*ny[n]*nz[n]
-        # rti[n] = domaincells[n]*setvmag/xres[n]
-        print(f"\tOrigin E/N:\t\t{xmin[n]}/{ymin[n]}")
-        if n > 0:
-            print('\tll-Position for &nesting_parameters\n\tx,y:\t\t\t'+str(llx[n])+', '+str(lly[n]))
-        # for c in range(len(probes_E)):
-        #     print(f"\tProbe {c+1} relative x,y\t{probes_E[c]-xmin[n]},{probes_N[c]-ymin[n]}")
-    print('\n----------------------\nTotal Number of Cells:\t\t'+"%4.2e" % (sum(domaincells)))
-    for m in range(len(domaincells)):
-        # print('  Domain '+str(m)+':\t\t\t%4.3e\t= %3.2d %%' % (domaincells[m], round(domaincells[m]/sum(domaincells),4)*100))
-        print(f'   Domain {m}:\t\t\t{domaincells[m]:4.3e}\t\t\t{domaincells[m]/sum(domaincells)*100:.2f}%')
-    
-    print('\nRuntime length score:\t\t'+str(round((sum(domaincells)*setvmag/min(xres))/1e06,2)))
-    
-    print('\n\n---------------------\nProbes (for masked output):\n')
-    if probes_E == '':
-        print('\tNone.')
-    if probes_E != '':
-        for b in range(totaldomains):
-            print(f'Domain {b}:')
-            for c in range(len(probes_E)):
-                print(f"\tProbe {c+1} x/y\t\t{probes_E[c]-xmin[b]}/{probes_N[c]-ymin[b]}")
-    
-    source = {0:'Source Data classes', 1:'PALM classes'}
-        
-    print('\n\n----------------------\nChanges to vegetation/albedo/water/pavement/soil_pars\n')
-    if (vegparchanges == [''] and albedoparchanges == [''] and watparchanges == [''] and 
-        pavparchanges == [''] and soilparchanges == [''] and bldgparchanges == [''] ):
-        print('\tNone.')
-    if vegparchanges != ['']:
-        print('\nManual overrides for vegetation type:')
-        for e in vegparchanges:
-            print(f"\tFor class {int(e[3])}, set npar {int(e[0])} to {e[1]} based on {source[e[2]]}.")
-            
-    if albedoparchanges != ['']:
-        print('\nManual overrides for albedo type:')
-        for e in albedoparchanges:
-            print(f"\tFor class {int(e[3])}, set npar {int(e[0])} to {e[1]} based on {source[e[2]]}.")
-        
-    if watparchanges != ['']:
-        print('\nManual overrides for vegetation type:')
-        for e in watparchanges:
-            print(f"\tFor class {int(e[3])}, set npar {int(e[0])} to {e[1]} based on {source[e[2]]}.")
-    
-    if pavparchanges != ['']:
-        print('\nManual overrides for vegetation type:')
-        for e in pavparchanges:
-            print(f"\tFor class {int(e[3])}, set npar {int(e[0])} to {e[1]} based on {source[e[2]]}.")
-        
-    if soilparchanges != ['']:
-        print('\nManual overrides for vegetation type:')
-        for e in soilparchanges:
-            print(f"\tFor class {int(e[3])}, set npar {int(e[0])} to {e[1]} based on {source[e[2]]}.")
-    
-    print(f'\n\nCreated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
-    
-    
     
     #%% create inifor namelist and save to file
     
