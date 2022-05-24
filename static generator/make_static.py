@@ -232,8 +232,9 @@ for i in range(0,len(cfp.sections())):
         #c = list(map(int,b))
 
 #%% correct nest coordinates if they are not on parent grid
-if checknestcoord_result == False: #shift coordinates so they match grid of their parents.
-    xmin,xmax,ymin,ymax = mst.shift_domain_llxy_to_parent_grid(xmin,ymin,xres,yres,xmax,ymax)
+if sum('domain' in s for s in cfp.sections())>1:
+    if checknestcoord_result == False: #shift coordinates so they match grid of their parents.
+        xmin,xmax,ymin,ymax = mst.shift_domain_llxy_to_parent_grid(xmin,ymin,xres,yres,xmax,ymax)
 
 #%% read in probe locations
 probes_E = cfp.get('probes', 'probes_E', fallback=str(xmin[0]))
