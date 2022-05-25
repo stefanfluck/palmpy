@@ -798,7 +798,7 @@ if extentsonly == False:
     print('-----------------------------------------', file = parfile)
     domaincells = totaldomains*[0]
     
-    print(f"\norigin_date_time\t\t=\t\t'{origin_time}'", file=parfile)
+    print(f"\norigin_date_time        =        '{origin_time}'", file=parfile)
     print('Topo shifted down by (origin_z):\t\t{:.2f} Meter'.format(origin_z), file=parfile)
     
     
