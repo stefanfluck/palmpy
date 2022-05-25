@@ -814,11 +814,12 @@ if extentsonly == False:
         # if n > 0:
         #     print('\tll-Position for &nesting_parameters\n\tx,y:\t\t\t'+str(llx[n])+', '+str(lly[n]))
     
-    for n in range(totaldomains):
-        if n == 0:
-            print(f'\nNesting Parameters: Child positions\n\t{"domain_layouts".ljust(25)}= "PAR", {n+1}, -1, #CORES,{str(0).rjust(8)}.,{str(0).rjust(8)}.,', file=parfile)
-        if n > 0:
-            print(f'\t{" ".ljust(25)}= "N{str(n+1).zfill(2)}", {n+1},  {n}, #CORES,{str(llx[n]).rjust(9)},{str(lly[n]).rjust(9)},', file=parfile)
+    if sum('domain' in s for s in cfp.sections())>1:
+        for n in range(totaldomains):
+            if n == 0:
+                print(f'\nNesting Parameters: Child positions\n\t{"domain_layouts".ljust(25)}= "PAR", {n+1}, -1, #CORES,{str(0).rjust(8)}.,{str(0).rjust(8)}.,', file=parfile)
+            if n > 0:
+                print(f'\t{" ".ljust(25)}= "N{str(n+1).zfill(2)}", {n+1},  {n}, #CORES,{str(llx[n]).rjust(9)},{str(lly[n]).rjust(9)},', file=parfile)
 
     
 
