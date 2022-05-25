@@ -1,3 +1,13 @@
+# changes in dev branch
+- automatic shift of nest lower left corner coords if they are invalid
+- parameters.txt now contains formatted, ready to copy/paste text for p3d files
+- parameters.txt contains domain_layouts variable ready to copy.
+- probes: names can be set, and only put to parameters.txt if they are within a certain domain
+- remove need for tmp file path - always in output file path.
+- paths don't require trailing / or \ anymore.
+- update template namelist
+
+
 # palmpy 
 
 palmpy consists of a python package and a python and bash scripts that support a user in the data preprocessing steps for conducting simulations with the [PALM Model System](https://palm.muk.uni-hannover.de/trac). The supplied static generator script makes it easy to generate static driver files containing the terrain variable, vegetation/water/pavement/soil_types, resolved vegetation and more. It is built to handle standard geodata formats (shape file vector data and geotiff raster data). 
