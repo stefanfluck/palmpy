@@ -805,8 +805,8 @@ if extentsonly == False:
 
     for n in range(totaldomains):
         print('\nDomain '+str(n)+':', file=parfile)
-        print(f'\tnx     = {str(int(nx[n]-1)).rjust(6)},\n\tny     = {str(int(ny[n]-1)).rjust(6)},\n\tnz     = {str(int(nz[n])).rjust(6)},', file=parfile)
-        print(f'\tdx     = {str(xres[n]).rjust(6)},\n\tdy     = {str(yres[n]).rjust(6)},\n\tdz     = {str(zres[n]).rjust(6)},', file=parfile)
+        print(f'    nx     = {str(int(nx[n]-1)).rjust(6)},\n    ny     = {str(int(ny[n]-1)).rjust(6)},\n    nz     = {str(int(nz[n])).rjust(6)},', file=parfile)
+        print(f'    dx     = {str(xres[n]).rjust(6)},\n    dy     = {str(yres[n]).rjust(6)},\n    dz     = {str(zres[n]).rjust(6)},', file=parfile)
         domaincells[n] = nx[n]*ny[n]*nz[n]
         
         # # rti[n] = domaincells[n]*setvmag/xres[n]
@@ -817,9 +817,9 @@ if extentsonly == False:
     if sum('domain' in s for s in cfp.sections())>1:
         for n in range(totaldomains):
             if n == 0:
-                print(f'\nNesting Parameters: Child positions\n\t{"domain_layouts".ljust(25)}= "PAR", {n+1}, -1, #CORES,{str(0).rjust(8)}.,{str(0).rjust(8)}.,', file=parfile)
+                print(f'\nNesting Parameters: Child positions\n    {"domain_layouts".ljust(25)}= "PAR", {n+1}, -1, #CORES,{str(0).rjust(8)}.,{str(0).rjust(8)}.,', file=parfile)
             if n > 0:
-                print(f'\t{" ".ljust(25)}= "N{str(n+1).zfill(2)}", {n+1},  {n}, #CORES,{str(llx[n]).rjust(9)},{str(lly[n]).rjust(9)},', file=parfile)
+                print(f'    {" ".ljust(25)}= "N{str(n+1).zfill(2)}", {n+1},  {n}, #CORES,{str(llx[n]).rjust(9)},{str(lly[n]).rjust(9)},', file=parfile)
 
     
 
