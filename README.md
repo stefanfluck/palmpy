@@ -6,6 +6,7 @@
 - remove need for tmp file path - always in output file path.
 - paths don't require trailing / or \ anymore.
 - update template namelist
+- fix origin_lon/lat calculation. For that an EPSG code needs to be provided in the namelist in the path section.
 
 
 # palmpy 
