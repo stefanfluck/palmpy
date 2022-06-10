@@ -77,6 +77,7 @@ simtime = cfp.getfloat('settings', 'simtime', fallback = 14400.0)
 #parse paths
 inputfilepath = cfp.get('paths', 'inputfilepath')
 inputfilepath = os.path.join(inputfilepath, '')
+input_crs_epsg =cfp.getint('paths','input_crs_epsg')
 ortho = inputfilepath+cfp.get('paths', 'orthoimage')
 dhm = inputfilepath+cfp.get('paths', 'dhm')
 bb = inputfilepath+cfp.get('paths', 'bb')
@@ -362,8 +363,8 @@ if extentsonly == False:
                     'origin_z':          0.0, #is changed further below
                     'origin_y':          ymin[i],
                     'origin_x':          xmin[i],
-                    'origin_lat':        gdt.lv95towgs84(xmin[i]+2000000,ymin[i]+1000000)[1],
-                    'origin_lon':        gdt.lv95towgs84(xmin[i]+2000000,ymin[i]+1000000)[0],
+                    'origin_lat':        gdt.epsgtoWGS84(input_crs_epsg, xmin[i], ymin[i])[0],
+                    'origin_lon':        gdt.epsgtoWGS84(input_crs_epsg, xmin[i], ymin[i])[1],
                     'origin_time':       origin_time,
                     'rotation_angle':    rotationangle}
         
