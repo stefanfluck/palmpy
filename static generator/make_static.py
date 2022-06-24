@@ -49,6 +49,9 @@ elif mapdialect == 'tutorial':
 elif mapdialect == 'DM01AVZH24':
     import palmpy.staticcreation.dictfolder.DM01AVZH24 as mpd
     print('\nINFO: Imported the DM01AVZH24 mapdict.')
+elif mapdialect == 'LULC_down_unige_2018':
+    import palmpy.staticcreation.dictfolder.LULC_down_unige_2018 as mpd
+    print('\nINFO: Imported the LULC downsampled by UNIGE 2018 mapdict.')
 elif mapdialect == 'custom':
     import palmpy.staticcreation.dictfolder.custom as mpd
     print('\nINFO: Imported the custom mapdict.')
@@ -65,6 +68,7 @@ origin_time = cfp.get('settings', 'origin_time', fallback='2020-08-01 12:00:00 +
 # totaldomains = cfp.getint('settings', 'totaldomains', fallback=1)
 cutorthoimg = cfp.getboolean('settings', 'cutorthoimg', fallback=False)
 extentsonly = cfp.getboolean('settings', 'extentsonly', fallback=False)
+discrete_zt = cfp.getboolean('settings','discrete_zt', fallback=False)
 surf_data_mode = cfp.get('settings','surf_data_mode',fallback='separate') #are land use and pavement separate or together
 src_luse_type = cfp.get('settings','src_luse_type',fallback='OBJEKTART') #attribute name of land use type in source shapefile
 src_pav_type = cfp.get('settings','src_pav_type',fallback='BELAGSART') #attribute name of pavement type in source shapefile
@@ -380,21 +384,28 @@ if extentsonly == False:
             ztdat = gdt.cutalti(dhm, subdir_rasteredshp+'dhm'+str(ischild[i])+'.asc',xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i])
             if ischild[i]==0:
                 ztdat, origin_z = mst.shifttopodown(ztdat,ischild[i]) #shift the domain downwards to min value if it's the parent domain
+                if discrete_zt == True:
+                    ztdat = zres[i]*np.round(ztdat/zres[i])
             else:
                 ztdat, origin_z = mst.shifttopodown(ztdat,ischild[i],shift=origin_z) #shift the domain downwards with origin_z value of parent if its a child.
+                if discrete_zt == True: 
+                    ztdat = zres[i]*np.round(ztdat/zres[i])
             infodict['origin_z'] = origin_z    #modify the origin_z attribute according to the shift
         
         #%% treat tlm-bb bulk parametrization
         if flags[i]['dolandcover'] == True:
-            bbdat = gdt.rasterandcuttlm(bb, subdir_rasteredshp+'bb'+str(ischild[i])+'.asc',xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i], burnatt=src_luse_type)
-            # vegarr, pavarr, watarr = mst.mapbbclasses(bbdat)  #map tlm bodenbedeckungs-kategorien to the palm definitions.
-            vegarr, pavarr, watarr = mst.mapbbclasses2(bbdat, mpd.bb2palmveg, mpd.bb2palmwat)  #map tlm bodenbedeckungs-kategorien to the palm definitions.
+            if bb.split('.')[-1] in 'shp':
+                bbdat = gdt.rasterandcuttlm(bb, subdir_rasteredshp+'bb'+str(ischild[i])+'.asc',xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i], burnatt=src_luse_type)
+                vegarr, pavarr, watarr = mst.mapbbclasses2(bbdat, mpd.bb2palmveg, mpd.bb2palmwat)  #map tlm bodenbedeckungs-kategorien to the palm definitions.
                 #or: function content in three lines.
                 # vegarr = mst.mapdicttoarray(bbdat, mpd.tlmbb2palmveg, mst.fillvalues['vegetation_type'])
                 # watarr = mst.mapdicttoarray(bbdat, mpd.tlmbb2palmwat, mst.fillvalues['water_type'])
                 # pavarr = np.ones((ny[i],nx[i]))*mst.fillvalues['pavement_type'] #empty array
     
-            
+            if bb.split('.')[-1] in 'tiff':
+                bbdat = gdt.cutalti(bb, subdir_rasteredshp+'bb'+str(ischild[i])+'.asc',xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i])
+                vegarr, pavarr, watarr = mst.mapbbclasses2(bbdat, mpd.bb2palmveg, mpd.bb2palmwat)  #map tlm bodenbedeckungs-kategorien to the palm definitions.
+
         #%% BLOCK FOR MODIFICATIONS TO VEGPARS AND ALBEDOPARS
             if flags[i]['dovegpars'] == True:
                 vegpars = mst.createparsarrays(nx[i], ny[i])[0] # create vegpars arrays and albedopars arrays
@@ -543,10 +554,11 @@ if extentsonly == False:
                 canopyid = np.where(canopyid[:,:] == 0, mst.fillvalues['tree_id'], canopyid[:,:]) #where ther is no tree to be found, set canopyid to its fill value
                 canopyid = np.where( np.maximum.reduce(ladarr) == mst.fillvalues['lad'], mst.fillvalues['tree_id'], canopyid[:,:]) #where no lad is defined, maybe bc its subgridscale, set tree-id to fillvalue too
                 
-            vegarr = np.where( (vegarr[:,:]==-127) & (watarr[:,:]==-127) & (pavarr[:,:]==-127), bulkvegclass[i], vegarr[:,:]) #fill unassigned vegetation types to defined bulk vegetation class.
+                vegarr = np.where( (vegarr[:,:]==-127) & (watarr[:,:]==-127) & (pavarr[:,:]==-127), bulkvegclass[i], vegarr[:,:]) #fill unassigned vegetation types to defined bulk vegetation class.
             
-            #%% crop fields
+            #%% crop fields will be deprecated
             if flags[i]['docropfields'] == True:
+                print('you selected crop fields. this will be deprecated in the future as this functionality has been kind of a workaround since the beginning.')
                 croptype = gdt.rasterandcuttlm(crops, subdir_rasteredshp+'croptype'+str(ischild[i])+'.asc', 
                                                xmin[i], xmax[i], ymin[i], ymax[i], xres[i], yres[i], burnatt=src_luse_type)
                 vegarr = np.where( (vegarr[:,:]==bulkvegclass[i]) & (croptype[:,:] != -9999), 2, vegarr[:,:]) #where vegarr is set to bulk class and crops are found, set class to 2 (crops)
@@ -565,8 +577,26 @@ if extentsonly == False:
 
             #%% do paved surfaces
             if flags[i]['dopavedbb'] == True:
-                paved = gdt.rasterandcuttlm(pavementareas, subdir_rasteredshp+'pavement'+str(ischild[i])+'.asc',
-                                            xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i], burnatt='BELAGSART', alltouched=pavealltouched[i])
+                #account for mode separate and ending in tiff -> cutalti. first the tiff ending. when "together", then use path from bb file
+                
+                if surf_data_mode == 'separate':
+                    if pavementareas.split('.')[-1] in 'shp':
+                        paved = gdt.rasterandcuttlm(pavementareas, subdir_rasteredshp+'paved'+str(ischild[i])+'.asc',
+                                                    xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i], burnatt=src_pav_type, alltouched=pavealltouched[i])
+                    if pavementareas.split('.')[-1] in 'tiff':
+                        paved = gdt.cutalti(pavementareas, subdir_rasteredshp+'paved'+str(ischild[i])+'.asc',xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i])
+
+                if surf_data_mode == 'together':
+                    if bb.split('.')[-1] in 'shp':
+                        print('not implemented and tested yet.')
+                        paved = gdt.rasterandcuttlm(bb, subdir_rasteredshp+'paved'+str(ischild[i])+'.asc',
+                                                    xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i], burnatt=src_luse_type, alltouched=pavealltouched[i])
+                        paved[:,:] = np.where( np.isin(paved[:,:],np.fromiter(mpd.pav2palmpav.keys(), dtype='int')), paved[:,:], -9999. )                
+                        
+                    if bb.split('.')[-1] in 'tiff':
+                        paved = gdt.cutalti(bb, subdir_rasteredshp+'pavementareas'+str(ischild[i])+'.asc',xmin[i],xmax[i],ymin[i],ymax[i],xres[i],yres[i])
+                        paved[:,:] = np.where( np.isin(paved[:,:],np.fromiter(mpd.pav2palmpav.keys(), dtype='int')), paved[:,:], -9999. )                
+                
                 vegarr = np.where( paved[:,:] != -9999 , mst.fillvalues['vegetation_type'], vegarr[:,:]) #overwrite vegarr where pavement areas are found with fillvalue
                 # if flags[i]['dovegpars'] == True:
                 #     vegpars[:,:,:] = np.where( paved[:,:] != -9999, mst.fillvalues['vegetation_pars'], vegpars[:,:,:]) #delete vegpars where there is pavement
