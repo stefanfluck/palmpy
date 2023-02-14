@@ -326,7 +326,7 @@ if cutorthoimg == True:
         ax.plot( (probes_E[b]-xmin[0])/orthores, 
                   (ylen[0]-(probes_N[b]-ymin[0]))/orthores, 
                   marker='.', markersize=8, color='red')
-    
+ 
     
 #%% debugging phase: show plot if exentsonly=True.
     if extentsonly == True:
@@ -931,3 +931,4 @@ if extentsonly == False:
     print('\nCreated inifor namelist.')
 
 
+    plt.show()
