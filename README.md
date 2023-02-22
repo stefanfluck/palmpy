@@ -1,22 +1,4 @@
-# changes in dev branch
-- automatic shift of nest lower left corner coords if they are invalid
-- land use data for vegetation and pavements can be provided as one file under the bb path. For that, set `surf_data_mode` in namelist to 'together'. 
-- land use data can be provided as tiff. the code checks for file endings tif(f) or shp.
-- option to have discrete `zt` rounded to `zres` value.
-- added mapdialect for LULC land use dataset from Uni Geneva 2018 (https://doi.org/10.3390/land11050615)
-- parameters.txt now contains formatted, ready to copy/paste text for p3d files
-- parameters.txt contains domain_layouts variable ready to copy.
-- probes: names can be set, and only put to parameters.txt if they are within a certain domain
-- remove need for tmp file path - always in output file path.
-- paths don't require trailing / or \ anymore.
-- update template namelist
-- fix origin_lon/lat calculation. For that an EPSG code needs to be provided in the namelist in the path section.
-- fix bug where when `dolad == False`, unclassified points would be set to the bulk vegetation type. indentation was wrong.
-- info that cropfields will be deprecated at some stage.
-
 # palmpy 
-
-**Please have a look at the dev branch for enhanced functionality!**
 
 
 palmpy consists of a python package and a python and bash scripts that support a user in the data preprocessing steps for conducting simulations with the [PALM Model System](https://palm.muk.uni-hannover.de/trac). The supplied static generator script makes it easy to generate static driver files containing the terrain variable, vegetation/water/pavement/soil_types, resolved vegetation and more. It is built to handle standard geodata formats (shape file vector data and geotiff raster data). 
