@@ -16,6 +16,9 @@
 
 # palmpy 
 
+**Please have a look at the dev branch for enhanced functionality!**
+
+
 palmpy consists of a python package and a python and bash scripts that support a user in the data preprocessing steps for conducting simulations with the [PALM Model System](https://palm.muk.uni-hannover.de/trac). The supplied static generator script makes it easy to generate static driver files containing the terrain variable, vegetation/water/pavement/soil_types, resolved vegetation and more. It is built to handle standard geodata formats (shape file vector data and geotiff raster data). 
 
 
@@ -86,9 +89,9 @@ It is recommended to import palmpy with the following command:
 
 ```python
 #static file generation
-import palmpy.staticcreation.geodatatools as gdt      	# geodata modification tools
-import palmpy.staticcreation.makestatictools as mst   	# static generation tools
-import palmpy.staticcreation.mapdicts.<dialect> as mpd	# mapping dictionaries for mst
+import palmpy.staticcreation.geodatatools as gdt      	 # geodata modification tools
+import palmpy.staticcreation.makestatictools as mst   	 # static generation tools
+import palmpy.staticcreation.dictfolder.<dialect> as mpd	 # mapping dictionaries for mst
 ```
 
 

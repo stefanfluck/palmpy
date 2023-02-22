@@ -22,12 +22,13 @@
 
 <center><font size="+0">Stefan Fluck</font></center>
 
-<center><font size="+0">fluckste@students.zhaw.ch or fluf@zhaw.ch</font></center>
+<center><font size="+0">Contact: Please use the Issue or Discussion functionality of github!</font></center>
 
 
 
 <center><font size="-1">Part of a Master Thesis</font></center>
 
+**NOTE: THIS DOCUMENTATION HAS MOVED INTO THE WIKI-SECTION OF THE GITHUB REPO. THIS DOCUMENT IS NOT UP TO DATE!**
 
 
 
@@ -239,12 +240,12 @@ It is recommended to load the different modules of the palmpy package as follows
 
 ```python
 #static file generation
-import palmpy.staticcreation.geodatatools as gdt      	# geodata modification tools
-import palmpy.staticcreation.makestatictools as mst   	# static generation tools
-import palmpy.staticcreation.mapdicts.<dialect> as mpd	# mapping dictionaries for mst
+import palmpy.staticcreation.geodatatools as gdt      	  # geodata modification tools
+import palmpy.staticcreation.makestatictools as mst   	  # static generation tools
+import palmpy.staticcreation.dictfolder.<dialect> as mpd	# mapping dictionaries for mst
 
 #post processing
-import palmpy.postprocessing.tools as ppt             	# postprocessing tools
+import palmpy.postprocessing.posttools as ppt             	# postprocessing tools
 ```
 
 To create a static file, you need the palmpy *geodatatools*, *makestatictools* and the dictionaries for mapping shp-file classes to PALM classes - which are separately available in *mapdicts*. Should a default mapping be not suitable for a particular project, this *mapdict*s file can be modified accordingly. For individual application of palmpy, these dicts can be accessed through python individually.
