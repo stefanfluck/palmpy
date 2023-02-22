@@ -1,19 +1,19 @@
 ## 2023-02-22
 changes merged from dev branch into master branch:
-- automatic shift of nest lower left corner coords if they are invalid
-- land use data for vegetation and pavements can be provided as one file under the bb path. For that, set `surf_data_mode` in namelist to 'together'. 
-- land use data can be provided as tiff. the code checks for file endings tif(f) or shp.
-- option to have discrete `zt` rounded to `zres` value.
-- added mapdialect for LULC land use dataset from Uni Geneva 2018 (https://doi.org/10.3390/land11050615)
-- parameters.txt now contains formatted, ready to copy/paste text for p3d files
-- parameters.txt contains domain_layouts variable ready to copy.
-- probes: names can be set, and only put to parameters.txt if they are within a certain domain
-- remove need for tmp file path - always in output file path.
-- paths don't require trailing / or \ anymore.
-- update template namelist
-- fix origin_lon/lat calculation. For that an EPSG code needs to be provided in the namelist in the path section.
-- fix bug where when `dolad == False`, unclassified points would be set to the bulk vegetation type. indentation was wrong.
-- info that cropfields will be deprecated at some stage.
+- Added automatic shift of nest lower left corner coords if they are invalid
+- Added: land use data for vegetation and pavements can be provided as one file under the bb path. For that, set `surf_data_mode` in namelist to 'together'. 
+- Added: land use data can be provided as tiff. the code checks for file endings tif(f) or shp.
+- Added: option to have discrete `zt` rounded to `zres` value.
+- Added mapdialect for LULC land use dataset from Uni Geneva 2018 (https://doi.org/10.3390/land11050615)
+- Changed: parameters.txt now contains formatted, ready to copy/paste text for p3d files
+- Changed: parameters.txt contains domain_layouts variable ready to copy.
+- Changed: Probes: Names can be set, and they are only put to parameters.txt if they are within a certain domain
+- Removed need for tmp file path - always in output file path.
+- Removed: paths don't require trailing / or \ anymore.
+- Changed: update template namelist
+- Fixed origin_lon/lat calculation. For that an EPSG code needs to be provided in the namelist in the path section.
+- Fixed bug where when `dolad == False`, unclassified points would be set to the bulk vegetation type. indentation was wrong.
+- Deprecated: info that cropfields will be deprecated at some stage.
 
 
 
