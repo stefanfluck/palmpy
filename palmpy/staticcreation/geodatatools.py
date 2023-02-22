@@ -161,6 +161,35 @@ def lv95towgs84(E,N):
     return lon,lat
 
 
+def epsgtoWGS84(epsgcode, x, y):
+    '''
+    Convert epsg coordinates x and y to WGS84 North and East.
+
+    Parameters
+    ----------
+    epsgcode : int
+        EPSG-code of the source data.
+    x : float
+        Easting coordinate in EPSG coordinate reference system.
+    y : float
+        Northing coordinate in EPSG coordinate reference system.
+
+    Returns
+    -------
+    N : float
+        DESCRIPTION.
+    E : TYPE
+        DESCRIPTION.
+
+    '''
+    from pyproj import Transformer
+    transformer = Transformer.from_crs("epsg:"+str(epsgcode), "epsg:4326")
+    N,E = transformer.transform(x, y)
+
+    return round(N,4),round(E,4)
+
+
+
 
 def cutortho(filein, fileout, xmin, xmax, ymin, ymax, xres, yres):
     '''

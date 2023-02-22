@@ -1,0 +1,154 @@
+#!/bin/bash
+
+### changelog
+# rev c:	added capability to parse the suitable z coordinates for each file.
+
+#script to convert all available cosmo files to inifor compliant format.
+#requires for successful run:
+#	- hourly cosmo-1 files
+# ABOVE FILES NEED TO BE AVAILABLE IN SAME WORKING DIRECTORY AS THIS SCRIPT
+######################################################################################################
+
+FILES=.
+#fileforhhl=laf2019071408.nc
+#fileforsoil=laf2019071408.nc
+fileforhhlsoil=$(ls $FILES | egrep -o '[0-9]{10}' -m 1)
+
+########################################## make hhl.nc file ##########################################
+#
+echo 'making hhl file now'
+
+hhlz=$(ncdump -h laf$fileforhhlsoil.nc | grep -e 'HEIGHT' -m 1 | cut -c 15-17)
+
+ncks -C -O -v $hhlz,HEIGHT,y_1,x_1,grid_mapping_1 laf$fileforhhlsoil.nc hhl.nc #made generic
+
+ncrename -O -d x_1,rlon -v x_1,rlon hhl.nc
+ncrename -O -d y_1,rlat -v y_1,rlat hhl.nc
+ncrename -O -v grid_mapping_1,rotated_pole hhl.nc
+ncrename -O -d $hhlz,height -v $hhlz,height hhl.nc #made generic
+ncatted -O -a grid_mapping,HEIGHT,o,c,'rotated_pole' hhl.nc
+
+ncrename -O -v HEIGHT,HHL hhl.nc
+
+echo '-------- making hhl file done'
+
+
+
+########################################## make soil.nc file ##########################################
+
+echo 'making soil file now'
+ncks -C -O -v x_1,y_1,grid_mapping_1,SOILTYP laf$fileforhhlsoil.nc soil.nc
+ncrename -O -d x_1,rlon -v x_1,rlon soil.nc
+ncrename -O -d y_1,rlat -v y_1,rlat soil.nc
+ncrename -O -v grid_mapping_1,rotated_pole soil.nc
+ncatted -O -a grid_mapping,SOILTYP,o,c,'rotated_pole' soil.nc
+
+echo '-------- making soil file done'
+
+
+########################################## make *-flow.nc and *-soil.nc files ##########################################
+
+momentlist=$(ls $FILES | egrep -o '[0-9]{10}' | sort -t_ -u -k1,3) #lists all files from FILES directory, greps the 10 digit number seq, sorts and drops duplicates
+
+
+for moment in $momentlist
+do
+	echo 'looking at the instant' $moment
+	echo '-------- make' $moment'-flow.nc file'
+	
+	echo 'fetch vertical coordinates used by U,V,W,T'
+	uz=$(ncdump -h laf$moment.nc | grep -e "U(" -m 1 | cut -c 16-18)
+	wz=$(ncdump -h laf$moment.nc | grep -e "W(" -m 1 | cut -c 16-18)
+	tsoz=$(ncdump -h laf$moment.nc | grep -e "T_SO(" -m 1 | cut -c 19-21)
+	wsoz=$(ncdump -h laf$moment.nc | grep -e "W_SO(" -m 1 | cut -c 19-21)
+	atmbnds=$(ncdump -h laf$moment.nc | grep -e "$uz:bounds" | cut -c 17-24)
+	soilbnds=$(ncdump -h laf$moment.nc | grep -e "$wsoz:bounds" | cut -c 17-24)
+
+	#ncks -C -O -v z_1,z_4,P,QV,y_1,x_1,grid_mapping_1,T,time,U,V,W,z_bnds_1 laf$moment.nc seg$moment-flow.nc
+	ncks -C -O -v $uz,$wz,P,QV,y_1,x_1,grid_mapping_1,T,time,U,V,W,$atmbnds laf$moment.nc seg$moment-flow.nc #generalized
+	echo '1 done'
+	
+	#ncks -C -A -v z_bnds_2 cosmo-1_sust_const.nc seg$moment-flow.nc
+	ncrename -O -d x_1,rlon -v x_1,rlon seg$moment-flow.nc
+	echo '2 done'
+	
+    ncrename -O -d y_1,rlat -v y_1,rlat seg$moment-flow.nc
+	echo '3 done'
+	
+	ncrename -O -d $wz,height -v $wz,height seg$moment-flow.nc
+	echo '4 done'
+	
+	ncrename -O -d $uz,height_2 -v $uz,height_2 seg$moment-flow.nc
+	echo '5 done'
+	
+    #ncrename -O -d z_bnds_1,height_2_bnds -v z_bnds_1,height_2_bnds seg$moment-flow.nc
+	ncrename -O -v $atmbnds,height_2_bnds seg$moment-flow.nc
+	echo '6 done'
+	
+	ncrename -O -v grid_mapping_1,rotated_pole seg$moment-flow.nc
+	echo '---------------- make flow file done'
+
+
+	echo '-------- make' $moment'-soil.nc file...'
+	#ncks -O -C -v z_5,z_6,z_bnds_6,x_1,y_1,grid_mapping_1,T_SO,time,W_SO laf${moment}.nc seg$moment-soil.nc
+	ncks -O -C -v $tsoz,$wsoz,$soilbnds,x_1,y_1,grid_mapping_1,T_SO,time,W_SO laf${moment}.nc seg$moment-soil.nc
+
+	ncrename -O -d x_1,rlon -v x_1,rlon seg$moment-soil.nc
+
+	ncrename -O -d y_1,rlat -v y_1,rlat seg$moment-soil.nc
+
+	ncrename -O -v grid_mapping_1,rotated_pole seg$moment-soil.nc
+	
+	ncrename -O -d $tsoz,depth -v $tsoz,depth seg$moment-soil.nc
+	
+	ncrename -O -d $wsoz,depth_2 -v $wsoz,depth_2 seg$moment-soil.nc
+	
+	ncrename -O -v $soilbnds,depth_2_bnds seg$moment-soil.nc
+	
+	#ncrename -O -d zbound,depth_2_bnds seg$moment-soil.nc
+	echo '---------------- make soil file done'
+
+	echo '-------- convert depth variables to meter from millimeter'
+	ncap2 -O -s 'depth=depth/1000' seg$moment-soil.nc seg$moment-soil.nc
+	ncatted -O -a units,depth,o,c,'m' seg$moment-soil.nc
+	ncap2 -O -s 'depth_2[depth_2]={0.005,0.02,0.06,0.18,0.54,1.62,4.86,14.58}' seg$moment-soil.nc seg$moment-soil.nc
+	ncatted -O -a units,depth_2,o,c,'m' seg$moment-soil.nc
+	echo '---------------- convert depth variables to meter from millimeter done'
+
+	echo '-------- change grid_mapping attribute to rotated_pole'
+	ncatted -O -a grid_mapping,W_SO,o,c,'rotated_pole' seg$moment-soil.nc
+	ncatted -O -a grid_mapping,T_SO,o,c,'rotated_pole' seg$moment-soil.nc
+	ncatted -O -a grid_mapping,P,o,c,'rotated_pole' seg$moment-flow.nc
+	ncatted -O -a grid_mapping,QV,o,c,'rotated_pole' seg$moment-flow.nc
+	ncatted -O -a grid_mapping,T,o,c,'rotated_pole' seg$moment-flow.nc
+	ncatted -O -a grid_mapping,U,o,c,'rotated_pole' seg$moment-flow.nc
+	ncatted -O -a grid_mapping,V,o,c,'rotated_pole' seg$moment-flow.nc
+	ncatted -O -a grid_mapping,W,o,c,'rotated_pole' seg$moment-flow.nc
+	
+	ncatted -O -a bounds,height_2,o,c,'height_2_bnds' seg$moment-flow.nc
+
+	echo '---------------- change grid_mapping attribute to rotated_pole done'
+
+done
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
